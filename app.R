@@ -315,26 +315,22 @@ tabPanel("Reservoir",
      ),
      tabPanel("Wachusett",
               navlistPanel(widths = c(2, 10),
-                           "Bacteria",
-                           tabPanel("Select / Filter Data", icon=icon("filter"), FILTER_WQ_UI("mod_bact_wach_filter")),
+                           "Biological",
+                           tabPanel("Phytoplankton", PHYTO_UI("mod_phyto_wach_plots", df_phyto_wach)),
+                           "Profile",
+                           tabPanel("Select / Filter Data", icon=icon("filter"), FILTER_WQ_UI("mod_prof_wach_filter")),
                            tabPanel("--- Plots", icon=icon("line-chart"),
-                                    br(),wellPanel(em('Plots use data from the "Select / Filter Data" tab')),
+                                    br(),
+                                    wellPanel(em('Plots use data from the "Select / Filter Data" tab')),
                                     tabsetPanel(
-                                      tabPanel("Time-Series Scatter", PLOT_TIME_WQ_UI("mod_bact_wach_plot_time")),
-                                      tabPanel("Correlation Scatter", PLOT_CORR_WQ_UI("mod_bact_wach_plot_corr")),
-                                      tabPanel("Distribution Charts", DISTRIBUTION_WQ_UI("mod_bact_wach_plot_dist"))
+                                      tabPanel("Heat Map", PROF_HEATMAP_UI("mod_prof_wach_heat")),
+                                      tabPanel("Scatter Plot", PLOT_TIME_WQ_UI("mod_prof_wach_plot_time")),
+                                      tabPanel("Line Plot", PROF_LINE_UI("mod_prof_wach_line", df_prof_wach)),
+                                      tabPanel("Distribution Charts", DISTRIBUTION_WQ_UI("mod_prof_wach_plot_dist"))
                                     )
                            ),
-                           tabPanel("--- Statistics", icon=icon("calculator"),
-                                    br(),wellPanel(em('Statistics use data from the "Select / Filter Data" tab')),
-                                    tabsetPanel(
-                                      tabPanel("Summary Statistics", STAT_TIME_WQ_UI("mod_bact_wach_stat_sum")),
-                                      tabPanel("Temporal Statistics", fluidRow(h5("Mann-Kendall Stats to come"))),
-                                      tabPanel("Correlation Matrix", PLOT_CORR_MATRIX_WQ_UI("mod_bact_wach_stat_cormat"))
-                                    )
-                           ),
-                           tabPanel("Geospatial", icon=icon("map-marker"), MAP_PLOT_UI("mod_bact_wach_map", df = df_bact_wach)),
-                           tabPanel("Metadata", icon=icon("table"), METADATA_UI("mod_bact_wach_meta")),
+                           tabPanel("Table and Summary", PROF_TABLE_STAT_UI("mod_prof_wach_sum", df_prof_wach)),
+                           tabPanel("Metadata", icon=icon("table"), METADATA_UI("mod_prof_wach_meta")),
                            "Chemical",
                            tabPanel("Select / Filter Data", icon=icon("filter"), FILTER_WQ_UI("mod_chem_wach_filter")),
                            tabPanel("--- Plots", icon=icon("line-chart"),
@@ -354,22 +350,26 @@ tabPanel("Reservoir",
                                     )
                            ),
                            tabPanel("Metadata", icon=icon("table"), METADATA_UI("mod_chem_wach_meta")),
-                           "Profile",
-                           tabPanel("Select / Filter Data", icon=icon("filter"), FILTER_WQ_UI("mod_prof_wach_filter")),
+                           "Bacteria",
+                           tabPanel("Select / Filter Data", icon=icon("filter"), FILTER_WQ_UI("mod_bact_wach_filter")),
                            tabPanel("--- Plots", icon=icon("line-chart"),
-                              br(),
-                              wellPanel(em('Plots use data from the "Select / Filter Data" tab')),
-                              tabsetPanel(
-                                tabPanel("Heat Map", PROF_HEATMAP_UI("mod_prof_wach_heat")),
-                                tabPanel("Scatter Plot", PLOT_TIME_WQ_UI("mod_prof_wach_plot_time")),
-                                tabPanel("Line Plot", PROF_LINE_UI("mod_prof_wach_line", df_prof_wach)),
-                                tabPanel("Distribution Charts", DISTRIBUTION_WQ_UI("mod_prof_wach_plot_dist"))
-                              )
+                                    br(),wellPanel(em('Plots use data from the "Select / Filter Data" tab')),
+                                    tabsetPanel(
+                                      tabPanel("Time-Series Scatter", PLOT_TIME_WQ_UI("mod_bact_wach_plot_time")),
+                                      tabPanel("Correlation Scatter", PLOT_CORR_WQ_UI("mod_bact_wach_plot_corr")),
+                                      tabPanel("Distribution Charts", DISTRIBUTION_WQ_UI("mod_bact_wach_plot_dist"))
+                                    )
                            ),
-                           tabPanel("Table and Summary", PROF_TABLE_STAT_UI("mod_prof_wach_sum", df_prof_wach)),
-                           tabPanel("Metadata", icon=icon("table"), METADATA_UI("mod_prof_wach_meta")),
-                           "Biological",
-                           tabPanel("Phytoplankton", PHYTO_UI("mod_phyto_wach_plots", df_phyto_wach))
+                           tabPanel("--- Statistics", icon=icon("calculator"),
+                                    br(),wellPanel(em('Statistics use data from the "Select / Filter Data" tab')),
+                                    tabsetPanel(
+                                      tabPanel("Summary Statistics", STAT_TIME_WQ_UI("mod_bact_wach_stat_sum")),
+                                      tabPanel("Temporal Statistics", fluidRow(h5("Mann-Kendall Stats to come"))),
+                                      tabPanel("Correlation Matrix", PLOT_CORR_MATRIX_WQ_UI("mod_bact_wach_stat_cormat"))
+                                    )
+                           ),
+                           tabPanel("Geospatial", icon=icon("map-marker"), MAP_PLOT_UI("mod_bact_wach_map", df = df_bact_wach)),
+                           tabPanel("Metadata", icon=icon("table"), METADATA_UI("mod_bact_wach_meta"))
             ) # end navlist panel
      ), # End TabPanel Watersheds
      selected = tab_selected
