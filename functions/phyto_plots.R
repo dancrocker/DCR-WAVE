@@ -29,7 +29,7 @@
 # Synura 149 goldenrod2
 # Uroglenopsis 573 sandybrown
 # Total_Cyanophytes 475 mediumturquoise
-# Anabaena 518 palegreen4
+# Dolichospermum 518 palegreen4
 # Microcystis 523 paleturquoise4
 # Grand_Total 24 black
 # Other (Select dropdown) 604 slategrey
@@ -51,7 +51,8 @@ taxaplot <- function(df,locs,vyear,taxa, color){
     select("Name","Threshold_early","Threshold_Tx") %>%
     dplyr::rename(Taxa = Name)
   df <- df %>%
-    mutate(Year = year(df$Date))
+    filter(Result != 8888) %>% 
+    mutate(Year = year(Date))
   df2 <- df[df$Taxa == taxa & df$Year %in% vyear & df$Station %in% locs,]
   title <- paste0(gsub("_", " ", taxa), " at Station(s) ", str_c(locs, collapse = ", "), " in ", vyear)
   xlabel <- "Date"
@@ -113,6 +114,7 @@ secchi <- df_secchi_wach # Eventually this needs to be changed to a df argument 
 # This is the Blue Line - usually 1-4 m
 GTA_epi <- df[df$Taxa == "Grand Total" & year(df$Date) %in% vyear & df$Depth_m >= epi_min & df$Depth_m <= epi_max &
       df$Station %in% locs,] %>%
+  filter(Result != 8888) %>% 
   group_by(Date) %>%
   drop_na() %>%
   summarize(Result = max(Result)) %>%
@@ -123,6 +125,7 @@ GTA_epi$dataset <- factor(GTA_epi$dataset)
 # This is the black line, 6-14 m
 GTA_em <- df[df$Taxa == "Grand Total" & year(df$Date) %in% vyear & df$Depth_m >= em_min & df$Depth_m <= em_max &
       df$Station %in% locs,] %>%
+  filter(Result != 8888) %>% 
   group_by(Date) %>%
   drop_na() %>%
   summarize(Result = max(Result)) %>%
@@ -210,6 +213,7 @@ historicplot <- function(df, taxa, locs, vyear, yg1min, yg1max, yg2min, yg2max, 
 ###########################################
 # Plot Options
   df <- df %>%
+    filter(Result != 8888) %>% 
     select(-PA)
   taxalabel <- paste0(gsub("_", " ", taxa))
   title <- paste0("Wachusett Reservoir ", taxalabel, " Density by Month")

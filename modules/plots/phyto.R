@@ -328,9 +328,9 @@ PHYTO <- function(input, output, session, df) {
     p10
   })
   output$taxaplot10 <- renderPlot({p10()})
-  # Anabaena 518 palegreen4
+  # Dolichospermum 518 palegreen4
   p11 <- reactive({
-    p11 <- taxaplot(df = df, locs = input$taxasite, vyear = input$taxayear, taxa = "Anabaena", color = "palegreen4")
+    p11 <- taxaplot(df = df, locs = input$taxasite, vyear = input$taxayear, taxa = "Dolichospermum", color = "palegreen4")
     p11
   })
   output$taxaplot11 <- renderPlot({p11()})
@@ -445,7 +445,7 @@ PHYTO <- function(input, output, session, df) {
   )
   output$save_plot11 <- downloadHandler(
     filename <- function() {
-      paste0("Anabaena-", input$taxayear,"_", format(Sys.time(), "%Y-%m-%d"), ".", input$taxaplot_save_type)},
+      paste0("Dolichospermum-", input$taxayear,"_", format(Sys.time(), "%Y-%m-%d"), ".", input$taxaplot_save_type)},
     content = function(file) {
       ggplot2::ggsave(file, plot = p11(), device = input$taxaplot_save_type,
                       width = input$taxaplot_save_width, height = input$taxaplot_save_height, dpi = 300)
