@@ -157,9 +157,11 @@ RUNRCMODEL <- function(rawdata, gam_models, flow, df_full, loc, pars, dir){
   ### Compare observed to predicted concentration:
   predconc <- predict(rcdata_model, retransform = TRUE)
 
-  obs_v_prd_c %<a-% {plot(rcdata$conc, predconc$fit, main = paste0(var, " Measured Concentration vs Predicted Concentration\n",loc), 
-                          xlab = "Actual Concentration (mg/L)", ylab = "Predicted Concentration (mg/L)", asp = 800/600);abline(0, 1)}
-  obs_v_prd_c
+  # obs_v_prd_c %<a-% {plot(rcdata$conc, predconc$fit, main = paste0(var, " Measured Concentration vs Predicted Concentration\n",loc), 
+  #                         xlab = "Actual Concentration (mg/L)", ylab = "Predicted Concentration (mg/L)", asp = 800/600);abline(0, 1)}
+  plot(rcdata$conc, predconc$fit, main = paste0(var, " Measured Concentration vs Predicted Concentration\n",loc), 
+                          xlab = "Actual Concentration (mg/L)", ylab = "Predicted Concentration (mg/L)", asp = 800/600);abline(0, 1)
+  # obs_v_prd_c
   dev.copy(png, width = 7, height = 4.5, units = "in", res = 300, paste0(newdir,"obs_v_prd_c.png"))
   dev.off()
 
