@@ -31,6 +31,7 @@ ipak(packages) ### Need to add "rcmodel"' - not in any repo...load from Mhageman
 if("rcmodel" %in% rownames(installed.packages()) == FALSE) {
   print("rcmodel package not installed, installing now")
   install_github("markwh/rcmodel")
+  library(rcmodel)
 }
 
 ### Specify User information ####
