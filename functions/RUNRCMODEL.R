@@ -76,7 +76,7 @@
 
 # Model run loop by location for all parameters chosen. Have separate button to knit report using outputs?
 RUNRCMODEL <- function(rawdata, gam_models, flow, df_full, loc, pars, dir){
- loc <- substrRight(loc, 4)
+  loc <- substrRight(loc, 4)
   ### LOOP THROUGH EACH PARAMETER AND RUN THE THE MODEL FUNCTIONS, RETURN TO NEXT LOC
   for(i in seq_along(pars)){ 
     ### Set the Variable
@@ -266,7 +266,7 @@ month_load_plot <- ggplot() +
         legend.position = "top")
 ggsave(paste0("month_load_plot.png"),plot = month_load_plot, device = "png", path = newdir, width = 7, height = 4.5, units = "in",dpi = 300)
 # saveRDS(mnth_load_plot, paste0(newdir, "month_load_plot.rds"))
-month_load_plot
+# month_load_plot
 
 # Annual Loads ####  
 rc_year  <- rcPredData %>% 
