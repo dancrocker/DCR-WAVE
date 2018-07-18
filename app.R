@@ -33,6 +33,8 @@ if("rcmodel" %in% rownames(installed.packages()) == FALSE) {
   install_github("markwh/rcmodel")
 }
 library(rcmodel)
+### Set any system environmental variables ####
+Sys.setenv(RSTUDIO_PANDOC="C:/RStudio/bin/pandoc")
 
 ### Specify User information ####
 user <-  Sys.getenv("USERNAME")
