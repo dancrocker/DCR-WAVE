@@ -22,13 +22,20 @@
  }
 ### Package List ####
 ### NOTE - Shiny must be installed and loaded in the LaunchAppGitHub.R script - any other packages requred should be listed below
-packages <- c("shiny","shinyjs", "shinyFiles","rmarkdown", "knitr", "tidyverse", "lubridate", "plotly", "leaflet", "RColorBrewer",
-              "DT", "akima", "odbc", "DBI", "scales", "stringr", "cowplot", "shinythemes","rgdal", "reshape2", "dataRetrieval", "pryr", "broom")
+
+packages <- c("shiny","shinyjs", "shinyFiles","rmarkdown", "knitr", "tidyverse", "lubridate", "plotly", "leaflet", "RColorBrewer", "devtools",
+              "DT", "akima", "odbc", "DBI", "scales", "stringr", "cowplot", "shinythemes","rgdal", "reshape2", "dataRetrieval", "pryr", "broom",
+              "ggthemes")
 ipak(packages) ### Need to add "rcmodel"' - not in any repo...load from Mhagemann's github
+
+if("rcmodel" %in% rownames(installed.packages()) == FALSE) {
+  print("rcmodel package not installed, installing now")
+  install_github("markwh/rcmodel")
+}
 
 ### Specify User information ####
 user <-  Sys.getenv("USERNAME")
-
+  
   userdata <- readxl::read_xlsx(path = config[17])
     ### Directory with saved .rds files
     if (user == userdata$Username[7]) {
