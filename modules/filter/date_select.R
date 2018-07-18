@@ -99,7 +99,7 @@ DATE_SELECT <- function(input, output, session, Df, hidden = FALSE) {
   ### Year Selection
 
   # Choices
-  Year_Choices <- reactive({c(rev(year(seq(Date_Min(), Date_Max(), "years"))))}) # Change to first year of data
+  Year_Choices <- reactive({c(rev(year(seq(Date_Min(), Sys.Date(), "years"))))}) # Change to first year of data
 
   # Parameter Selection UI
   output$year_ui <- renderUI({
