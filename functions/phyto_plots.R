@@ -50,10 +50,15 @@ taxaplot <- function(df,locs,vyear,taxa, color){
     filter(!is.na(Threshold_early)) %>%
     select("Name","Threshold_early","Threshold_Tx") %>%
     dplyr::rename(Taxa = Name)
-  df <- df %>%
-    filter(Result != 8888, Result != 9999) %>% 
-    mutate(Year = year(Date))
-  df2 <- df[df$Taxa == taxa & df$Year %in% vyear & df$Station %in% locs,]
+   df <- df %>%
+     filter(Result != 8888, Result != 9999) %>% 
+     mutate("Year" = year(Date))
+   
+   df$Taxa_f <-  df_taxa_wach$Frmr_name[match(df$Taxa, df_taxa_wach$Name)]
+   
+  plot_taxa <- c(taxa, df$Taxa_f[df$Taxa == taxa]) %>% unique()
+  
+  df2 <- df[df$Taxa_f %in% plot_taxa & df$Year %in% vyear & df$Station %in% locs,]
   title <- paste0(gsub("_", " ", taxa), " at Station(s) ", str_c(locs, collapse = ", "), " in ", vyear)
   xlabel <- "Date"
   ylabel <- paste0(gsub("_", " ", taxa)," Density (ASUs/ml)")
@@ -215,6 +220,9 @@ historicplot <- function(df, taxa, locs, vyear, yg1min, yg1max, yg2min, yg2max, 
   df <- df %>%
     filter(Result != 8888, Result != 9999) %>% 
     select(-PA)
+  df$Taxa_f <-  df_taxa_wach$Frmr_name[match(df$Taxa, df_taxa_wach$Name)]
+  plot_taxa <- c(taxa, df$Taxa_f[df$Taxa == taxa]) %>% unique()
+  
   taxalabel <- paste0(gsub("_", " ", taxa))
   title <- paste0("Wachusett Reservoir ", taxalabel, " Density by Month")
   subtitle <- paste0("Data included only from Stations: (", str_c(locs, collapse = ", "), "), All Depths")
@@ -236,7 +244,8 @@ historicplot <- function(df, taxa, locs, vyear, yg1min, yg1max, yg2min, yg2max, 
   colors <- c("#F49B00", "black", "#7F7F7F", "#77933C")
 
   # Parent data set
-  df <- df[df$Taxa %in% taxa & df$Station %in% locs & df$Depth_m >= depthmin & df$Depth_m <= depthmax,]
+
+  df <- df[df$Taxa_f %in% plot_taxa & df$Station %in% locs & df$Depth_m >= depthmin & df$Depth_m <= depthmax,]
   df$plotdate <- NA
   df$plotdate <- as.Date(paste0(vyear,"-",month(df$Date),"-15"), format = '%Y-%m-%d')
   df$Year <- year(df$Date)
