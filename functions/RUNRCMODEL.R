@@ -176,8 +176,10 @@ RUNRCMODEL <- function(rawdata, gam_models, flow, df_full, loc, pars, dir){
   
   obs_v_prd_ld <-  plot(measload, predload$fit, main = paste0(var, " Measured Load vs Predicted Load\n",loc), 
                            xlab = "Measured Load (kg/day)", ylab = "Predicted Load (kg/day)");abline(0, 1)
-  dev.copy(png, width = wd, height = ht, units = "in", res = 300, paste0(newdir,"obs_v_prd_ld.png"))
-  dev.off()
+  
+  ggsave(paste0("obs_v_prd_ld.png"), plot = obs_v_prd_ld, device = "png", path = newdir, width = wd, height = ht, units = "in", dpi = 300)
+  # dev.copy(png, width = wd, height = ht, units = "in", res = 300, paste0(newdir,"obs_v_prd_ld.png"))
+  # dev.off()
 
   ### Various evaluation metrics are shown using the `summary` function:
   rcmodel_sum <- summary(rcdata_model)
