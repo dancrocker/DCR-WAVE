@@ -158,14 +158,18 @@ RUNRCMODEL <- function(rawdata, gam_models, flow, df_full, loc, pars, dir){
   
   ### Compare observed to predicted concentration:
   predconc <- predict(rcdata_model, retransform = TRUE)
-  ### The %<a% is from the pyr package
-  # obs_v_prd_c %<a-% {plot(rcdata$conc, predconc$fit, main = paste0(var, " Measured Concentration vs Predicted Concentration\n",loc),
-  #                         xlab = "Actual Concentration (mg/L)", ylab = "Predicted Concentration (mg/L)", asp = 800/600);abline(0, 1)}
+
+  obs_v_prd_c <- ggplot() +
+    geom_point(aes(x = rcdata$conc, y = predconc$fit)) +
+    geom_abline() +
+    theme(plot.title = element_text(face="bold", size=12, vjust = 1, hjust = 0.5),
+          aspect.ratio=ht/wd) +
+    theme_bw() +
+    ggtitle(toupper(paste0(var, " Measured Concentration vs Predicted Concentration at ",loc))) +
+    xlab("Measured Concentration (mg/L)") +
+    ylab("Predicted Concentration (mg/L)")
   
-  obs_v_prd_c <- plot(rcdata$conc, predconc$fit, main = paste0(var, " Measured Concentration vs Predicted Concentration\n",loc), 
-                          xlab = "Actual Concentration (mg/L)", ylab = "Predicted Concentration (mg/L)", asp = wd/ht);abline(0, 1)
-  dev.copy(png, width = wd, height = ht, units = "in", res = 300, paste0(newdir,"obs_v_prd_c.png"))
-  dev.off()
+  ggsave(paste0("obs_v_prd_c.png"), plot = obs_v_prd_c, device = "png", path = newdir, width = wd, height = ht, units = "in", dpi = 300)
 
   ### Compare observed to predicted daily load:
   
@@ -174,12 +178,17 @@ RUNRCMODEL <- function(rawdata, gam_models, flow, df_full, loc, pars, dir){
   
   measload <- rcdata$conc * rcdata$flow * 2.4466 # last part is unit conversion
   
-  obs_v_prd_ld <-  plot(measload, predload$fit, main = paste0(var, " Measured Load vs Predicted Load\n",loc), 
-                           xlab = "Measured Load (kg/day)", ylab = "Predicted Load (kg/day)");abline(0, 1)
+  obs_v_prd_ld <- ggplot() +
+    geom_point(aes(x = measload, y = predload$fit)) +
+    geom_abline() +
+    theme(plot.title = element_text(face="bold", size=12, vjust = 1, hjust = 0.5),
+          aspect.ratio=ht/wd) +
+    theme_bw() +
+    ggtitle(toupper(paste0(var, " Measured Load vs Predicted Load at ",loc))) +
+    xlab("Measured Load (kg/day)") +
+    ylab("Predicted Load (kg/day)")
   
   ggsave(paste0("obs_v_prd_ld.png"), plot = obs_v_prd_ld, device = "png", path = newdir, width = wd, height = ht, units = "in", dpi = 300)
-  # dev.copy(png, width = wd, height = ht, units = "in", res = 300, paste0(newdir,"obs_v_prd_ld.png"))
-  # dev.off()
 
   ### Various evaluation metrics are shown using the `summary` function:
   rcmodel_sum <- summary(rcdata_model)
@@ -200,17 +209,30 @@ RUNRCMODEL <- function(rawdata, gam_models, flow, df_full, loc, pars, dir){
   
   concpreds <- predict(rcdata_model, what = "concentration", newdata = rcPredData)
   
-  ts_conc <-  plot(rcPredData$Date, concpreds$fit, type = "l", main = paste0(" Predicted Concentration of ", var, "\n", 
-                                    rcPredData$LocationLabel[1]), xlab = "Date", ylab = "concentration (mg/L)")
-  dev.copy(png, width = wd, height = ht, units = "in", res = 300, paste0(newdir,"ts_conc.png"))
-  dev.off()
+  ts_conc <- ggplot() +
+    geom_line(aes(x = rcPredData$Date, y = concpreds$fit)) +
+    theme(plot.title = element_text(face="bold", size=12, vjust = 1, hjust = 0.5),
+          aspect.ratio=ht/wd) +
+    theme_bw() +
+    ggtitle(toupper(paste0(" Predicted Concentration of ", var, " at ", rcPredData$LocationLabel[1]))) +
+    xlab("Date") +
+    ylab("Concentration (mg/L)")
+  
+  ggsave(paste0("ts_conc.png"), plot = ts_conc, device = "png", path = newdir, width = wd, height = ht, units = "in", dpi = 300)
+  
   
   loadpreds <- predict(rcdata_model, what = "load", newdata = rcPredData)
  
-  ts_load <-  plot(rcPredData$Date, loadpreds$fit, type = "l", main = paste0(" Predicted Load of ", var, "\n", 
-                                  rcPredData$LocationLabel[1]), xlab = "Date", ylab = "Load (kg/day)")
-  dev.copy(png, width = wd, height = ht, units = "in", res = 300, paste0(newdir,"ts_load.png"))
-  dev.off() 
+  ts_load <- ggplot() +
+    geom_line(aes(x = rcPredData$Date, y = concpreds$fit)) +
+    theme(plot.title = element_text(face="bold", size=12, vjust = 1, hjust = 0.5),
+          aspect.ratio=ht/wd) +
+    theme_bw() +
+    ggtitle(toupper(paste0(" Predicted Load of ", var, " AT ", rcPredData$LocationLabel[1]))) +
+    xlab("Date") +
+    ylab("Load (kg/day)")
+  
+  ggsave(paste0("ts_load.png"), plot = ts_load, device = "png", path = newdir, width = wd, height = ht, units = "in", dpi = 300)
 
  ### Total load can be computed as follows:
  # totLoad(loadpreds$fit, datetime = rcPredData$Date, load.units = "kg/day")
@@ -222,7 +244,7 @@ RUNRCMODEL <- function(rawdata, gam_models, flow, df_full, loc, pars, dir){
    mutate("PredLoad" = loadpreds$fit, "PredConc" = concpreds$fit) %>% 
    left_join(obs_conc, by = "Date")
  
- title <- paste(var, "Concentration at \n", rcPredData$LocationLabel[1])
+ title <- toupper(paste(var, "Concentration at ", rcPredData$LocationLabel[1]))
  pred_v_obs_c_plot <- ggplot() +
    geom_line(aes(x = Date, y = PredConc, color = "Modeled Concentration"), data = rcPredData) +
    geom_point(aes(x = Date, y = conc, color = "Measured Concentration"), data = rcPredData) +
@@ -257,7 +279,7 @@ month_load_plot <- ggplot() +
   geom_bar(aes(x= PlotDate, y = Load, fill = "Monthly Load"), data = rc_month, stat = "identity") +
   scale_fill_manual(name = "", values = c("Monthly Load" = "olivedrab")) +
   labs(x = "Month-Year", y = "Load (kg/month)") +
-  ggtitle(paste0("Monthly ", var, " Loads at\n", rcPredData$LocationLabel[1] )) +
+  ggtitle(toupper(paste0("Monthly ", var, " Loads at ", rcPredData$LocationLabel[1]))) +
   scale_x_date(expand=c(0, 0),
                    labels=scales::date_format('%m-%Y')) +
   theme(plot.title = element_text(face="bold", size=12, vjust = 1, hjust = 0.5),
@@ -284,7 +306,7 @@ annual_load_plot <- ggplot() +
   geom_bar(aes(x = Year, y = Load, fill = "Annual Load"), data = rc_year, stat = "identity") +
   scale_fill_manual(name = "", values = c("Annual Load" = "lightskyblue4")) +
   labs(x = "Year", y = "Load (kg/year)") +
-  ggtitle(paste0("Annual ", var, " Loads at\n ", rcPredData$LocationLabel[1])) +
+  ggtitle(toupper(paste0("Annual ", var, " Loads at ", rcPredData$LocationLabel[1]))) +
   theme(plot.title = element_text(face="bold", size=12, vjust = 1, hjust = 0.5),
         axis.title.y=element_text(angle=90, vjust=3, face = "bold"),
         axis.title.x=element_text(face = "bold"),
