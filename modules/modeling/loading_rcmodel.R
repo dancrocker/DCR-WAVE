@@ -18,14 +18,22 @@ LOADING_RCMODEL_UI <- function(id) {
   ns <- NS(id) # see General Note 1
   tagList(
     tabsetPanel(
-      tabPanel("MODEL SETUP/INPUT:",
-                 fluidRow(h3("MODEL INPUT OPTIONS", align = "center")),
+      tabPanel("MODEL SETUP/INPUT:", ### INPUT UI ####
+          div(id = ns("form2"), ### Set div() for Refresh Button ####
+                fluidRow(
+                  br(),
+                   column(1,
+                          div(actionButton(ns("refresh"), "REFRESH"), align = "center")
+                   ),
+                   column(11,
+                          (h3("MODEL INPUT OPTIONS", align = "center"))
+                   )
+                 ),
                  fluidRow(
                    column(6,
-                      wellPanel(h4("1. REQUIRED OPTIONS:"), 
+                      wellPanel(h4("1. REQUIRED OPTIONS:"), ### Required options ####
                           br(),
                           uiOutput(ns("site_ui")),
-                          # verbatimTextOutput(ns("sites")),
                           uiOutput(ns("param_ui")),
                           uiOutput(ns("model_years_ui")),
                           uiOutput(ns("pred_years_ui")),
@@ -37,7 +45,7 @@ LOADING_RCMODEL_UI <- function(id) {
                    ), # end Column  
                    column(6,
                         wellPanel(
-                          h4("2. OPTIONAL FILTERS:"),
+                          h4("2. OPTIONAL FILTERS:"), ### Optional Filters ####
                           br(),
                           checkboxInput(ns("rm_storms"),
                                         label =  "Remove Storm Samples from model data",
@@ -47,12 +55,12 @@ LOADING_RCMODEL_UI <- function(id) {
                                         value = FALSE),
                           SELECT_SELECT_ALL_UI(ns("flag"))
                         ),# end Well Panel
-                        wellPanel(h4("3. PREPARE MODEL INPUT DATA:", align = "left"),
+                        wellPanel(h4("3. PREPARE MODEL INPUT DATA:", align = "left"), ### Prep Data Button ####
                           br(),
                           uiOutput(ns("prep_data.UI"))
                           # placeholder for messages
                         ), # end Well Panel
-                        wellPanel(h4("4. RUN RCMODEL:", align = "left"),
+                        wellPanel(h4("4. RUN RCMODEL:", align = "left"), ### Run Model Button ####
                           br(),
                           uiOutput(ns("run_model.UI"))
                           # Placeholder for messages
@@ -61,7 +69,7 @@ LOADING_RCMODEL_UI <- function(id) {
                ),
               fluidRow(
                 column(12,
-                  tabsetPanel(
+                  tabsetPanel( ### Model Data Tabs ####
                     tabPanel("Basic Model Data",
                              dataTableOutput(ns("rawdata"))
                     ),
@@ -74,16 +82,15 @@ LOADING_RCMODEL_UI <- function(id) {
                   ) # End Tabset Panel
                 ) # End Column
               )# End fluid row
+          )  ### End Div ####
       ),
-      tabPanel("MODEL OUTPUT:",
+      tabPanel("MODEL OUTPUT:", ### Model Output Data Tab ####
                fluidRow(column(12,
                                h3("RC MODEL OUTPUT RESULTS", align = "center"),
                                br(),
                                wellPanel(
                                  div(style="display: inline-block;vertical-align:top; width: 400px;",uiOutput(ns("results_site_ui"))),
                                  div(style="display: inline-block;vertical-align:top; width: 400px;",uiOutput(ns("results_param_ui")))
-                                 # uiOutput(ns("report_site_ui")),
-                                 # uiOutput(ns("report_param_ui"))
                                )
                )
                ),
@@ -99,15 +106,13 @@ LOADING_RCMODEL_UI <- function(id) {
                )
                )
       ),# End Tab Panel
-      tabPanel("MODEL REPORT:",
+      tabPanel("MODEL REPORT:", ### Model Report ####
                fluidRow(column(12,
                           h3("RC MODEL OUTPUT REPORT", align = "center"),
                           br(),
                           wellPanel(
                             div(style="display: inline-block;vertical-align:top; width: 400px;",uiOutput(ns("report_site_ui"))),
                             div(style="display: inline-block;vertical-align:top; width: 400px;",uiOutput(ns("report_param_ui")))
-                            # uiOutput(ns("report_site_ui")),
-                            # uiOutput(ns("report_param_ui"))
                           )
                       )
                ),
@@ -117,8 +122,8 @@ LOADING_RCMODEL_UI <- function(id) {
                )
       )# End Tab Panel
     ) # End Tabset Panel
-  ) # End TagList
-} # end UI
+  ) # End tagList
+} ### end UI ####
 
 #__________________________________________________________________________________________________________
 # Server Function ####
@@ -317,7 +322,7 @@ LOADING_RCMODEL <- function(input, output, session, df_wq, df_flow, df_precip,
     req(input$param)
     actionButton(inputId = ns("prep_data"),
                  label = "Prepare Model Input Data",
-                 width = '500px')
+                 width = '100%')
   })
   
   # observeEvent(input$prep_data, {
@@ -352,7 +357,6 @@ LOADING_RCMODEL <- function(input, output, session, df_wq, df_flow, df_precip,
   df_full <- reactive({dfs()[[3]]})
 ### Text Outputs ####
  
-  output$sites <- renderText({input$site}) 
 
   ### Table Outputs ####
   
@@ -393,7 +397,7 @@ LOADING_RCMODEL <- function(input, output, session, df_wq, df_flow, df_precip,
     req(try(dfs()))
     actionButton(inputId = ns("run_model"),
                  label = "Run Model",
-                 width = '500px')
+                 width = '100%')
   })
   
   # observeEvent(input$run_model, {
@@ -403,7 +407,11 @@ LOADING_RCMODEL <- function(input, output, session, df_wq, df_flow, df_precip,
   # })
   
   ### Run the function to process the data and return 2 dataframes and path as list
-  observeEvent(input$run_model,{
+   observeEvent(input$refresh, {
+     shinyjs::reset("form2")
+   })  
+   
+    observeEvent(input$run_model,{
     showModal(modalDialog(
       title = paste0("Model run(s) started at ", now()),
       paste0("Model run(s) have begun for location(s) (",Site(),") and parameter(s) (", Param(), ").\n A new message will appear upon completion."),
@@ -434,17 +442,6 @@ LOADING_RCMODEL <- function(input, output, session, df_wq, df_flow, df_precip,
       footer = "Click anywhere or press esc. to continue"
       )
     )
-  # rep_site <- reactive({ 
-  #   req(input$report_site)
-  #   rep_site <- substrRight(input$report_site, 4)
-  #   rep_site
-  # })
-  # rcmodel_report <-  reactive({  
-  #   req(input$report_site)
-  #   req(input$report_param)
-  #   rcmodel_report <- paste0(input$dir,"/", rep_site(), "/", input$report_param, "/", "RC_Model_Report_", rep_site(),"_", input$report_param, ".html")
-  #   rcmodel_report
-  #   })
 
   })
   

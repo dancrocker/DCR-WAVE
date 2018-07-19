@@ -163,7 +163,7 @@ ui <- tagList(
                color: #0C4B91;
              }'
              ),
-  ### Use ShinyJS for reset button in Filter Tab
+  ### Use ShinyJS for reset buttons in Filter Tab and in Modeling module
   useShinyjs(),
 
   ### Create the Top Navigation Bar as well as define aesthetics
