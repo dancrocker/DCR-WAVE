@@ -18,21 +18,27 @@ LOADING_RCMODEL_UI <- function(id) {
   ns <- NS(id) # see General Note 1
   tagList(
     tabsetPanel(
-      tabPanel("Model Setup/Input:",
-                 fluidRow(h3("1. Model Input Options", align = "center")),
+      tabPanel("MODEL SETUP/INPUT:",
+                 fluidRow(h3("MODEL INPUT OPTIONS", align = "center")),
                  fluidRow(
                    column(6,
-                      wellPanel(strong("Required Choices:"), # Bold Text
+                      wellPanel(h4("1. REQUIRED OPTIONS:"), 
+                          br(),
                           uiOutput(ns("site_ui")),
-                          verbatimTextOutput(ns("sites")),
+                          # verbatimTextOutput(ns("sites")),
                           uiOutput(ns("param_ui")),
                           uiOutput(ns("model_years_ui")),
-                          uiOutput(ns("pred_years_ui"))
+                          uiOutput(ns("pred_years_ui")),
+                          strong("Model Output Directory:"),# Bold Text
+                          br(),
+                          textInput(ns("dir"),label =  "Type a directory to save model results\n (change all backslashes to forward slashes)",
+                                    value = "C:/WQDatabase/WAVE_WIT_Apps/Outputs")
                       ) # End Well Panel  
                    ), # end Column  
                    column(6,
                         wellPanel(
-                          strong("Optional Choices:"), # Bold Text
+                          h4("2. OPTIONAL FILTERS:"),
+                          br(),
                           checkboxInput(ns("rm_storms"),
                                         label =  "Remove Storm Samples from model data",
                                         value = FALSE),
@@ -40,44 +46,19 @@ LOADING_RCMODEL_UI <- function(id) {
                                         label =  "Remove Below detection results from model data",
                                         value = FALSE),
                           SELECT_SELECT_ALL_UI(ns("flag"))
-                        ) # end Well Panel
-                 ) # End Column
-               ),
-               fluidRow(
-                 column(6,
-                        # wellPanel(
-                        #   tags$div(class="form-group shiny-input-container", 
-                        #            tags$div(tags$label("File input")),
-                        #            tags$div(tags$label("Choose folder", class="btn btn-primary",
-                        #                                tags$input(id = "fileIn", webkitdirectory = TRUE, type = "file", style="display: none;", onchange="pressed()"))),
-                        #            tags$label("No folder choosen", id = "noFile"),
-                        #            tags$div(id="fileIn_progress", class="progress progress-striped active shiny-file-input-progress",
-                        #                     tags$div(class="progress-bar")
-                        #            )     
-                        #   ),
-                        #   verbatimTextOutput("results")
-                        # )
-                        wellPanel(strong("Model Output Options:"),# Bold Text
-                                  br(),
-                                textInput(ns("dir"),label =  "Type a directory to save model results\n (change all backslashes to forward slashes)", value = "C:/WQDatabase/WAVE_WIT_Apps/Outputs")
-                                ) # End Well Panel
-                        
-                 ), # end Column
-                 column(6,
-                        wellPanel(
-                          strong("3. Generate Model Input Data:"), # Bold Text# Bold Text
+                        ),# end Well Panel
+                        wellPanel(h4("3. PREPARE MODEL INPUT DATA", align = "left"),
                           br(),
                           uiOutput(ns("prep_data.UI"))
                           # placeholder for messages
-                          ), # end Well Panel
-                        wellPanel(
-                          strong("4. Run RCMODEL:"), # Bold Text
+                        ), # end Well Panel
+                        wellPanel(h4("4. RUN RCMODEL", align = "left"),
                           br(),
                           uiOutput(ns("run_model.UI"))
                           # Placeholder for messages
-                          ) # end Well Panel
+                        ) # end Well Panel
                  ) # End Column
-              ),
+               ),
               fluidRow(
                 column(12,
                   tabsetPanel(
@@ -94,13 +75,39 @@ LOADING_RCMODEL_UI <- function(id) {
                 ) # End Column
               )# End fluid row
       ),
-      tabPanel("Model Output:",
+      tabPanel("MODEL OUTPUT:",
+               fluidRow(column(12,
+                               h3("RC MODEL OUTPUT RESULTS", align = "center"),
+                               br(),
+                               wellPanel(
+                                 div(style="display: inline-block;vertical-align:top; width: 400px;",uiOutput(ns("results_site_ui"))),
+                                 div(style="display: inline-block;vertical-align:top; width: 400px;",uiOutput(ns("results_param_ui")))
+                                 # uiOutput(ns("report_site_ui")),
+                                 # uiOutput(ns("report_param_ui"))
+                               )
+               )
+               ),
+               fluidRow(column(12,
+                               tabsetPanel(
+                                 tabPanel("Monthly Loads",
+                                          dataTableOutput(ns("results_month"))
+                                 ),
+                                 tabPanel("Annual Loads",
+                                          dataTableOutput(ns("results_year"))
+                                 ) # End Tab Panel
+                               ) # End Tabset Panel
+               )
+               )
+      ),# End Tab Panel
+      tabPanel("MODEL REPORT:",
                fluidRow(column(12,
                           h3("RC MODEL OUTPUT REPORT", align = "center"),
                           br(),
                           wellPanel(
-                            uiOutput(ns("report_site_ui")),
-                            uiOutput(ns("report_param_ui"))
+                            div(style="display: inline-block;vertical-align:top; width: 400px;",uiOutput(ns("report_site_ui"))),
+                            div(style="display: inline-block;vertical-align:top; width: 400px;",uiOutput(ns("report_param_ui")))
+                            # uiOutput(ns("report_site_ui")),
+                            # uiOutput(ns("report_param_ui"))
                           )
                       )
                ),
@@ -118,7 +125,7 @@ LOADING_RCMODEL_UI <- function(id) {
 #__________________________________________________________________________________________________________
 LOADING_RCMODEL <- function(input, output, session, df_wq, df_flow, df_precip, 
                             df_locs, gam_models, df_flags, df_flag_index, type = "wq"){
-
+  
   ns <- session$ns # see General Note 1
   
   substrRight <- function(x, n){
@@ -244,7 +251,22 @@ LOADING_RCMODEL <- function(input, output, session, df_wq, df_flow, df_precip,
                 round = TRUE,
                 sep = "")
   })
-    
+    ### Results_Site UI ####  
+    output$results_site_ui <- renderUI({
+      selectInput(ns("results_site"),
+                  label = "Choose Location:",
+                  choices = Site(),
+                  multiple = FALSE,
+                  selected = "")
+    })
+    ### Results_Param UI #### 
+    output$results_param_ui <- renderUI({
+      selectInput(ns("results_param"),
+                  label = "Choose Parameter:",
+                  choices = Param(),
+                  multiple = FALSE,
+                  selected = "")
+    })
     
     ### Report_Site UI ####  
     output$report_site_ui <- renderUI({
@@ -264,12 +286,7 @@ LOADING_RCMODEL <- function(input, output, session, df_wq, df_flow, df_precip,
     })
     
     ### Report UI #### 
-    # output$report_html_ui <- renderUI({
-    #   req(input$report_site)
-    #   req(input$report_param)
-    #   includeHTML(ns(rcmodel_report()))
-    # })
-    
+
     getReport <- function() {
       rep_site <- substrRight(input$report_site, 4)
       return(includeHTML(paste0(input$dir,"/", rep_site, "/", input$report_param, "/", "RC_Model_Report_", rep_site,"_", input$report_param, ".html")))
@@ -356,6 +373,20 @@ LOADING_RCMODEL <- function(input, output, session, df_wq, df_flow, df_precip,
     df_flow3()
   })  
   
+  output$results_month <- renderDataTable({
+    req(input$results_site)
+    req(input$results_param)
+    results_site <- substrRight(input$results_site, 4)
+    readRDS(paste0(input$dir,"/", results_site, "/", input$results_param, "/", "rc_month.rds"))
+  })
+ 
+   output$results_year <- renderDataTable({
+     req(input$results_site)
+     req(input$results_param)
+     results_site <- substrRight(input$results_site, 4) 
+     readRDS(paste0(input$dir,"/", results_site, "/", input$results_param, "/", "rc_year.rds"))
+  })
+  
 ### Run RCMODEL ####
   # Run Model Button - Will only be shown when a data is prepared successfully
   output$run_model.UI <- renderUI({
@@ -375,7 +406,7 @@ LOADING_RCMODEL <- function(input, output, session, df_wq, df_flow, df_precip,
   observeEvent(input$run_model,{
     showModal(modalDialog(
       title = paste0("Model run(s) started at ", now()),
-      "Model run(s) have begun ... a new message will appear upon completion.",
+      paste0("Model run(s) have begun for location(s) (",Site(),") and parameter(s) (", Param(), ").\n A new message will appear upon completion."),
       fade = TRUE,
       footer = NULL
     ))
@@ -397,7 +428,7 @@ LOADING_RCMODEL <- function(input, output, session, df_wq, df_flow, df_precip,
     }
     showModal(modalDialog(
       title = paste0("Model run(s) finished at ", now()),
-      paste0("Model Report(s) can be viewd on the Model Output tab.\n All model outputs are available at ", input$dir),
+      paste0("Model Report(s) can be viewd on the Model Report tab and output data is on the Model Output tab.\n All model outputs are available at ", input$dir),
       easyClose = TRUE,
       footer = "Click anywhere or press esc. to continue"
       )

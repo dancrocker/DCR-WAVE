@@ -77,6 +77,8 @@
 # Model run loop by location for all parameters chosen. Have separate button to knit report using outputs?
 RUNRCMODEL <- function(rawdata, gam_models, flow, df_full, loc, pars, dir){
   loc <- substrRight(loc, 4)
+  ht <- 4.5
+  wd <- 10
   ### LOOP THROUGH EACH PARAMETER AND RUN THE THE MODEL FUNCTIONS, RETURN TO NEXT LOC
   for(i in seq_along(pars)){ 
     ### Set the Variable
@@ -156,13 +158,13 @@ RUNRCMODEL <- function(rawdata, gam_models, flow, df_full, loc, pars, dir){
   
   ### Compare observed to predicted concentration:
   predconc <- predict(rcdata_model, retransform = TRUE)
-
-  # obs_v_prd_c %<a-% {plot(rcdata$conc, predconc$fit, main = paste0(var, " Measured Concentration vs Predicted Concentration\n",loc), 
+  ### The %<a% is from the pyr package
+  # obs_v_prd_c %<a-% {plot(rcdata$conc, predconc$fit, main = paste0(var, " Measured Concentration vs Predicted Concentration\n",loc),
   #                         xlab = "Actual Concentration (mg/L)", ylab = "Predicted Concentration (mg/L)", asp = 800/600);abline(0, 1)}
-  plot(rcdata$conc, predconc$fit, main = paste0(var, " Measured Concentration vs Predicted Concentration\n",loc), 
-                          xlab = "Actual Concentration (mg/L)", ylab = "Predicted Concentration (mg/L)", asp = 800/600);abline(0, 1)
-  # obs_v_prd_c
-  dev.copy(png, width = 7, height = 4.5, units = "in", res = 300, paste0(newdir,"obs_v_prd_c.png"))
+  
+  obs_v_prd_c <- plot(rcdata$conc, predconc$fit, main = paste0(var, " Measured Concentration vs Predicted Concentration\n",loc), 
+                          xlab = "Actual Concentration (mg/L)", ylab = "Predicted Concentration (mg/L)", asp = wd/ht);abline(0, 1)
+  dev.copy(png, width = wd, height = ht, units = "in", res = 300, paste0(newdir,"obs_v_prd_c.png"))
   dev.off()
 
   ### Compare observed to predicted daily load:
@@ -172,10 +174,9 @@ RUNRCMODEL <- function(rawdata, gam_models, flow, df_full, loc, pars, dir){
   
   measload <- rcdata$conc * rcdata$flow * 2.4466 # last part is unit conversion
   
-  obs_v_prd_ld %<a-% {plot(measload, predload$fit, main = paste0(var, " Measured Load vs Predicted Load\n",loc), 
-                           xlab = "Measured Load (kg/day)", ylab = "Predicted Load (kg/day)");abline(0, 1)}
-  obs_v_prd_ld
-  dev.copy(png, width = 7, height = 4.5, units = "in", res = 300, paste0(newdir,"obs_v_prd_ld.png"))
+  obs_v_prd_ld <-  plot(measload, predload$fit, main = paste0(var, " Measured Load vs Predicted Load\n",loc), 
+                           xlab = "Measured Load (kg/day)", ylab = "Predicted Load (kg/day)");abline(0, 1)
+  dev.copy(png, width = wd, height = ht, units = "in", res = 300, paste0(newdir,"obs_v_prd_ld.png"))
   dev.off()
 
   ### Various evaluation metrics are shown using the `summary` function:
@@ -197,16 +198,16 @@ RUNRCMODEL <- function(rawdata, gam_models, flow, df_full, loc, pars, dir){
   
   concpreds <- predict(rcdata_model, what = "concentration", newdata = rcPredData)
   
-  ts_conc %<a-% {plot(rcPredData$Date, concpreds$fit, type = "l", main = paste0(" Predicted Concentration of ", var, "\n", rcPredData$LocationLabel[1]), xlab = "Date", ylab = "concentration (mg/L)")}
-  ts_conc
-  dev.copy(png, width = 7, height = 4.5, units = "in", res = 300, paste0(newdir,"ts_conc.png"))
+  ts_conc <-  plot(rcPredData$Date, concpreds$fit, type = "l", main = paste0(" Predicted Concentration of ", var, "\n", 
+                                    rcPredData$LocationLabel[1]), xlab = "Date", ylab = "concentration (mg/L)")
+  dev.copy(png, width = wd, height = ht, units = "in", res = 300, paste0(newdir,"ts_conc.png"))
   dev.off()
   
   loadpreds <- predict(rcdata_model, what = "load", newdata = rcPredData)
  
-  ts_load %<a-% {plot(rcPredData$Date, loadpreds$fit, type = "l", main = paste0(" Predicted Load of ", var, "\n", rcPredData$LocationLabel[1]), xlab = "Date", ylab = "Load (kg/day)")}
-  ts_load
-  dev.copy(png, width = 7, height = 4.5, units = "in", res = 300, paste0(newdir,"ts_load.png"))
+  ts_load <-  plot(rcPredData$Date, loadpreds$fit, type = "l", main = paste0(" Predicted Load of ", var, "\n", 
+                                  rcPredData$LocationLabel[1]), xlab = "Date", ylab = "Load (kg/day)")
+  dev.copy(png, width = wd, height = ht, units = "in", res = 300, paste0(newdir,"ts_load.png"))
   dev.off() 
 
  ### Total load can be computed as follows:
@@ -231,13 +232,13 @@ RUNRCMODEL <- function(rawdata, gam_models, flow, df_full, loc, pars, dir){
         axis.title.x=element_text(face = "bold"),
         panel.background = element_rect(colour = "black", size=1.5, fill=NA),
         panel.grid.major = element_line(colour = "grey40"),
-        panel.grid.minor = element_blank(),
-        aspect.ratio=4.5/7) +
+        panel.grid.minor = element_blank()) +
+        # aspect.ratio=ht/wd) +
    scale_color_manual(name = "", values = c("Modeled Concentration" = "orange3", "Measured Concentration" = "salmon4")) +
    ggtitle(title) +
    ylab(paste0(var, " (mg/L)"))
  
-ggsave(paste0("pred_v_obs_c_plot.png"), plot = pred_v_obs_c_plot, device = "png", path = newdir, width = 7, height = 4.5, units = "in", dpi = 300)
+ggsave(paste0("pred_v_obs_c_plot.png"), plot = pred_v_obs_c_plot, device = "png", path = newdir, width = wd, height = ht, units = "in", dpi = 300)
 # saveRDS(pred_v_obs_c_plot, paste0(newdir, "pred_v_obs_c_plot.rds"))       
 # pred_v_obs_c_plot
 
@@ -247,7 +248,7 @@ rc_month  <- rcPredData %>%
   summarize("sum_load" = sum(PredLoad), "MonthYear" = max(floor_date(Date, unit = "month")), "days" = n())
 
 names(rc_month) <- c("Month", "Year","Load", "PlotDate", "Days")
-# saveRDS(rc_month, paste0(newdir, "rc_month.rds"))
+saveRDS(rc_month, paste0(newdir, "rc_month.rds"))
 # write.csv(x = rc_month,file = paste0(newdir, "MonthLoads.csv"), row.names = FALSE)
 
 month_load_plot <- ggplot() +
@@ -264,9 +265,9 @@ month_load_plot <- ggplot() +
         panel.grid.major = element_line(colour = "grey40"),
         panel.grid.minor = element_blank(),
         panel.ontop = T,
-        aspect.ratio=4.5/7,
+        # aspect.ratio=ht/wd,
         legend.position = "top")
-ggsave(paste0("month_load_plot.png"),plot = month_load_plot, device = "png", path = newdir, width = 7, height = 4.5, units = "in",dpi = 300)
+ggsave(paste0("month_load_plot.png"),plot = month_load_plot, device = "png", path = newdir, width = wd, height = ht, units = "in",dpi = 300)
 # saveRDS(mnth_load_plot, paste0(newdir, "month_load_plot.rds"))
 # month_load_plot
 
@@ -289,14 +290,12 @@ annual_load_plot <- ggplot() +
         panel.grid.major = element_line(colour = "grey40"),
         panel.grid.minor = element_blank(),
         panel.ontop = T,
-        aspect.ratio=4.5/7,
+        # aspect.ratio=ht/wd,
         legend.position = "top")
-ggsave(paste0("annual_load_plot.png"),plot = annual_load_plot, device = "png", path = newdir, width = 7, height = 4.5, units = "in", dpi = 300)
+ggsave(paste0("annual_load_plot.png"),plot = annual_load_plot, device = "png", path = newdir, width = wd, height = ht, units = "in", dpi = 300)
 # saveRDS(annual_load_plot, paste0(newdir, "annual_load_plot.rds"))
 # annual_load_plot
   
-
-
 
   ### Compare to LOADEST model:
 #  le1 <- loadest_cal(data = rcdata_f, timeout = 2)
@@ -341,7 +340,7 @@ renderMyDocument <- function(loc, par,dir, oformat) {
 }
 renderMyDocument(loc = loc, par = var, dir = newdir, oformat = "html")
 # renderMyDocument(loc = loc, par = var, dir = newdir, oformat = "pdf")
-  
+
   } # End parameter loop
 } # End Function
 
