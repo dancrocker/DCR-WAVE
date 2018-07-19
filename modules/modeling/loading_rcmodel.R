@@ -429,7 +429,7 @@ LOADING_RCMODEL <- function(input, output, session, df_wq, df_flow, df_precip,
     showModal(modalDialog(
       title = paste0("Model run(s) finished at ", now()),
       paste0("Model report(s) can be viewd on the Model Report tab and output data is on the Model Output tab.\n All model outputs are available at ", 
-             normalizePath(path = input$dir, winslash = "/")),
+             input$dir),
       easyClose = TRUE,
       footer = "Click anywhere or press esc. to continue"
       )
