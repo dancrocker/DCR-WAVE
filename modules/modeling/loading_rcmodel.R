@@ -47,12 +47,12 @@ LOADING_RCMODEL_UI <- function(id) {
                                         value = FALSE),
                           SELECT_SELECT_ALL_UI(ns("flag"))
                         ),# end Well Panel
-                        wellPanel(h4("3. PREPARE MODEL INPUT DATA", align = "left"),
+                        wellPanel(h4("3. PREPARE MODEL INPUT DATA:", align = "left"),
                           br(),
                           uiOutput(ns("prep_data.UI"))
                           # placeholder for messages
                         ), # end Well Panel
-                        wellPanel(h4("4. RUN RCMODEL", align = "left"),
+                        wellPanel(h4("4. RUN RCMODEL:", align = "left"),
                           br(),
                           uiOutput(ns("run_model.UI"))
                           # Placeholder for messages
@@ -316,7 +316,7 @@ LOADING_RCMODEL <- function(input, output, session, df_wq, df_flow, df_precip,
     req(input$site)
     req(input$param)
     actionButton(inputId = ns("prep_data"),
-                 label = "Generate Model Input Data",
+                 label = "Prepare Model Input Data",
                  width = '500px')
   })
   

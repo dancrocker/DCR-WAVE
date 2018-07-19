@@ -224,7 +224,7 @@ RUNRCMODEL <- function(rawdata, gam_models, flow, df_full, loc, pars, dir){
   loadpreds <- predict(rcdata_model, what = "load", newdata = rcPredData)
  
   ts_load <- ggplot() +
-    geom_line(aes(x = rcPredData$Date, y = concpreds$fit)) +
+    geom_line(aes(x = rcPredData$Date, y = loadpreds$fit)) +
     theme(plot.title = element_text(face="bold", size=12, vjust = 1, hjust = 0.5),
           aspect.ratio=ht/wd) +
     theme_bw() +
