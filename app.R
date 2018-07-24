@@ -25,7 +25,7 @@
 
 packages <- c("shiny","shinyjs", "shinyFiles","rmarkdown", "knitr", "tidyverse", "lubridate", "plotly", "leaflet", "RColorBrewer", "devtools",
               "DT", "akima", "odbc", "DBI", "scales", "stringr", "cowplot", "shinythemes","rgdal", "reshape2", "dataRetrieval", "pryr", "broom",
-              "ggthemes")
+              "ggthemes", "visreg", "devtools")
 ipak(packages) ### Need to add "rcmodel"' - not in any repo...load from Mhagemann's github
 
 if("rcmodel" %in% rownames(installed.packages()) == FALSE) {
