@@ -13,7 +13,7 @@
 ###   1_
 
 ### Load Libraries and Script (Sources, Modules, and Functions) ####
-
+print(paste0("WAVE App lauched at", Sys.time()))
  ipak <- function(pkg){
    new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
    if (length(new.pkg))
@@ -991,6 +991,7 @@ server <- function(input, output, session) {
 ### SESSION END ####
 # Code to stop app when browser session window closes
 session$onSessionEnded(function() {
+      print(paste0("WAVE session ended at", Sys.time()))
       stopApp()
     })
 } # END SERVER FUNCTION ####

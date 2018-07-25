@@ -421,7 +421,9 @@ LOADING_RCMODEL <- function(input, output, session, df_wq, df_flow, df_precip,
     ### Make sure output Directory is valid, if so then proceed with model loop, if not then send message to user
     if (file.exists(input$dir)){
         source("functions/RUNRCMODEL.R", local = T) # Hopefully this will overwrite functions as source changes...needs more testing
-        ### Run Model for Locations Selected
+      # Create the output directory
+      dir.create(input$dir, recursive = TRUE, showWarnings = FALSE )  
+      ### Run Model for Locations Selected
         for(i in seq_along(Site())){
           RUNRCMODEL(rawdata = rawdata(),
                  gam_models = gam_models,
