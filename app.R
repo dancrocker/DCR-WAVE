@@ -25,7 +25,7 @@ print(paste0("WAVE App lauched at", Sys.time()))
 
 packages <- c("shiny","shinyjs", "shinyFiles","rmarkdown", "knitr", "tidyverse", "lubridate", "plotly", "leaflet", "RColorBrewer", "devtools",
               "DT", "akima", "odbc", "DBI", "scales", "stringr", "cowplot", "shinythemes","rgdal", "reshape2", "dataRetrieval", "pryr", "broom",
-              "ggthemes", "visreg", "devtools")
+              "ggthemes", "visreg")
 ipak(packages) ### Need to add "rcmodel"' - not in any repo...load from Mhagemann's github
 
 if("rcmodel" %in% rownames(installed.packages()) == FALSE) {
@@ -34,7 +34,7 @@ if("rcmodel" %in% rownames(installed.packages()) == FALSE) {
 }
 library(rcmodel)
 ### Set any system environmental variables ####
-Sys.setenv(RSTUDIO_PANDOC="C:/RStudio/bin/pandoc")
+Sys.setenv(RSTUDIO_PANDOC= paste0(config[21],"/bin/pandoc"))
 
 ### Specify User information ####
 user <-  Sys.getenv("USERNAME")
@@ -676,7 +676,7 @@ server <- function(input, output, session) {
                              df = df_trib_wach,
                              df_site = df_trib_wach_site,
                              df_flags = df_flags,
-                             df_flag_index = df_wach_flag_index[df_wach_flag_index$Dataset == "df_trib_bact_wach",],
+                             df_flag_index = df_wach_flag_index[df_wach_flag_index$DataTableName == "tblWQALLDATA",],
                              type = "wq")
 
   ### Plots
@@ -746,7 +746,7 @@ server <- function(input, output, session) {
                              df = df_bact_wach,
                              df_site = df_bact_wach_site,
                              df_flags = df_flags,
-                             df_flag_index = df_wach_flag_index[df_wach_flag_index$Dataset == "df_trib_bact_wach",],
+                             df_flag_index = df_wach_flag_index[df_wach_flag_index$DataTableName == "tblWQALLDATA",],
                              type = "wq")
 
   ### Plots
@@ -772,7 +772,7 @@ server <- function(input, output, session) {
                              df = df_chem_wach,
                              df_site = df_chem_wach_site,
                              df_flags = df_flags,
-                             df_flag_index = df_wach_flag_index[df_wach_flag_index$Dataset == "df_chem_wach",],
+                             df_flag_index = df_wach_flag_index[df_wach_flag_index$DataTableName == "tbl_Nutrients",],
                              type = "wq_depth")
 
   ### Plots
@@ -819,7 +819,7 @@ server <- function(input, output, session) {
                                df_site = df_trib_wach_site[!is.na(df_trib_wach_site$LocationFlow),],
                                df_wq = df_trib_wach,
                                df_flags = df_flags,
-                               df_flag_index = df_wach_flag_index[df_wach_flag_index$Dataset == "df_hobo_wach",],
+                               df_flag_index = df_wach_flag_index[df_wach_flag_index$DataTableName == "tblHOBO_DATA",],
                                type = "wq"
                               )
   
@@ -866,7 +866,7 @@ server <- function(input, output, session) {
              df_locs = df_trib_wach_site,
              gam_models = gam_models_wach,
              df_flags = df_flags,
-             df_flag_index = df_wach_flag_index[df_wach_flag_index$Dataset == "df_trib_bact_wach",])
+             df_flag_index = df_wach_flag_index[df_wach_flag_index$DataTableName == "tblWQALLDATA",])
 
   # callModule(LOADING_FLUX, "mod_trib_loads_flux", Args)
   # callModule(LOADING_LOADFLEX, "mod_trib_loads_loadflex", Args)
