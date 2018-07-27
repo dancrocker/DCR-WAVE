@@ -44,7 +44,6 @@ user <-  Sys.getenv("USERNAME")
             ### Directory with saved .rds files
             if (user == userdata$Username[7]) {
               datadir <- config[14]
-              df_users <- readRDS(paste0(config[1],"/df_users.rds"))
             } else {
               datadir <- config[1]
             }
