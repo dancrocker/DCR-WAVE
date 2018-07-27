@@ -13,7 +13,7 @@
 ###   1_
 
 ### Load Libraries and Script (Sources, Modules, and Functions) ####
-print(paste0("WAVE App lauched at", Sys.time()))
+print(paste0("WAVE App lauched at ", Sys.time()))
  ipak <- function(pkg){
    new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
    if (length(new.pkg))
@@ -36,17 +36,15 @@ library(rcmodel)
 ### Set any system environmental variables ####
 Sys.setenv(RSTUDIO_PANDOC= paste0(config[21],"/bin/pandoc"))
 
+datadir <- config[1]
+
 ### Specify User information ####
 user <-  Sys.getenv("USERNAME")
   
-  if (file.exists(config[17])){
+
           userdata <- readxl::read_xlsx(path = config[17])
             ### Directory with saved .rds files
-            if (user == userdata$Username[7]) {
-              datadir <- config[14]
-            } else {
-              datadir <- config[1]
-            }
+
           if(user %in% userdata$Username){
             username <- paste(userdata$FirstName[userdata$Username %in% user],userdata$LastName[userdata$Username %in% user],sep = " ")
             useremail <- userdata$Email[userdata$Username %in% user]
@@ -56,12 +54,7 @@ user <-  Sys.getenv("USERNAME")
             useremail <- "other"
             userlocation <- "non-DCR"
           }
-  } else {
-    datadir <- config[1]
-    username <- "non-DCR"
-    useremail <- "other"
-    userlocation <- "non-DCR"
-  }
+
 ### Tab Default ####
   if(userlocation == "Quabbin"){
     tab_selected = "Quabbin"
@@ -997,7 +990,7 @@ server <- function(input, output, session) {
 ### SESSION END ####
 # Code to stop app when browser session window closes
 session$onSessionEnded(function() {
-      print(paste0("WAVE session ended at", Sys.time()))
+      print(paste0("WAVE session ended at ", Sys.time()))
       stopApp()
     })
 } # END SERVER FUNCTION ####
