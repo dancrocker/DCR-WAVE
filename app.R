@@ -39,23 +39,30 @@ Sys.setenv(RSTUDIO_PANDOC= paste0(config[21],"/bin/pandoc"))
 ### Specify User information ####
 user <-  Sys.getenv("USERNAME")
   
-  userdata <- readxl::read_xlsx(path = config[17])
-    ### Directory with saved .rds files
-    if (user == userdata$Username[7]) {
-      datadir <- config[14]
-      df_users <- readRDS(paste0(config[1],"/df_users.rds"))
-    } else {
-      datadir <- config[1]
-    }
-  if(user %in% userdata$Username){
-    username <- paste(userdata$FirstName[userdata$Username %in% user],userdata$LastName[userdata$Username %in% user],sep = " ")
-    useremail <- userdata$Email[userdata$Username %in% user]
-    userlocation <- userdata$Location[userdata$Username %in% user]
+  if (file.exists(config[17])){
+          userdata <- readxl::read_xlsx(path = config[17])
+            ### Directory with saved .rds files
+            if (user == userdata$Username[7]) {
+              datadir <- config[14]
+              df_users <- readRDS(paste0(config[1],"/df_users.rds"))
+            } else {
+              datadir <- config[1]
+            }
+          if(user %in% userdata$Username){
+            username <- paste(userdata$FirstName[userdata$Username %in% user],userdata$LastName[userdata$Username %in% user],sep = " ")
+            useremail <- userdata$Email[userdata$Username %in% user]
+            userlocation <- userdata$Location[userdata$Username %in% user]
+          } else {
+            username <- "non-DCR"
+            useremail <- "other"
+            userlocation <- "non-DCR"
+          }
   } else {
+    datadir <- config[1]
     username <- "non-DCR"
     useremail <- "other"
     userlocation <- "non-DCR"
-  }  
+  }
 ### Tab Default ####
   if(userlocation == "Quabbin"){
     tab_selected = "Quabbin"
