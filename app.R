@@ -120,7 +120,10 @@ source("modules/plot_options/plot_save.R")
 source("modules/stats/stats_summary.R")
 source("modules/stats/stats_time_depth_wq.R") # Merge into stats_sumamry
 source("modules/stats/profile_table_stats.R") # Merge into stats_summary
-### Add Hydro Stats here?
+
+### Hydro
+source("modules/precip/precip_current.R")   
+    
     
 ### Modeling
 source("modules/modeling/loading_rcmodel.R")      
@@ -135,6 +138,7 @@ source("modules/maps/home.R")
 source("modules/maps/geospatial_plot.R")
 source("modules/maps/site_map.R")
 source("modules/maps/site_map_single.R")
+source("modules/maps/precip_map.R")
 
 ### Reports - Modules for report and document generation
 source("modules/reports/report_AWQ.R")
@@ -274,7 +278,7 @@ ui <- tagList(
       ),
       selected = tab_selected
     )
-),  ### end Tributary Tabpanel (page)
+),  ### end Tributary Tabpanel (tributary)
 
 ### RESERVOIR ####
 
@@ -386,7 +390,7 @@ tabPanel("Reservoir",
      ), ### End TabPanel Watersheds
      selected = tab_selected
    )
- ),  ### end Tabpanel (page)
+ ),  ### end Tabpanel (reservoir)
 
 ### HYDRO-MET-MODELING ####
 
@@ -519,24 +523,11 @@ tabPanel("Reservoir",
               #          )
               # ),
               "Precipitation",
-              tabPanel("Select / Filter Data", icon=icon("filter"), FILTER_WQ_UI("mod_precip_wach_filter")),
-              tabPanel("--- Plots", icon = icon("line-chart"),
-                       br(),
-                       wellPanel(em('Plots use data from the "Select / Filter Data" tab')),
-                       tabsetPanel(
-                         # tabPanel("Current Conditions", PRECIP_CURRENT_UI("mod_precip_wach_current")),
-                         # tabPanel("Historical Precip", PRECIP_HIST_UI("mod_precip_wach_hist", df_prof_wach)),
-                         # tabPanel("Distribution Charts", DISTRIBUTION_WQ_UI("mod_precip_wach_plot_dist"))
-                       )
-              ),
-              tabPanel("--- Stats/Tables", icon = icon("calculator"),
-                       br(),
-                       wellPanel(em('Statistics use data from the "Select / Filter Data" tab')),
-                       tabsetPanel(
-                         # tabPanel("Summary Statistics", STAT_TIME_DEPTH_WQ_UI("mod_precip_wach_stat_sum")),
-                         # tabPanel("Historical Statistics", PLOT_CORR_MATRIX_WQ_UI("mod_precip_wach_stat_hist"))
-                       )
-              ),
+                tabPanel("Current Conditions", icon = icon("filter"), PRECIP_CURRENT_UI("mod_precip_wach_current")),
+                # tabPanel("Historical Precip", icon = icon("filter"), PRECIP_HIST_UI("mod_precip_wach_hist")),
+                # tabPanel("Statistics", icon = icon("filter"), PRECIP_STATS_UI("mod_precip_wach_stats")),
+                # tabPanel("Filter/Export Precip Data ", PRECIP_FILTER_UI("mod_precip_wach_filter")),
+              
               "Water Supply",
               tabPanel("Reservoirs/Transfers", icon=icon("calculator"),
                        br(),
@@ -563,7 +554,7 @@ tabPanel("Reservoir",
       ), ### End TabPanel Watersheds
       selected = tab_selected
     )
-  ),  ### end Tabpanel (page)
+  ),  ### end Tabpanel (HydroMet)
 
 ### FORESTRY ####
 
@@ -632,7 +623,7 @@ server <- function(input, output, session) {
 
   ### Filter
   Df_Trib_Quab <- callModule(FILTER_WQ, "mod_trib_quab_filter", df = df_trib_quab, df_site = df_trib_quab_site, type = "wq")
-
+    
   ### Plots
   callModule(PLOT_TIME_WQ, "mod_trib_quab_plot_time", Df = Df_Trib_Quab$Long)
   callModule(PLOT_CORR_WQ, "mod_trib_quab_plot_corr", Df = Df_Trib_Quab$Long)
@@ -834,18 +825,12 @@ server <- function(input, output, session) {
     # callModule(RATINGS, "mod_prof_wach_plot_dist", Df = Df_Prof_Wach$Long)
   
   # ### Precip ####
-  #
-  # # Filter
-  # Df_Precip_Wach <- callModule(FILTER_PRECIP, "mod_precip_wach_filter",
-  #                             df_precip = df_wach_precip_daily,
-  #                             type = "wq")
-  #
-  # callModule(PRECIP_MAP, "mod_prof_wach_plot_dist", Df = Df_Prof_Wach$Long)
-  # callModule(PRECIP, "mod_prof_wach_plot_dist", Df = Df_Prof_Wach$Long)
-  # callModule(PRECIP_PLOTS, "mod_prof_wach_plot_dist", Df = Df_Prof_Wach$Long)
-  # callModule(PRECIP_STATS, "mod_prof_wach_plot_dist", Df = Df_Prof_Wach$Long)
-  # ### PRECIP
-  #
+
+  callModule(PRECIP_CURRENT, "mod_precip_wach_current", df = df_wach_prcp_daily, df_site = df_wq_wach_site)
+  # callModule(PRECIP_HIST, "mod_precip_wach_hist", df = df_wach_prcp_daily)
+  # callModule(PRECIP_STATS, "mod_precip_wach_stats", df = df_wach_prcp_daily)
+  # callModule(PRECIP_FILTER, "mod_precip_wach_filter", df = df_wach_prcp_daily)
+  # 
   # # Water Supply ####
   # # Filter
   # Df_wSupply_Wach <- callModule(FILTER_WSUPPLY, "mod_wsupply_wach_filter",
