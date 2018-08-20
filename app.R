@@ -827,7 +827,7 @@ server <- function(input, output, session) {
   
   # ### Precip ####
 
-  callModule(PRECIP_CURRENT, "mod_precip_wach_current", df = df_wach_prcp_daily, df_site = df_wq_wach_site)
+  callModule(PRECIP_CURRENT, "mod_precip_wach_current", df = df_wach_prcp_daily, df_site = df_trib_wach_site)
   callModule(PRECIP_HISTORICAL, "mod_precip_wach_hist", df = df_wach_prcp_daily)
   # callModule(PRECIP_STATS, "mod_precip_wach_stats", df = df_wach_prcp_daily)
   # callModule(PRECIP_FILTER, "mod_precip_wach_filter", df = df_wach_prcp_daily)

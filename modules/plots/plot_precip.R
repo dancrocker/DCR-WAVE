@@ -8,6 +8,7 @@ PRECIP_MONTH_BAR <- function(df1, df2, vyear, type = NULL){
   # vyear <- 2018
 
 this_year <- year(Sys.Date()) 
+this_month <- month(Sys.Date())
   
 p1data <- filter(df1, Year == vyear) %>%
   left_join(df2, by = "Month") %>%
@@ -15,11 +16,11 @@ p1data <- filter(df1, Year == vyear) %>%
   select(c(1,3,5)) %>%
   gather(2:3, key = "Year" , value = "Precip")
 
-month_ave <- PrcpMonthMean
+month_ave <- df2
 
 if(this_year == vyear){
   p1data <- filter(p1data, Month < this_month)
-  month_ave <- filter(PrcpMonthMean, Month < this_month)
+  month_ave <- filter(df2, Month < this_month)
 }
 
 t1data <- p1data[p1data$Year == vyear,]
@@ -188,8 +189,8 @@ PRECIP_YEAR_BAR <- function(df, date_min, date_max, type = FALSE){
           legend.title = element_blank(),
           axis.text.x = element_text(angle = 90,face = "bold"),
           axis.title.y = element_text(vjust = 2, face = "bold"),
-          axis.title.x = element_text(vjust = -1,face = "bold"),
-          plot.title = element_text(hjust = 0.5)) +
+          axis.title.x = element_text(vjust = -1, face = "bold"),
+          plot.title = element_text(hjust = 0.5, face = "bold")) +
     scale_fill_manual(values=c("deepskyblue3")) +
     scale_x_continuous(breaks = seq.int(min(years),max(years), by = 1)) +
     scale_y_continuous(breaks = pretty_breaks(), limits = c(0, plotmax)) +
