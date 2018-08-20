@@ -121,7 +121,7 @@ HOME <- function(input, output, session, df_site) {
         opacity = 0.8,
         fillOpacity = 0.4) %>%
       # Legend
-      addLegend(
+      leaflet::addLegend(
                 position = "bottomleft",
                 values = ~MapFactor,
                 pal = pal,

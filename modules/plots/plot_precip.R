@@ -74,7 +74,7 @@ out <- list()
     }
 return(out)
 } # End of function
-PRECIP_MONTH_BAR(df = PrcpMonthYear,vyear = 2018, type = TRUE)
+# PRECIP_MONTH_BAR(df = PrcpMonthYear,vyear = 2018, type = TRUE)
 
 ### MONTHLY PLOT2 ####
 PRECIP_MONTH_BAR2 <- function(df, date_min, date_max, type = NULL){
@@ -118,7 +118,7 @@ PRECIP_MONTH_BAR2 <- function(df, date_min, date_max, type = NULL){
     return(p)
   }
 } # End of function
-PRECIP_MONTH_BAR2(df = PrcpMonthYear, date_min = date_min, date_max = date_max, type = TRUE)
+# PRECIP_MONTH_BAR2(df = PrcpMonthYear, date_min = date_min, date_max = date_max, type = TRUE)
 
 ### DAILY PLOT ####
 PRECIP_DAILY_BAR <- function(df, date_min, date_max, type){
@@ -155,7 +155,7 @@ PRECIP_DAILY_BAR <- function(df, date_min, date_max, type){
     return(p)
   }
 } # End of function
-PRECIP_DAILY_BAR(df = df_wach_prcp_daily, date_min = date_min, date_max = date_max, type = FALSE)
+# PRECIP_DAILY_BAR(df = df_wach_prcp_daily, date_min = date_min, date_max = date_max, type = FALSE)
 
 ### YEAR PLOT ####
 PRECIP_YEAR_BAR <- function(df, date_min, date_max, type = FALSE){
@@ -196,7 +196,7 @@ PRECIP_YEAR_BAR <- function(df, date_min, date_max, type = FALSE){
     return(p)
   }
 } # End of function
-PRECIP_YEAR_BAR(df = YTD_J_Day, date_min, date_max, type = FALSE)
+# PRECIP_YEAR_BAR(df = YTD_J_Day, date_min, date_max, type = FALSE)
 
 ### CUMULATIVE PRECIP PLOT ####
 # Julian Day plot - Days 1 - 366 showing cumulative precip
@@ -239,7 +239,7 @@ if(isTruthy(type)){
 }
 
 } # End function
-PRECIP_LINE(df = df_wach_prcp_daily, vyear = 1987, type = TRUE)
+# PRECIP_LINE(df = df_wach_prcp_daily, vyear = 1987, type = TRUE)
 
 ## MATRIX MONTH PLOT ####
 PRECIP_MATRIX <- function(df){
@@ -272,6 +272,6 @@ mplot <- print(matrixplot(M, ColorRamp="Precipitation",
                  main="Wachusett Watershed Monthly Precipitation, [in/month]"))
 return(mplot)
 } # End function
-PRECIP_MATRIX(df = df_wach_prcp_daily)
+# PRECIP_MATRIX(df = df_wach_prcp_daily)
 
 

@@ -302,7 +302,7 @@ MAP_PLOT <- function(input, output, session, df, df_site) {
                      label= ~as.character(Value),         # show Value when hovering
                      popup = ~Site) %>%                   # Show Site name when clicked
           clearControls() %>%
-          addLegend(position = "topright",
+          leaflet::addLegend(position = "topright",
                     pal = pal,
                     values = ~Value,
                     title = input$param,
