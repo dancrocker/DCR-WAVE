@@ -1,15 +1,16 @@
 # PRECIPITATION PLOTS ####
 
 ### MONTHLY PLOT1 (just 1 year ####
-PRECIP_MONTH_BAR <- function(df, vyear, type = NULL){
+PRECIP_MONTH_BAR <- function(df1, df2, vyear, type = NULL){
 # Plot Args
-# df <- PrcpMonthYear
-# vyear <- 2017
+  # df1 <- PrcpMonthYear
+  # df2 <- PrcpMonthMean
+  # vyear <- 2018
 
 this_year <- year(Sys.Date()) 
   
-p1data <- filter(df, Year == vyear) %>%
-  left_join(PrcpMonthMean, by = "Month") %>%
+p1data <- filter(df1, Year == vyear) %>%
+  left_join(df2, by = "Month") %>%
   rename(!!paste0(vyear) := MonthPrcpTotal, "Normal" = MonthPrcpAve) %>%
   select(c(1,3,5)) %>%
   gather(2:3, key = "Year" , value = "Precip")
@@ -74,7 +75,13 @@ out <- list()
     }
 return(out)
 } # End of function
-# PRECIP_MONTH_BAR(df = PrcpMonthYear,vyear = 2018, type = TRUE)
+# dfs <- PRECIP_MONTH_BAR(df1 = PrcpMonthYear, df2 = PrcpMonthMean, vyear = 2017, type = TRUE)
+# p <- dfs[[1]]
+# p
+# t <- dfs[[2]]
+# t
+
+###__________________________________________________________________________________________________________
 
 ### MONTHLY PLOT2 ####
 PRECIP_MONTH_BAR2 <- function(df, date_min, date_max, type = NULL){
@@ -118,7 +125,7 @@ PRECIP_MONTH_BAR2 <- function(df, date_min, date_max, type = NULL){
     return(p)
   }
 } # End of function
-# PRECIP_MONTH_BAR2(df = PrcpMonthYear, date_min = date_min, date_max = date_max, type = TRUE)
+PRECIP_MONTH_BAR2(df = PrcpMonthYear, date_min = date_min, date_max = date_max, type = TRUE)
 
 ### DAILY PLOT ####
 PRECIP_DAILY_BAR <- function(df, date_min, date_max, type){

@@ -68,6 +68,7 @@ PRECIP_CURRENT_UI <- function(id) {
 
 PRECIP_CURRENT <- function(input, output, session, df, df_site) {
   # df <- df_wach_prcp_daily
+  # df_site <- df_wq_wach_site
   callModule(PRECIP_MAP, "precip_map", df_site = df_site)
   source("functions/wach_precip_stats.R") # Function args (df)
   source("modules/plots/plot_precip.R") # Function args (df)
@@ -97,7 +98,7 @@ output$t_precip_sum <-  renderTable(dfs[[7]], striped = T)
 
 # Plot 1 - monthly bar chart [[1]] and table [[2]]
 p1out  <- reactive({
-  p1out <- PRECIP_MONTH_BAR(df = dfs[[1]], vyear = input$vyear1, type = input$plot1_type)
+  p1out <- PRECIP_MONTH_BAR(df1 = dfs[[1]], df2 = dfs[[2]], vyear = input$vyear1, type = input$plot1_type)
   p1out
 })
 
