@@ -43,7 +43,11 @@ PRECIP_CURRENT_UI <- function(id) {
           uiOutput(ns("plot1_ui")),     
           # plotOutput(ns("plot_bar_current")),
           checkboxInput(ns("plot1_type"), "Check here to make interactive plot"),
-          downloadButton(ns('save_plot1'), "Save Plot")
+          downloadButton(ns('save_plot1'), "Save Plot"),
+          br(),
+          br(),
+          h5(textOutput(ns("table1_title"))),
+          uiOutput(ns("table1"))
         ), # End Column
         column(6,
           sliderInput(ns("vyear2"), "Switch to another year:", min = 1985, max = year(Sys.Date()), 
@@ -91,10 +95,22 @@ df_gauges$`End Date` <- format(df_gauges$`End Date`,'%Y-%m-%d')
 output$t_gauges <-  renderTable(df_gauges, striped = T) 
 output$t_precip_sum <-  renderTable(dfs[[7]], striped = T)
 
-# Plot 1 - monthly bar chart
-p1  <- reactive({
-  p1 <- PRECIP_MONTH_BAR(df = dfs[[1]], vyear = input$vyear1, type = input$plot1_type)
-  p1
+# Plot 1 - monthly bar chart [[1]] and table [[2]]
+p1out  <- reactive({
+  p1out <- PRECIP_MONTH_BAR(df = dfs[[1]], vyear = input$vyear1, type = input$plot1_type)
+  p1out
+})
+
+
+p1 <- reactive({
+  p1out()[[1]]
+  })
+t1 <- reactive({
+  p1out()[[2]]
+  })
+
+output$table1_title <- renderText({
+  paste0("Monthly Precipitation totals for ", input$vyear1)
 })
 
   output$plot1_static <- renderPlot({p1()})
@@ -108,7 +124,13 @@ p1  <- reactive({
     }
   })
 
-# Plot 2 - Cummulative line chart
+  output$table1_ui <- renderUI({
+    tableOutput(ns("table1"))
+  })
+  
+  output$table1 <- renderTable(t1(), bordered = T, rownames = T, striped = T)
+
+  # Plot 2 - Cummulative line chart
 p2  <- reactive({
   p2 <- PRECIP_LINE(df = df, vyear = input$vyear2, type = input$plot2_type)
   p2
@@ -125,30 +147,25 @@ p2  <- reactive({
     }
   })
 
-  # # Plot1 Print
-  # output$save_plot1 <- downloadHandler(
-  #   filename <- function() {
-  #     paste0("Daily_", input$param1, "_at_", input$site,"_", Sys.Date(), ".", input$plot_save_type)},
-  #   content = function(file) {
-  #     ggplot2::ggsave(file, plot = p(), device = input$plot_save_type, width = input$plot_save_width, height = input$plot_save_height, dpi = 300)
-  #     contentType = 'image/png'
-  #   }
-  # )
-  # # Plot2 Print
-  # output$save_plot2 <- downloadHandler(
-  #   filename <- function() {
-  #     paste0("Daily_", input$param1, "_at_", input$site,"_", Sys.Date(), ".", input$plot_save_type)},
-  #   content = function(file) {
-  #     ggplot2::ggsave(file, plot = p(), device = input$plot_save_type, width = input$plot_save_width, height = input$plot_save_height, dpi = 300)
-  #     contentType = 'image/png'
-  #   }
-  # )
+  # Plot1 Print
+  output$save_plot1 <- downloadHandler(
+    filename <- function() {
+      paste0("MonthlyPrecip_", input$vyear1, ".png")},
+    content = function(file) {
+      ggplot2::ggsave(file, plot = p1(), device = "png", units = "in", width = 6, height = 4, dpi = 300)
+      contentType = 'image/png'
+    }
+  )
+  # Plot2 Print
+  output$save_plot2 <- downloadHandler(
+    filename <- function() {
+      paste0("CummulativePrecip_", input$vyear2, ".png")},
+    content = function(file) {
+      ggplot2::ggsave(file, plot = p2(), device = "png", units = "in", width = 6, height = 4, dpi = 300)
+      contentType = 'image/png'
+    }
+  )
 
-
-
-
-  
- 
 } # End Server function
 
 
