@@ -53,7 +53,7 @@ PRECIP_HISTORICAL <- function(input, output, session, df) {
   source("functions/wach_precip_stats.R") # Data
   source("modules/plots/plot_precip.R") # Plots
   
-  dfs <- PRECIP_STATS(df, vyear = NULL) ### Running this again makes an independent dataset for historical plots w/o affecting current stats
+  dfs <- PRECIP_STATS(df_precip = df, vyear = NULL) ### Running this again makes an independent dataset for historical plots w/o affecting current stats
   # dfs[[1]] <- PrcpMonthYear
   # dfs[[2]] <- PrcpMonthMean
   # dfs[[3]] <- YTD_J_Day

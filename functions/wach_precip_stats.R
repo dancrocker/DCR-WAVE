@@ -183,8 +183,7 @@ return(dfs)
 
 } # End Function
 
-# dfs <- PRECIP_STATS(df_precip = df_precip, vyear = 2017)
-
+# dfs <- PRECIP_STATS(df_precip = df_wach_prcp_daily, vyear = NULL)
 
  # Generate Sample date vectors for precip threshold filters:
       #* Need to have an explanation on this filter saying:

@@ -88,11 +88,10 @@ PRECIP_MONTH_BAR2 <- function(df, date_min, date_max, type = NULL){
   # Plot Args
   # df <- PrcpMonthYear
   # date_min <- today() - 1500
-  # date_max <- today() 
+  # date_max <- today()
   # type <-  FALSE
-
+  
   df$filter_date <- as.Date(paste0(df$Year,"-",df$Month,"-01"))
-
 
   p1data <- df %>% 
     filter(filter_date >= floor_date(date_min, unit = "month"), filter_date <= floor_date(date_max, unit = "month"), nDays >=28) %>%
@@ -116,7 +115,7 @@ PRECIP_MONTH_BAR2 <- function(df, date_min, date_max, type = NULL){
     scale_y_continuous(breaks = pretty_breaks()) + 
     scale_x_date(date_labels = "%b\n%Y", breaks =  pretty_breaks(n=12))
   
-  p
+  # p
   
   ### Plot return type 
   if(isTruthy(type)){
@@ -125,7 +124,7 @@ PRECIP_MONTH_BAR2 <- function(df, date_min, date_max, type = NULL){
     return(p)
   }
 } # End of function
-PRECIP_MONTH_BAR2(df = PrcpMonthYear, date_min = date_min, date_max = date_max, type = TRUE)
+# PRECIP_MONTH_BAR2(df = PrcpMonthYear, date_min = date_min, date_max = date_max, type = TRUE)
 
 ### DAILY PLOT ####
 PRECIP_DAILY_BAR <- function(df, date_min, date_max, type){
@@ -154,7 +153,7 @@ PRECIP_DAILY_BAR <- function(df, date_min, date_max, type){
     scale_fill_manual(values=c("deepskyblue3")) +
     scale_y_continuous(breaks = pretty_breaks()) +
     scale_x_date(date_labels = "%b %d\n%Y", breaks =  pretty_breaks(n=12))
-  p
+  # p
   ### Plot return type 
   if(isTruthy(type)){
     return(plotly::ggplotly(p, tooltip = c("x","y")))
