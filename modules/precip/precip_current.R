@@ -38,15 +38,19 @@ PRECIP_CURRENT_UI <- function(id) {
     wellPanel(
       fluidRow(
         column(6, 
+          sliderInput(ns("vyear1"), "Switch to another year:", min = 1985, max = year(Sys.Date()), 
+                      value = year(Sys.Date()), step = 1, sep = "", ticks = F),     
           uiOutput(ns("plot1_ui")),     
           # plotOutput(ns("plot_bar_current")),
-          checkboxInput(ns("plot1_type"), "Check here to make interactive plot)"),
+          checkboxInput(ns("plot1_type"), "Check here to make interactive plot"),
           downloadButton(ns('save_plot1'), "Save Plot")
         ), # End Column
         column(6,
+          sliderInput(ns("vyear2"), "Switch to another year:", min = 1985, max = year(Sys.Date()), 
+                      value = year(Sys.Date()), step = 1, sep = "", ticks = F),
           uiOutput(ns("plot2_ui")),  
           # plotOutput(ns("plot_line_current")),
-          checkboxInput(ns("plot2_type"), "Check here to make interactive plot)"),
+          checkboxInput(ns("plot2_type"), "Check here to make interactive plot"),
           downloadButton(ns('save_plot2'), "Save Plot")
         ) # End Column
       ) # End FR
@@ -89,7 +93,7 @@ output$t_precip_sum <-  renderTable(dfs[[7]], striped = T)
 
 # Plot 1 - monthly bar chart
 p1  <- reactive({
-  p1 <- PRECIP_MONTH_BAR(df = dfs[[1]], vyear = year(Sys.Date()), type = input$plot1_type)
+  p1 <- PRECIP_MONTH_BAR(df = dfs[[1]], vyear = input$vyear1, type = input$plot1_type)
   p1
 })
 
@@ -106,7 +110,7 @@ p1  <- reactive({
 
 # Plot 2 - Cummulative line chart
 p2  <- reactive({
-  p2 <- PRECIP_LINE(df = df, vyear = year(Sys.Date()), type = input$plot2_type)
+  p2 <- PRECIP_LINE(df = df, vyear = input$vyear2, type = input$plot2_type)
   p2
 })
 
@@ -140,28 +144,9 @@ p2  <- reactive({
   #   }
   # )
 
-  # 
-  # output$plot_ui <- renderUI({
-  #   req(input$param1, input$site,(isTruthy(Date_Year$Lower()) & isTruthy(Date_Year$Upper())) | isTruthy(Date_Year$Years()))
-  #   plotOutput(ns("flowPlot"), width = "100%", height = 600)
-  # })
-  # 
-  # p  <- reactive({
-  #   p <- HYDRO_G(Df = Df2(),
-  #                df2 = Df3(),
-  #                df_site = df_site,
-  #                df_precip = df_precip,
-  #                loc = input$site ,
-  #                Y1Par = input$param1,
-  #                Y2Par = input$param2 ,
-  #                USGS_days = input$USGSdays ,
-  #                USGS_IV = input$showUSGS,
-  #                PlotPrecip = input$showPrecip)
-  #   
-  #   p
-  # })
-  # 
-  # output$flowPlot <- renderPlot({p()})
+
+
+
   
  
 } # End Server function

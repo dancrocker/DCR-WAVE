@@ -24,9 +24,9 @@ print(paste0("WAVE App lauched at ", Sys.time()))
 ### NOTE - Shiny must be installed and loaded in the LaunchAppGitHub.R script - any other packages requred should be listed below
 
 packages <- c("shiny","shinyjs", "shinyFiles","rmarkdown", "knitr", "tidyverse", "lubridate", "plotly", "leaflet", "RColorBrewer", "devtools",
-              "DT", "akima", "odbc", "DBI", "scales", "stringr", "cowplot", "shinythemes","rgdal", "reshape2", "dataRetrieval", "pryr", "broom",
-              "ggthemes", "visreg")
-ipak(packages) ### Need to add "rcmodel"' - not in any repo...load from Mhagemann's github
+              "DT", "akima", "scales", "stringr", "cowplot", "shinythemes","rgdal", "reshape2", "dataRetrieval", "pryr", "broom",
+              "ggthemes", "visreg", "lattice", "chron", "hydroTSM") # Took out odbc and dbi since app no longer connects to databases directly
+ipak(packages) 
 
 if("rcmodel" %in% rownames(installed.packages()) == FALSE) {
   print("rcmodel package not installed, installing now")
@@ -36,6 +36,7 @@ library(rcmodel)
 ### Set any system environmental variables ####
 Sys.setenv(RSTUDIO_PANDOC= paste0(config[21],"/bin/pandoc"))
 
+### Directory with saved .rds files
 datadir <- config[1]
 
 ### Specify User information ####
@@ -43,7 +44,7 @@ user <-  Sys.getenv("USERNAME")
   
 
           userdata <- readxl::read_xlsx(path = config[17])
-            ### Directory with saved .rds files
+
 
           if(user %in% userdata$Username){
             username <- paste(userdata$FirstName[userdata$Username %in% user],userdata$LastName[userdata$Username %in% user],sep = " ")
@@ -123,7 +124,7 @@ source("modules/stats/profile_table_stats.R") # Merge into stats_summary
 
 ### Hydro
 source("modules/precip/precip_current.R")   
-    
+source("modules/precip/precip_historical.R")
     
 ### Modeling
 source("modules/modeling/loading_rcmodel.R")      
@@ -523,8 +524,8 @@ tabPanel("Reservoir",
               #          )
               # ),
               "Precipitation",
-                tabPanel("Current Conditions", icon = icon("filter"), PRECIP_CURRENT_UI("mod_precip_wach_current")),
-                # tabPanel("Historical Precip", icon = icon("filter"), PRECIP_HIST_UI("mod_precip_wach_hist")),
+                tabPanel("Current Conditions", icon = icon("line-chart"), PRECIP_CURRENT_UI("mod_precip_wach_current")),
+                tabPanel("Historical Precip", icon = icon("line-chart"), PRECIP_HISTORICAL_UI("mod_precip_wach_hist")),
                 # tabPanel("Statistics", icon = icon("filter"), PRECIP_STATS_UI("mod_precip_wach_stats")),
                 # tabPanel("Filter/Export Precip Data ", PRECIP_FILTER_UI("mod_precip_wach_filter")),
               
@@ -827,7 +828,7 @@ server <- function(input, output, session) {
   # ### Precip ####
 
   callModule(PRECIP_CURRENT, "mod_precip_wach_current", df = df_wach_prcp_daily, df_site = df_wq_wach_site)
-  # callModule(PRECIP_HIST, "mod_precip_wach_hist", df = df_wach_prcp_daily)
+  callModule(PRECIP_HISTORICAL, "mod_precip_wach_hist", df = df_wach_prcp_daily)
   # callModule(PRECIP_STATS, "mod_precip_wach_stats", df = df_wach_prcp_daily)
   # callModule(PRECIP_FILTER, "mod_precip_wach_filter", df = df_wach_prcp_daily)
   # 

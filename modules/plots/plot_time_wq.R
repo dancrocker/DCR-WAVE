@@ -338,13 +338,13 @@ PLOT_TIME_WQ <- function(input, output, session, Df) {
 
       # Group by both Color and Shape when both selected
       if(input$group_color != "None" & input$group_shape != "None/Parameter"){
-          p <- p + geom_point(aes_string(x = "as.POSIXct(Date)",
+          p <- p + geom_point(aes_string(x = "SampleDateTime",
                                          y = "Result",
                                          color = input$group_color,
                                          shape = input$group_shape),
                               size = input$point_size)
           if(input$trend_show == TRUE){
-            p <- p + geom_smooth(aes_string(x = "as.POSIXct(Date)",
+            p <- p + geom_smooth(aes_string(x = "SampleDateTime",
                                             y = "Result",
                                             color = input$group_color,
                                             linetype = input$group_shape),
@@ -356,13 +356,13 @@ PLOT_TIME_WQ <- function(input, output, session, Df) {
           }
           # Group by only Color when only color grouping is selected
       } else if (input$group_color != "None"){
-        p <- p + geom_point(aes_string(x = "as.POSIXct(Date)",
+        p <- p + geom_point(aes_string(x = "SampleDateTime",
                                        y = "Result",
                                        color = input$group_color),
                             shape = 16,
                             size = input$point_size)
         if(input$trend_show == TRUE){
-          p <- p + geom_smooth(aes_string(x = "as.POSIXct(Date)",
+          p <- p + geom_smooth(aes_string(x = "SampleDateTime",
                                           y = "Result",
                                           color = input$group_color),
                                linetype = input$trend_line,
@@ -374,14 +374,14 @@ PLOT_TIME_WQ <- function(input, output, session, Df) {
         }
         # Group by only Shape when only shape grouping is selected
       } else if (input$group_shape != "None/Parameter"){
-        p <- p + geom_point(aes_string(x = "as.POSIXct(Date)",
+        p <- p + geom_point(aes_string(x = "SampleDateTime",
                                        y = "Result",
                                        shape = input$group_shape),
                             color = input$point_color1,
                             size = input$point_size)
 
         if(input$trend_show == TRUE){
-          p <- p + geom_smooth(aes_string(x = "as.POSIXct(Date)",
+          p <- p + geom_smooth(aes_string(x = "SampleDateTime",
                                           y = "Result",
                                           linetype = input$group_shape),
                                method = input$trend_type,
@@ -392,13 +392,13 @@ PLOT_TIME_WQ <- function(input, output, session, Df) {
         }
         # No Grouping Selected
       } else {
-        p <- p + geom_point(aes_string(x = "as.POSIXct(Date)",
+        p <- p + geom_point(aes_string(x = "SampleDateTime",
                                        y = "Result"),
                             color = input$point_color1,
                             shape = 16,
                             size = input$point_size)
         if(input$trend_show == TRUE){
-          p <- p + geom_smooth(aes_string(x = "as.POSIXct(Date)",
+          p <- p + geom_smooth(aes_string(x = "SampleDateTime",
                                           y = "Result"),
                                linetype = input$trend_line,
                                method = input$trend_type,
@@ -439,19 +439,19 @@ PLOT_TIME_WQ <- function(input, output, session, Df) {
       # Grouped by Shape
       if(input$group_shape != "None/Parameter"){
         p <- p + geom_point(data = Df1(),
-                            aes_string(x = "as.POSIXct(Date)",
+                            aes_string(x = "SampleDateTime",
                                        y = "Result",
                                        shape = input$group_shape),
                             color = input$point_color1,
                             size = input$point_size*2) +
           geom_point(data = Df2(),
-                     aes_string(x = "as.POSIXct(Date)",
+                     aes_string(x = "SampleDateTime",
                                 y = "Result*Mult()",
                                 shape = input$group_shape),
                      color = input$point_color2,
                      size = input$point_size*2)
         if(input$trend_show == TRUE){
-          p <- p + geom_smooth(data = Df1(), aes_string(x = "as.POSIXct(Date)",
+          p <- p + geom_smooth(data = Df1(), aes_string(x = "SampleDateTime",
                                                         y = "Result",
                                                         linetype = input$group_shape),
                                color = input$point_color1,
@@ -460,7 +460,7 @@ PLOT_TIME_WQ <- function(input, output, session, Df) {
                                alpha = input$trend_alpha,
                                se = input$trend_ribbon,
                                level = as.numeric(input$trend_conf)) +
-            geom_smooth(data = Df2(), aes_string(x = "as.POSIXct(Date)",
+            geom_smooth(data = Df2(), aes_string(x = "SampleDateTime",
                                                  y = "Result*Mult()",
                                                  linetype = input$group_shape),
                         color = input$point_color2,
@@ -473,20 +473,20 @@ PLOT_TIME_WQ <- function(input, output, session, Df) {
         # Not Grouped
       } else{
         p <- p + geom_point(data = Df1(),
-                            aes_string(x = "as.POSIXct(Date)",
+                            aes_string(x = "SampleDateTime",
                                        y = "Result"),
                             shape = 15,
                             color = input$point_color1,
                             size = input$point_size*2) +
           geom_point(data = Df2(),
-                     aes_string(x = "as.POSIXct(Date)",
+                     aes_string(x = "SampleDateTime",
                                 y = "Result*Mult()"),
                      shape = 17,
                      color = input$point_color2,
                      size = input$point_size*2)
       }
       if(input$trend_show == TRUE){
-        p <- p + geom_smooth(data = Df1(), aes_string(x = "as.POSIXct(Date)",
+        p <- p + geom_smooth(data = Df1(), aes_string(x = "SampleDateTime",
                                                       y = "Result"),
                              linetype = input$trend_line,
                              color = input$point_color1,
@@ -494,7 +494,7 @@ PLOT_TIME_WQ <- function(input, output, session, Df) {
                              size = input$trend_size,
                              se = input$trend_ribbon,
                              level = as.numeric(input$trend_conf)) +
-          geom_smooth(data = Df2(), aes_string(x = "as.POSIXct(Date)",
+          geom_smooth(data = Df2(), aes_string(x = "SampleDateTime",
                                                y = "Result*Mult()"),
                       linetype = input$trend_line,
                       color = input$point_color2,

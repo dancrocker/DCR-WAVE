@@ -1,40 +1,37 @@
 ######################################################################################
-#     Title: USGS_Data_stats
-#     Description: This script will calculate some stats based on daily USGS data in the databases
+#     Title: wach_precip_stats
+#     Description: This script will calculate some stats based on daily USGS/NOAA data in the databases
 #                 1) Precip Totals (Annual, Monthly, Monthly_by_Year)
 #                 2) Precip Cummulative (2D Sum, 7D Sum, 14D Sum, 30D Sum)
 #     Written by: Dan Crocker
-#     Last Updated: April, 2018
+#     Last Updated: August, 2018
 #
 #################################################################################
 
 # Load Libraries
-library(tidyverse)
-library(lubridate)
-library(scales)
-library(chron)
-library(hydroTSM)
-library(plotly)
-library(lattice)
+# library(tidyverse)
+# library(lubridate)
+# library(scales)
+# library(chron)
+# library(hydroTSM)
+# library(plotly)
+# library(lattice)
 
 
 # Precip stats function  - processes daily precip records and caches relevant stats for WAVE App
 
-# Read config file to access database
+#### THIS IS TEMPORARY FOR USE OUTSIDE OF SHINY
+# Read config file to access database  
 # config <- read.csv("//env.govt.state.ma.us/enterprise/DCR-WestBoylston-WKGRP/WatershedJAH/EQStaff/WQDatabase/R-Shared/WAVE-WIT/Configs/WAVE_WIT_Config.csv", header = TRUE)
 # config <- as.character(config$CONFIG_VALUE)
-#
-# # Variables (To set interactively in Shiny)
-# vmonth <- 1
+# 
+# rds_files <- list.files(config[1],full.names = T)
+# rds_files # Take a look at the rds files:
+# df_precip <- readRDS(rds_files[30]) # NOTE: This rds file is created daily at the conclusion of the NOAA data fetch
+#####
 
-# vday <- 90
-# vdate <- "2018-02-22"
-# vdaterange_a <- "2018-02-22" # Either date slider or min max picker - default to jEndPrecip - 30
-# vdaterange_b <- "2018-02-22"
-#
-### Module level variables ####
-# df_precip <- df_wach_prcp_daily
-# vyear <- 2017
+
+# Wachusett Precip DF
 
 PRECIP_STATS <- function(df_precip, vyear = NULL){
 
@@ -186,7 +183,7 @@ return(dfs)
 
 } # End Function
 
-# dfs <- PRECIP_STATS(df_precip = df_precip, vyear = 2017) 
+# dfs <- PRECIP_STATS(df_precip = df_precip, vyear = 2017)
 
 
  # Generate Sample date vectors for precip threshold filters:
