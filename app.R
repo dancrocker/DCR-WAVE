@@ -60,8 +60,8 @@ if(userlocation == "Quabbin"){
 
 ### Directory with saved .rds files
 if(!userlocation %in% c("Quabbin", "Wachusett")){
-  source("functions/FetchDropboxData.R") 
-  fetchDropbox(dir = config[1])
+  # source("functions/FetchDropboxData.R") 
+  # fetchDropbox(dir = config[1])
   datadir <- config[1]
 } else {
   datadir <- config[1]
