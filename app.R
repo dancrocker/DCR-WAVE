@@ -25,7 +25,7 @@ print(paste0("WAVE App lauched at ", Sys.time()))
 
 packages <- c("shiny","shinyjs", "shinyFiles","rmarkdown", "knitr", "tidyverse", "lubridate", "plotly", "leaflet", "RColorBrewer", "devtools",
               "DT", "akima", "scales", "stringr", "cowplot", "shinythemes","rgdal", "reshape2", "dataRetrieval", "pryr", "broom",
-              "ggthemes", "visreg", "lattice", "chron", "hydroTSM","httr") # Took out odbc and dbi since app no longer connects to databases directly
+              "ggthemes", "visreg", "lattice", "chron", "hydroTSM", "httr") # Took out odbc and dbi since app no longer connects to databases directly
 ipak(packages) 
 
 if("rcmodel" %in% rownames(installed.packages()) == FALSE) {
@@ -42,7 +42,7 @@ user <-  Sys.getenv("USERNAME")
 userdata <- readxl::read_xlsx(path = config[17])
 
 if(user %in% userdata$Username){
-  username <- paste(userdata$FirstName[userdata$Username %in% user],userdata$LastName[userdata$Username %in% user],sep = " ")
+  username <- paste(userdata$FirstName[userdata$Username %in% user], userdata$LastName[userdata$Username %in% user], sep = " ")
   useremail <- userdata$Email[userdata$Username %in% user]
   userlocation <- userdata$Location[userdata$Username %in% user]
 } else {
@@ -61,8 +61,8 @@ if(userlocation == "Quabbin"){
 ### Directory with saved .rds files
 if(!userlocation %in% c("Quabbin", "Wachusett")){
   source("functions/FetchDropboxData.R") 
-  fetchDropbox()
-  datadir <- "C:/WQDatabase/WAVE_WIT_Apps/WAVE/data"
+  fetchDropbox(dir = config[1])
+  datadir <- config[1]
 } else {
   datadir <- config[1]
 }
