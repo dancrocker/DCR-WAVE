@@ -25,7 +25,7 @@ print(paste0("WAVE App lauched at ", Sys.time()))
 
 packages <- c("shiny","shinyjs", "shinyFiles","rmarkdown", "knitr", "tidyverse", "lubridate", "plotly", "leaflet", "RColorBrewer", "devtools",
               "DT", "akima", "scales", "stringr", "cowplot", "shinythemes","rgdal", "reshape2", "dataRetrieval", "pryr", "broom",
-              "ggthemes", "visreg", "lattice", "chron", "hydroTSM") # Took out odbc and dbi since app no longer connects to databases directly
+              "ggthemes", "visreg", "lattice", "chron", "hydroTSM","httr") # Took out odbc and dbi since app no longer connects to databases directly
 ipak(packages) 
 
 if("rcmodel" %in% rownames(installed.packages()) == FALSE) {
@@ -36,52 +36,57 @@ library(rcmodel)
 ### Set any system environmental variables ####
 Sys.setenv(RSTUDIO_PANDOC= paste0(config[21],"/bin/pandoc"))
 
-### Directory with saved .rds files
-datadir <- config[1]
 
 ### Specify User information ####
 user <-  Sys.getenv("USERNAME")
-  
+userdata <- readxl::read_xlsx(path = config[17])
 
-          userdata <- readxl::read_xlsx(path = config[17])
-
-
-          if(user %in% userdata$Username){
-            username <- paste(userdata$FirstName[userdata$Username %in% user],userdata$LastName[userdata$Username %in% user],sep = " ")
-            useremail <- userdata$Email[userdata$Username %in% user]
-            userlocation <- userdata$Location[userdata$Username %in% user]
-          } else {
-            username <- "non-DCR"
-            useremail <- "other"
-            userlocation <- "non-DCR"
-          }
+if(user %in% userdata$Username){
+  username <- paste(userdata$FirstName[userdata$Username %in% user],userdata$LastName[userdata$Username %in% user],sep = " ")
+  useremail <- userdata$Email[userdata$Username %in% user]
+  userlocation <- userdata$Location[userdata$Username %in% user]
+} else {
+  username <- "non-DCR"
+  useremail <- "other"
+  userlocation <- "non-DCR"
+}
 
 ### Tab Default ####
-  if(userlocation == "Quabbin"){
-    tab_selected = "Quabbin"
-  } else {
-    tab_selected = "Wachusett"
-  }
+if(userlocation == "Quabbin"){
+  tab_selected = "Quabbin"
+} else {
+  tab_selected = "Wachusett"
+}
+
+### Directory with saved .rds files
+if(!userlocation %in% c("Quabbin", "Wachusett")){
+  source("functions/FetchDropboxData.R") 
+  fetchDropbox()
+  datadir <- "C:/WQDatabase/WAVE_WIT_Apps/WAVE/data"
+} else {
+  datadir <- config[1]
+}
 ### Load rds files ####
-  
-    ### Make a list of all the .rds files using full path
-    rds_files <- list.files(datadir,full.names = TRUE ,pattern = "\\.rds$")
 
-    ### create an object that contains all of the rds files
-    data <- lapply(rds_files, readRDS)
+### Make a list of all the .rds files using full path
+rds_files <- list.files(datadir,full.names = TRUE ,pattern = "\\.rds$")
 
-    ### Make a list of the df names by eliminating extension from files
-    df_names <- gsub(".rds", "", list.files(datadir, pattern = "\\.rds$"))
+### create an object that contains all of the rds files
+data <- lapply(rds_files, readRDS)
 
-    # name each df in the data object appropriately
-    names(data) <- df_names
-    ### Extract each element of the data object into the global environment
-    list2env(data ,.GlobalEnv)
-    ### Remove data
-    rm(data)
-    
+### Make a list of the df names by eliminating extension from files
+df_names <- gsub(".rds", "", list.files(datadir, pattern = "\\.rds$"))
+
+# name each df in the data object appropriately
+names(data) <- df_names
+### Extract each element of the data object into the global environment
+list2env(data ,.GlobalEnv)
+### Remove data
+rm(data)
+
 ### SOURCE OTHER DATA ####    
 gam_models_wach <- readxl::read_xlsx(path = paste0(datadir,"/GAM_loading_models_wach.xlsx"))
+    
 ### SOURCE MODULES ####
 
 ### Filter - Filter Related Modules
@@ -295,6 +300,8 @@ tabPanel("Reservoir",
    tabsetPanel(
      tabPanel("Quabbin",
               navlistPanel(widths = c(2, 10),
+                           "Biological",
+                           tabPanel("Phytoplankton", PHYTO_UI("mod_phyto_quab_plots", df_phyto_quab)),
                            "Chemical",
                            tabPanel("Select / Filter data", icon=icon("filter"), FILTER_WQ_UI("mod_chem_quab_filter")),
                            tabPanel("--- Plots", icon = icon("line-chart"),
@@ -725,8 +732,9 @@ server <- function(input, output, session) {
 
   ### Change the Data Frames to Profile Data
   callModule(METADATA, "mod_prof_quab_meta", df = df_prof_quab, df_site = df_prof_quab_site, df_param = df_quab_param)
-
-
+  
+  ### Phytoplankton
+  callModule(PHYTO, "mod_phyto_quab_plots", df = df_phyto_quab)
 
 ##### Wachusett #####
 
