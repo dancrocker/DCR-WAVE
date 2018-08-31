@@ -1,10 +1,10 @@
 ######################################################################################
-#     Title: wach_precip_stats
+#     Title: quab_precip_stats
 #     Description: This script will calculate some stats based on daily USGS/NOAA data in the databases
 #                 1) Precip Totals (Annual, Monthly, Monthly_by_Year)
 #                 2) Precip Cummulative (2D Sum, 7D Sum, 14D Sum, 30D Sum)
-#     Written by: Dan Crocker
-#     Last Updated: August, 2018
+#     Written by: Dan Crocker, edited by Brett Boisjolie for Quabbin
+#     Last Updated: Aug, 2018
 #
 #################################################################################
 
@@ -16,24 +16,24 @@
 # library(hydroTSM)
 # library(plotly)
 # library(lattice)
-
-
-# Precip stats function  - processes daily precip records and caches relevant stats for WAVE App
-
-#### THIS IS TEMPORARY FOR USE OUTSIDE OF SHINY
-# Read config file to access database  
+# 
+# 
+# # Precip stats function  - processes daily precip records and caches relevant stats for WAVE App
+# 
+# #### THIS IS TEMPORARY FOR USE OUTSIDE OF SHINY
+# # Read config file to access database
 # config <- read.csv("//env.govt.state.ma.us/enterprise/DCR-WestBoylston-WKGRP/WatershedJAH/EQStaff/WQDatabase/R-Shared/WAVE-WIT/Configs/WAVE_WIT_Config.csv", header = TRUE)
 # config <- as.character(config$CONFIG_VALUE)
 # 
 # rds_files <- list.files(config[1],full.names = T)
 # rds_files # Take a look at the rds files:
-# df_precip <- readRDS(rds_files[30]) # NOTE: This rds file is created daily at the conclusion of the NOAA data fetch
+# df_precip <- readRDS(rds_files[19]) # NOTE: This rds file is created daily at the conclusion of the NOAA data fetch
 #####
 
 
-# Wachusett Precip DF
+# Quabbin Precip DF
 
-PRECIP_STATS_WACH <- function(df_precip, vyear = NULL){
+PRECIP_STATS_QUAB <- function(df_precip, vyear = NULL){
 
 # Calculate some key values for displaying data
 start_precip <- min(df_precip$DATE) # First precip date
@@ -104,15 +104,14 @@ last30prcp <- round(df_precip$`30dPRCP`[df_precip$DATE == end_precip],2)
 
 lastjday <- df_precip$jDay[df_precip$DATE == end_precip]
 
-# Need to make begin dates for Quabbin gauges too
-wor_begin <- min(df_precip$DATE[!is.na(df_precip$WORCESTER)])
-fitch_begin <- min(df_precip$DATE[!is.na(df_precip$FITCHBURG)])
-still_begin <- min(df_precip$DATE[!is.na(df_precip$STILLWATER)])
-quin_begin <- min(df_precip$DATE[!is.na(df_precip$QUINAPOXET)])
-wor_end <- max(df_precip$DATE[!is.na(df_precip$WORCESTER)])
-fitch_end <- max(df_precip$DATE[!is.na(df_precip$FITCHBURG)])
-still_end <- max(df_precip$DATE[!is.na(df_precip$STILLWATER)])
-quin_end <- max(df_precip$DATE[!is.na(df_precip$QUINAPOXET)])
+# begin dates 
+bel_begin <- min(df_precip$DATE[!is.na(df_precip$BELCHERTOWN)])
+oran_begin <- min(df_precip$DATE[!is.na(df_precip$ORANGE)])
+ware_begin <- min(df_precip$DATE[!is.na(df_precip$WARE)])
+
+bel_end <- max(df_precip$DATE[!is.na(df_precip$BELCHERTOWN)])
+oran_end <- max(df_precip$DATE[!is.na(df_precip$ORANGE)])
+ware_end <- max(df_precip$DATE[!is.na(df_precip$WARE)])
 
 # Annual Cumulative Precip Sum (calendar day)
 # Group by Jday - jday total + sum of precip on all prior days of that year.
@@ -138,21 +137,18 @@ jday_sum_vyear <- df_precip %>%
 
 # Summary Table ####
 # NOAA Stations of interest:
-# USW00004780 # FITCHBURG MUNICIPAL AIRPORT, MA US
-# USW00094746 # WORCESTER, MA US
+# USC00190562 # BELCHERTOWN, MA US
 # USW00054756 # ORANGE MUNICIPAL AIRPORT, MA US
 # USC00198793 # WARE, MA US
-# USC00190562 # BELCHERTOWN, MA US
-
 
 ### Need to come up with way to make this fit into module - also need a note that Worcester data is available prior to 1985,
 # but it is not stored locally in databases
 
-t_gauge_summary  <- tibble("Gauge Name" = c("WORCESTER", "FITCHBURG","STILLWATER","QUINAPOXET"),
-                           "Owner" = c("NOAA", "NOAA", "USGS", "USGS"),
-                           "Gauge Number" = c("USW00094746","USW00004780","01095220 (MD07)","01095375 (MD69)"),
-                           "Start Date" = c(wor_begin, fitch_begin, still_begin, quin_begin),
-                           "End Date" = c(wor_end, fitch_end, still_end, quin_end)
+t_gauge_summary  <- tibble("Gauge Name" = c("BELCHERTOWN", "ORANGE","WARE"),
+                           "Owner" = c("NOAA", "NOAA", "NOAA"),
+                           "Gauge Number" = c("USC00190562","USW00054756","USC00198793"),
+                           "Start Date" = c(bel_begin, oran_begin, ware_begin),
+                           "End Date" = c(bel_end, oran_end, ware_end)
                     )
 
 
@@ -183,7 +179,8 @@ return(dfs)
 
 } # End Function
 
-# dfs <- PRECIP_STATS(df_precip = df_wach_prcp_daily, vyear = NULL)
+# dfs <- PRECIP_STATS(df_precip = df_precip, vyear = 2017)
+
 
  # Generate Sample date vectors for precip threshold filters:
       #* Need to have an explanation on this filter saying:

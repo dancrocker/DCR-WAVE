@@ -52,7 +52,7 @@ t_precip_month[4,ncol(t_precip_month)] <- NA
 
 p <- ggplot(p1data, aes(x = Month, y = Precip)) +
   geom_bar(aes(fill = p1data$Year, text = paste("Precip:", Precip)), position = "dodge", stat = "identity") +
-  labs(title = paste0("Wachusett Watershed Monthly Precipitation for ", vyear),
+  labs(title = paste0("Monthly Watershed Precipitation for ", vyear),
        caption="Source: USGS and NOAA") +
   xlab("Month") +
   ylab("Precipitation (Inches)") +
@@ -102,7 +102,7 @@ PRECIP_MONTH_BAR2 <- function(df, date_min, date_max, type = NULL){
   
   p <- ggplot(p1data, aes(x = Month, y = Precip)) +
     geom_bar(aes(fill = "deepskyblue3", text = paste("Month:", format(Month,"%b-%Y"), "<br>","Precip:", Precip)), stat = "identity", color = "black") +
-    labs(title = paste0("Wachusett Watershed Monthly Precipitation\n", format(min(p1data$Month),"%b-%Y"), " to ", format(max(p1data$Month),"%b-%Y")),
+    labs(title = paste0("Monthly Watershed Precipitation\n", format(min(p1data$Month),"%b-%Y"), " to ", format(max(p1data$Month),"%b-%Y")),
          caption="Source: USGS and NOAA") +
     xlab("Month") +
     ylab("Precipitation (Inches)") +
@@ -141,7 +141,7 @@ PRECIP_DAILY_BAR <- function(df, date_min, date_max, type){
   
   p <- ggplot(df, aes(x = Date, y = Precip)) +
     geom_bar(fill = "deepskyblue3", position = "dodge", stat = "identity", color = "black") +
-    labs(title = paste0("Wachusett Watershed Daily Precipitation"),
+    labs(title = paste0("Daily Watershed Precipitation"),
          caption="Source: USGS and NOAA") +
     xlab("Date") +
     ylab("Precipitation (Inches)") +
@@ -181,7 +181,7 @@ PRECIP_YEAR_BAR <- function(df, date_min, date_max, type = FALSE){
   p <- ggplot(df2, aes(x = Year, y = Precip)) +
     geom_bar(aes(fill = "deepskyblue3"), stat = "identity", color = "black") +
     geom_hline(yintercept = PrcpAnnualAve, color = "red") +
-    labs(title = paste0("Wachusett Watershed Annual Precipitation Totals")) +
+    labs(title = paste0("Annual Watershed Precipitation Totals")) +
     xlab("Year") +
     ylab("Precipitation (Inches)") +
     theme_light() +
@@ -276,7 +276,7 @@ rownames(M) <- unique(format(time(m), "%Y"))
 
 ## Loading required package: lattice
 mplot <- print(matrixplot(M, ColorRamp="Precipitation",
-                 main="Wachusett Watershed Monthly Precipitation, [in/month]"))
+                 main="Watershed Monthly Precipitation, [in/month]"))
 return(mplot)
 } # End function
 # PRECIP_MATRIX(df = df_wach_prcp_daily)

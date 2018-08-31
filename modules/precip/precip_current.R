@@ -66,13 +66,19 @@ PRECIP_CURRENT_UI <- function(id) {
 # SERVER ####
 ###_________________________________________________________________
 
-PRECIP_CURRENT <- function(input, output, session, df, df_site) {
+PRECIP_CURRENT <- function(input, output, session, df, df_site, wshed) {
   # df <- df_wach_prcp_daily
   # df_site <- df_wq_wach_site
   callModule(PRECIP_MAP, "precip_map", df_site = df_site)
+  source("functions/quab_precip_stats.R") # Function args (df)
   source("functions/wach_precip_stats.R") # Function args (df)
   source("modules/plots/plot_precip.R") # Function args (df)
-    dfs <- PRECIP_STATS(df, vyear = NULL)
+  
+  if(wshed == "Wachusett"){  
+  dfs <- PRECIP_STATS_WACH(df, vyear = NULL)
+  } else {
+  dfs <- PRECIP_STATS_QUAB(df, vyear = NULL)  
+  }
     # dfs[[1]] <- PrcpMonthYear
     # dfs[[2]] <- PrcpMonthMean
     # dfs[[3]] <- YTD_J_Day
@@ -83,12 +89,18 @@ PRECIP_CURRENT <- function(input, output, session, df, df_site) {
     
   ns <- session$ns 
 
-  output$intro <- renderText({paste0("Daily Wachusett Watershed precipitation has been compiled starting January 1, 1985 
+intro_text <- switch(wshed,
+      "Wachusett" = paste0("Daily Wachusett Watershed precipitation has been compiled starting January 1, 1985 
     through ", format(max(df$DATE), '%B %d, %Y'), " (Day of Year # ", format(max(df$DATE), '%j'),"). The sources of precipitation 
     data have fluctuated through time and the daily watershed precipitation is a straight average of 1-4 gauges depending on what data is 
     available at a particular time. The table and map show the precipitation gauge locations that 
-    have been utilized over the years to estimate watershed average precipitation.")})
+    have been utilized over the years to estimate watershed average precipitation."),
+      "Quabbin" = paste0("Intro Text")
+  )
+ 
+ output$intro <- renderText({intro_text})
 
+  
 df_gauges <- dfs[[6]]
 df_gauges$`Start Date` <- format(df_gauges$`Start Date`,'%Y-%m-%d')
 df_gauges$`End Date` <- format(df_gauges$`End Date`,'%Y-%m-%d')
@@ -111,7 +123,7 @@ t1 <- reactive({
   })
 
 output$table1_title <- renderText({
-  paste0("Monthly Precipitation totals for ", input$vyear1)
+  paste0(wshed, " Monthly Precipitation totals for ", input$vyear1)
 })
 
   output$plot1_static <- renderPlot({p1()})

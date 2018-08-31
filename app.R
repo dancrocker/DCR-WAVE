@@ -59,9 +59,9 @@ if(userlocation == "Quabbin"){
 }
 
 ### Directory with saved .rds files
-if(!userlocation %in% c("Quabbin", "Wachusett")){
-  # source("functions/FetchDropboxData.R") 
-  # fetchDropbox(dir = config[1])
+if(userlocation %in% c("UMASS")){
+  source("functions/FetchDropboxData.R")
+  fetchDropbox(dir = config[1])
   datadir <- config[1]
 } else {
   datadir <- config[1]
@@ -450,24 +450,26 @@ tabPanel("Reservoir",
             #          )
             # ),
             "Precipitation",
-            tabPanel("Select / Filter Data", icon=icon("filter"), FILTER_WQ_UI("mod_precip_quab_filter")),
-            tabPanel("--- Plots", icon = icon("line-chart"),
-                     br(),
-                     wellPanel(em('Plots use data from the "Select / Filter Data" tab')),
-                     tabsetPanel(
-                     #   tabPanel("Current Conditions", PROF_HEATMAP_UI("mod_precip_quab_current")),
-                     #   tabPanel("Historical Precip", PROF_LINE_UI("mod_precip_quab_hist", df_prof_quab)),
-                     #   tabPanel("Distribution Charts", DISTRIBUTION_WQ_UI("mod_precip_quab_plot_dist"))
-                     )
-            ),
-            tabPanel("--- Stats/Tables", icon = icon("calculator"),
-                     br(),
-                      wellPanel(em('Statistics use data from the "Select / Filter Data" tab')),
-                      tabsetPanel(
-                        # tabPanel("Summary Statistics", STAT_TIME_DEPTH_WQ_UI("mod_precip_quab_stat_sum")),
-                        # tabPanel("Historical Statistics", PLOT_CORR_MATRIX_WQ_UI("mod_precip_quab_stat_hist"))
-                      )
-            ),
+            tabPanel("Current Conditions", icon = icon("line-chart"), PRECIP_CURRENT_UI("mod_precip_quab_current")),
+            tabPanel("Historical Precip", icon = icon("line-chart"), PRECIP_HISTORICAL_UI("mod_precip_quab_hist")),
+            # tabPanel("Select / Filter Data", icon=icon("filter"), FILTER_WQ_UI("mod_precip_quab_filter")),
+            # tabPanel("--- Plots", icon = icon("line-chart"),
+            #          br(),
+            #          wellPanel(em('Plots use data from the "Select / Filter Data" tab')),
+            #          tabsetPanel(
+            #          #   tabPanel("Current Conditions", PROF_HEATMAP_UI("mod_precip_quab_current")),
+            #          #   tabPanel("Historical Precip", PROF_LINE_UI("mod_precip_quab_hist", df_prof_quab)),
+            #          #   tabPanel("Distribution Charts", DISTRIBUTION_WQ_UI("mod_precip_quab_plot_dist"))
+            #          )
+            # ),
+            # tabPanel("--- Stats/Tables", icon = icon("calculator"),
+            #          br(),
+            #           wellPanel(em('Statistics use data from the "Select / Filter Data" tab')),
+            #           tabsetPanel(
+            #             # tabPanel("Summary Statistics", STAT_TIME_DEPTH_WQ_UI("mod_precip_quab_stat_sum")),
+            #             # tabPanel("Historical Statistics", PLOT_CORR_MATRIX_WQ_UI("mod_precip_quab_stat_hist"))
+            #           )
+            # ),
             "Water Supply",
             tabPanel("Reservoirs/Transfers", icon=icon("calculator"),
                      br(),
@@ -665,7 +667,10 @@ server <- function(input, output, session) {
 
   ### Geospatial
   callModule(MAP_PLOT, "mod_trib_ware_map", df = df_trib_ware, df_site = df_trib_ware_site)
-
+ 
+  ### Precipitation #### 
+  callModule(PRECIP_CURRENT, "mod_precip_quab_current", df = df_quabbin_prcp_daily, df_site = df_trib_quab_site, wshed = "Quabbin")
+  callModule(PRECIP_HISTORICAL, "mod_precip_quab_hist", df = df_quabbin_prcp_daily, wshed = "Quabbin")
 
   ### Wachusett ####
 
@@ -835,8 +840,8 @@ server <- function(input, output, session) {
   
   # ### Precip ####
 
-  callModule(PRECIP_CURRENT, "mod_precip_wach_current", df = df_wach_prcp_daily, df_site = df_trib_wach_site)
-  callModule(PRECIP_HISTORICAL, "mod_precip_wach_hist", df = df_wach_prcp_daily)
+  callModule(PRECIP_CURRENT, "mod_precip_wach_current", df = df_wach_prcp_daily, df_site = df_trib_wach_site, wshed = "Wachusett")
+  callModule(PRECIP_HISTORICAL, "mod_precip_wach_hist", df = df_wach_prcp_daily, wshed = "Wachusett")
   # callModule(PRECIP_STATS, "mod_precip_wach_stats", df = df_wach_prcp_daily)
   # callModule(PRECIP_FILTER, "mod_precip_wach_filter", df = df_wach_prcp_daily)
   # 

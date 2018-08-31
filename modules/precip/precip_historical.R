@@ -17,7 +17,7 @@ PRECIP_HISTORICAL_UI <- function(id) {
         br(),
           fluidRow(
             column(4,
-                   wellPanel(em('Plot Options'),
+                   wellPanel(em('Plot Options'), ### Plot Options ####
                              radioButtons(inputId = ns("slider_type"),
                                                 label = "Plot precipitation totals by: ",
                                                 selected = "month",
@@ -25,13 +25,12 @@ PRECIP_HISTORICAL_UI <- function(id) {
                                                 choiceValues = c("day", "month", "year")
                              ),
                              uiOutput(ns("slider_ui")),
-                             # verbatimTextOutput(ns("range")),
                              checkboxInput(ns("plot_type"), "Check here to make interactive plot)"),
                              downloadButton(ns('save_plot'), "Save Plot")
                    ) # End Well Panel
             ), # End Column
             column(8,
-                   uiOutput(ns("plot_ui")) # The plot
+                   uiOutput(ns("plot_ui")) ### Plot UI ####
             ) # End Column
         ) # End FR
       ) # End TabPanel
@@ -46,14 +45,22 @@ PRECIP_HISTORICAL_UI <- function(id) {
 # SERVER ####
 ###_________________________________________________________________
 
-PRECIP_HISTORICAL <- function(input, output, session, df) {
+PRECIP_HISTORICAL <- function(input, output, session, df, wshed) {
   ns <- session$ns 
 # df is df_wach_prcp_daily
 
   source("functions/wach_precip_stats.R") # Data
+  source("functions/quab_precip_stats.R") # Data
   source("modules/plots/plot_precip.R") # Plots
   
-  dfs <- PRECIP_STATS(df_precip = df, vyear = NULL) ### Running this again makes an independent dataset for historical plots w/o affecting current stats
+  ### Generate new stats ####
+  ### Running this again makes an independent dataset for historical plots w/o affecting current stats
+  if(wshed == "Wachusett"){  
+    dfs <- PRECIP_STATS_WACH(df, vyear = NULL)
+  } else {
+    dfs <- PRECIP_STATS_QUAB(df, vyear = NULL)  
+  }
+ 
   # dfs[[1]] <- PrcpMonthYear
   # dfs[[2]] <- PrcpMonthMean
   # dfs[[3]] <- YTD_J_Day
@@ -81,8 +88,6 @@ PRECIP_HISTORICAL <- function(input, output, session, df) {
     )
   })
   
-  # output$range <- renderPrint({ input$date_range })
-  
   ### Make Plot Object based on Slider Type ####
   p  <- reactive({
     switch(input$slider_type,
@@ -93,7 +98,6 @@ PRECIP_HISTORICAL <- function(input, output, session, df) {
   }) 
 
   ### PLOT UI ####
-  
   output$plot_static <- renderPlot({p()})
   output$plot_inter <- renderPlotly({p()})
   
@@ -105,16 +109,16 @@ PRECIP_HISTORICAL <- function(input, output, session, df) {
     }
   })
   
-  # # Plot Print
-  # output$save_plot <- downloadHandler(
-  #   filename <- function() {
-  #     paste0("Daily_", input$param1, "_at_", input$site,"_", Sys.Date(), ".", input$plot_save_type)},
-  #   content = function(file) {
-  #     ggplot2::ggsave(file, plot = p(), device = input$plot_save_type, width = input$plot_save_width, height = input$plot_save_height, dpi = 300)
-  #     contentType = 'image/png'
-  #   }
-  # )
+  # Plot Print ####
+  output$save_plot <- downloadHandler(
+    filename <- function() {
+      paste0("HistoricalPrecip_",input$slider_type, ".png")},
+    content = function(file) {
+      ggplot2::ggsave(file, plot = p(), device = "png", units = "in", width = 6, height = 4, dpi = 300)
+      contentType = 'image/png'
+    }
+  )
   
-  } # End Server function
+  } # End Server function ####
 
 
