@@ -145,7 +145,7 @@ output$table1_title <- renderText({
 
   # Plot 2 - Cummulative line chart
 p2  <- reactive({
-  p2 <- PRECIP_LINE(df = df, vyear = input$vyear2, type = input$plot2_type)
+  p2 <- PRECIP_LINE(df = df, vyear = input$vyear2, type = input$plot2_type, wshed = wshed)
   p2
 })
 

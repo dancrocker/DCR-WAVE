@@ -179,8 +179,9 @@ return(dfs)
 
 } # End Function
 
-# dfs <- PRECIP_STATS(df_precip = df_precip, vyear = 2017)
-
+# dfs <- PRECIP_STATS_QUAB(df_precip = df_precip, vyear = 2017)
+# 
+# YTD_J_Day <- dfs[[3]]
 
  # Generate Sample date vectors for precip threshold filters:
       #* Need to have an explanation on this filter saying:

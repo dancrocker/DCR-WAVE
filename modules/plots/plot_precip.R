@@ -130,11 +130,11 @@ PRECIP_MONTH_BAR2 <- function(df, date_min, date_max, type = NULL){
 ### DAILY PLOT ####
 PRECIP_DAILY_BAR <- function(df, date_min, date_max, type){
   # Plot Args
-  # df = df_wach_prcp_daily
+  df = df_wach_prcp_daily
   # date_min <- as.Date("2018-05-03")
   # date_max <- as.Date("2018-08-08")
   
-  df <- select(df,c(1,7)) %>%
+  df <- select(df,c(DATE,DailyPrcpAve)) %>%
     dplyr::rename("Date" = DATE, "Precip" = DailyPrcpAve) %>% 
     filter(Date >= date_min, Date <= date_max)
   df$Precip <- round(df$Precip,2)
@@ -207,9 +207,17 @@ PRECIP_YEAR_BAR <- function(df, date_min, date_max, type = FALSE){
 
 ### CUMULATIVE PRECIP PLOT ####
 # Julian Day plot - Days 1 - 366 showing cumulative precip
-PRECIP_LINE <-  function(df, vyear, type = NULL){ 
-source("functions/wach_precip_stats.R") # Function args (df)  
-dfs <- PRECIP_STATS(df_precip = df, vyear = vyear)
+PRECIP_LINE <-  function(df, vyear, type = NULL, wshed){ 
+  source("functions/wach_precip_stats.R") # Function args (df)   
+  source("functions/quab_precip_stats.R") # Function args (df) 
+
+    if(wshed == "Wachusett"){  
+    dfs <- PRECIP_STATS_WACH(df, vyear = vyear)
+  } else {
+    dfs <- PRECIP_STATS_QUAB(df, vyear = vyear)  
+  }
+
+
 df <- dfs[[5]]
   
 # df <- jday_sum_vyear
@@ -254,7 +262,7 @@ require(lattice)
 require(hydroTSM)
 # df <- df_wach_prcp_daily
 
-tsm_data <- df[year(df$DATE) < year(Sys.Date()) ,c(1,7)]
+tsm_data <- df[year(df$DATE) < year(Sys.Date()) ,c(DATE,DailyPrcpAve)]
 tsm_data <-  zoo(x = tsm_data[,2], order.by = tsm_data[,1])
 
 x <- window(tsm_data, start = as.Date("1985-01-01"))
