@@ -55,6 +55,7 @@ PRECIP_HISTORICAL <- function(input, output, session, df, wshed) {
   
   ### Generate new stats ####
   ### Running this again makes an independent dataset for historical plots w/o affecting current stats
+  
   if(wshed == "Wachusett"){  
     dfs <- PRECIP_STATS_WACH(df, vyear = NULL)
   } else {
