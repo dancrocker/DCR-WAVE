@@ -40,7 +40,7 @@ start_precip <- min(df_precip$DATE) # First precip date
 end_precip <- max(df_precip$DATE) # Last precip date
 jend_precip <- df_precip$jDay[df_precip$DATE == end_precip] # Last Precip Julian day
 this_year <- year(Sys.Date()) # Current Year
-this_month <- month(Sys.Date()) # Current Month
+this_month <-   month(max(df_precip$DATE, na.rm = TRUE)) # Current Month of data (this will lag for 1-3 days at the end of each month)
 
 # Calculate Month Totals, then filter out months that are missing daily records so they are not used in stats
 PrcpMonthYear <- df_precip %>%

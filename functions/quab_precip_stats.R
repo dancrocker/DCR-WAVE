@@ -9,27 +9,27 @@
 #################################################################################
 
 # Load Libraries
-# library(tidyverse)
-# library(lubridate)
-# library(scales)
-# library(chron)
-# library(hydroTSM)
-# library(plotly)
-# library(lattice)
-# 
-# 
-# # Precip stats function  - processes daily precip records and caches relevant stats for WAVE App
-# 
-# #### THIS IS TEMPORARY FOR USE OUTSIDE OF SHINY
-# # Read config file to access database
-# config <- read.csv("//env.govt.state.ma.us/enterprise/DCR-WestBoylston-WKGRP/WatershedJAH/EQStaff/WQDatabase/R-Shared/WAVE-WIT/Configs/WAVE_WIT_Config.csv", header = TRUE)
-# config <- as.character(config$CONFIG_VALUE)
-# 
-# rds_files <- list.files(config[1],full.names = T)
-# rds_files # Take a look at the rds files:
-# df_precip <- readRDS(rds_files[19]) # NOTE: This rds file is created daily at the conclusion of the NOAA data fetch
-#####
+library(tidyverse)
+library(lubridate)
+library(scales)
+library(chron)
+library(hydroTSM)
+library(plotly)
+library(lattice)
 
+
+# Precip stats function  - processes daily precip records and caches relevant stats for WAVE App
+
+#### THIS IS TEMPORARY FOR USE OUTSIDE OF SHINY
+# Read config file to access database
+config <- read.csv("//env.govt.state.ma.us/enterprise/DCR-WestBoylston-WKGRP/WatershedJAH/EQStaff/WQDatabase/R-Shared/WAVE-WIT/Configs/WAVE_WIT_Config.csv", header = TRUE)
+config <- as.character(config$CONFIG_VALUE)
+
+rds_files <- list.files(config[1],full.names = T)
+rds_files # Take a look at the rds files:
+df_precip <- readRDS(rds_files[19]) # NOTE: This rds file is created daily at the conclusion of the NOAA data fetch
+vyear <- NULL
+#####
 
 # Quabbin Precip DF
 
@@ -40,7 +40,7 @@ start_precip <- min(df_precip$DATE) # First precip date
 end_precip <- max(df_precip$DATE) # Last precip date
 jend_precip <- df_precip$jDay[df_precip$DATE == end_precip] # Last Precip Julian day
 this_year <- year(Sys.Date()) # Current Year
-this_month <- month(Sys.Date()) # Current Month
+this_month <-   month(max(df_precip$DATE, na.rm = TRUE)) # Current Month of data (this will lag for 1-3 days at the end of each month)
 
 # Calculate Month Totals, then filter out months that are missing daily records so they are not used in stats
 PrcpMonthYear <- df_precip %>%
@@ -129,6 +129,7 @@ jday_sum_thisyear <- df_precip %>%
 if(is.null(vyear)){
   vyear <- year(Sys.Date())
 }
+
 jday_sum_vyear <- df_precip %>%
   filter(year(DATE) == vyear) %>%
   mutate(jDay_YTJD = cumsum(DailyPrcpAve[jDay <= jDay])) %>%
@@ -158,7 +159,7 @@ t_prcp_summary <- tibble("Stat" = c(paste0("Most recent precipitation value (", 
                                     paste0("Precipitation so far this month (", floor_date(today(),"month"), " - ", end_precip,")"),
                                     paste0("Year to calendar date (",this_year, "-01-01 - ", end_precip, ")"),
                                     paste0("Year to day-of-year (",end_precip - dyears(1), " - ", end_precip, ")")),
-                         "Inches" = c(last1prcp, last7prcp, last30prcp, PrcpThisMonthSoFar, YTCD,YTJD),
+                         "Inches" = c(last1prcp, last7prcp, last30prcp, PrcpThisMonthSoFar, YTCD, YTJD),
                          "Normal" = c(NA, NA, NA, PrcpMonthNormalSoFar, YTCDNormal, YTJDNormal),
                          "Departure" = c(NA, NA, NA, ThisMonth_Depart, YTCD_Depart, YTJD_Depart)
                          )
