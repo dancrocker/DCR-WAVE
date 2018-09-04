@@ -130,7 +130,7 @@ PRECIP_MONTH_BAR2 <- function(df, date_min, date_max, type = NULL){
 ### DAILY PLOT ####
 PRECIP_DAILY_BAR <- function(df, date_min, date_max, type){
   # Plot Args
-  df = df_wach_prcp_daily
+  # df = df_wach_prcp_daily
   # date_min <- as.Date("2018-05-03")
   # date_max <- as.Date("2018-08-08")
   
