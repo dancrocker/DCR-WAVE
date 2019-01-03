@@ -45,17 +45,20 @@ DATE_SELECT <- function(input, output, session, Df, hidden = FALSE) {
   # Min and Max Dates for Sites Selected
   Date_Min <- reactive({Df()$Date %>% min(na.rm=TRUE)})
   Date_Max <- reactive({Df()$Date %>% max(na.rm=TRUE)})
-
+  
+  # Min and Max years for Sites Selected
+  Year_Min <- reactive({as.numeric(year(Date_Min()))})
+  Year_Max <- reactive({as.numeric(year(Date_Max()))})
 
   # Date Selection UI
   output$date_ui <- renderUI({
 
     # Date Input
     dateRangeInput(ns("date"), "Date Range:",
-                   # start = Date_Min(),
-                   # end = Date_Max(),
+                   start = Date_Min(),
+                   end = Date_Max(),
                    min = Date_Min(),
-                   max = Sys.Date(),
+                   max = Date_Max(),
                    startview = "year")
   })
 
@@ -76,7 +79,7 @@ DATE_SELECT <- function(input, output, session, Df, hidden = FALSE) {
                            start = save_selected_lower,
                            end = save_selected_upper,
                            min = Date_Min(),
-                           max = Sys.Date())
+                           max = Date_Max())
 
       # If Site list is empty than make a date range of the previously selected date range to save it.
     } else {
@@ -99,11 +102,12 @@ DATE_SELECT <- function(input, output, session, Df, hidden = FALSE) {
   ### Year Selection
 
   # Choices
-  Year_Choices <- reactive({c(rev(year(seq(Date_Min(), Sys.Date(), "years"))))}) # Change to first year of data
+  # Year_Choices <- reactive({rev(year(seq(Date_Min(), Date_Max(),"years")))}) # Change to first year of data
+  Year_Choices <- reactive({rev(seq(Year_Min(), Year_Max(),1))}) # Change to first year of data
 
   # Parameter Selection UI
   output$year_ui <- renderUI({
-    selectInput(ns("year"), "Year(s):", choices=Year_Choices(), multiple = TRUE)
+    selectInput(ns("year"), "Year(s):", choices = Year_Choices(), multiple = TRUE)
   })
 
   # To fill back in previously selected - Memory

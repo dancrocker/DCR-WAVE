@@ -23,10 +23,11 @@ print(paste0("WAVE App lauched at ", Sys.time()))
 ### Package List ####
 ### NOTE - Shiny must be installed and loaded in the LaunchAppGitHub.R script - any other packages requred should be listed below
 
-packages <- c("shiny","shinyjs", "shinyFiles","rmarkdown", "knitr", "tidyverse", "lubridate", "plotly", "leaflet", "RColorBrewer", "devtools",
+packages <- c("shiny","shinyjs", "shinyFiles","rmarkdown", "knitr", "tidyverse", "tidyselect", "lubridate", "plotly", "leaflet", "RColorBrewer", "devtools",
               "DT", "akima", "scales", "stringr", "cowplot", "shinythemes","rgdal", "reshape2", "dataRetrieval", "pryr", "broom",
-              "ggthemes", "visreg", "lattice", "chron", "hydroTSM", "httr") # Took out odbc and dbi since app no longer connects to databases directly
-ipak(packages) 
+              "ggthemes", "visreg", "lattice", "hydroTSM", "httr") # Took out odbc and dbi since app no longer connects to databases directly
+  # Removed chron - was conflicting with lubridate
+ ipak(packages) 
 
 if("rcmodel" %in% rownames(installed.packages()) == FALSE) {
   print("rcmodel package not installed, installing now")
@@ -155,7 +156,7 @@ source("modules/reports/report_custom.R")
 
 source("functions/stat_functions.R")
 source("functions/phyto_plots.R")
-source("functions/flow_plots.R")
+source("functions/flow_plots2.R")
 
 
     
@@ -416,7 +417,7 @@ tabPanel("Reservoir",
           navlistPanel(widths = c(2, 10),
             "Streamflow",
             tabPanel("Select / Filter Data", icon = icon("filter"), FILTER_WQ_UI("mod_flow_quab_filter")),
-            tabPanel("--- Plots/Ratings", icon = icon("line-chart"),
+            tabPanel("--- Plot Streamflow", icon = icon("line-chart"),
                      br(),
                      wellPanel(em('Plots use data from the "Select / Filter Data" tab')),
                      tabsetPanel(
@@ -499,7 +500,7 @@ tabPanel("Reservoir",
           navlistPanel(widths = c(2, 10),
               "Streamflow",
               tabPanel("Select / Filter Data", icon = icon("filter"), FILTER_FLOW_UI("mod_flow_wach_filter")),
-              tabPanel("--- Plots/Ratings", icon = icon("line-chart"),
+              tabPanel("--- Plot Streamflow", icon = icon("line-chart"),
                        br(),
                        wellPanel(em('Plots use data from the "Select / Filter Data" tab')),
                        tabsetPanel(
@@ -700,7 +701,6 @@ server <- function(input, output, session) {
 
 ### RESERVOIR ####
 
-
 ##### Quabbin #####
 
   ### Chemical
@@ -820,16 +820,17 @@ server <- function(input, output, session) {
     # # Filter
     Df_Flow_Wach <- callModule(FILTER_FLOW, "mod_flow_wach_filter",
                                df = df_wach_flow,
+                               df_inst = df_wach_flow_inst,
                                df_site = df_trib_wach_site[!is.na(df_trib_wach_site$LocationFlow),],
-                               df_wq = df_trib_wach,
                                df_flags = df_flags,
-                               df_flag_index = df_wach_flag_index[df_wach_flag_index$DataTableName == "tblHOBO_DATA",],
+                               df_flag_index = df_wach_flag_index[df_wach_flag_index$DataTableName == "tbl_HOBO",],
                                type = "wq"
                               )
   
   callModule(PLOT_FLOW, "mod_flow_wach_hydrograph",
-             Df = Df_Flow_Wach$Long,
-             df2 = df_trib_wach,
+             Df = Df_Flow_Wach$Long, # This is a pre-filtered dataset from module Filter Flow
+             Df_inst = Df_Flow_Wach$Inst, # This is a pre-filtered dataset from module Filter Flow
+             df_wq = df_trib_wach,
              df_site = df_trib_wach_site[!is.na(df_trib_wach_site$LocationFlow),],
              df_precip = df_wach_prcp_daily)
     

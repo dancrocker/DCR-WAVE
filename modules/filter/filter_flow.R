@@ -1,20 +1,15 @@
-##############################################################################################################################
-#     Title: filter_flow.R
-#     Type: Module for DCR Shiny App
-#     Description: Filter and Export Flow data (HOBO and USGS)
-#     Written by: Nick Zinck/Dan Crocker, Spring 2017
-##############################################################################################################################
+###     Title: filter_flow.R 
+###     Type: Module for DCR Shiny App
+###     Description: Filter and Export Sensor data (HOBO and USGS)
+###     Written by: Dan Crocker, December 2018
 
-# Notes:
+### Notes: ####
 #   1. req() will delay the rendering of a widget or other reactive object until a certain logical expression is TRUE or not NULL
-#
 # To-Do List:
 #   1. Make the Metero/Hydro Filters work
-#   2. Plotting Features - Show Limits, Finish and Clean up Coloring options (flagged data, met filters)
+#   2. 
 
-##############################################################################################################################
-# User Interface
-##############################################################################################################################
+### User Interface ####
 
 FILTER_FLOW_UI <- function(id) {
 
@@ -23,8 +18,10 @@ FILTER_FLOW_UI <- function(id) {
   tagList(
     br(),
     wellPanel(
-      em('Select and filter data to view, export, and use in the "Plots" and "Statistics" tabs. To view and use the full (unfiltered) data, check the box below.'),
-      checkboxInput(ns("full_data"), "Use Full Dataset")
+      em('Select and filter data to view, export, and use in the "Plots" and "Statistics" tabs. To view and use the full (unfiltered) data, check the box below.\n'),
+      br(),
+      strong("Note: USGS Instantaneous data is not cached locally, thus it will not load unless a date range of 100 days or less is selected first."),
+      checkboxInput(ns("full_data"), "Use Full Dataset (Note - Does not include USGS instantaneous records)")
     ),
     tabsetPanel(
       tabPanel("Select / Filter Data",
@@ -44,7 +41,8 @@ FILTER_FLOW_UI <- function(id) {
                                 h4(textOutput(ns("text_no_storm")), align = "center"),
                                 h4(textOutput(ns("text_no_month")), align = "center"),
                                 h5(textOutput(ns("text_num_text")), align = "center"),
-                                strong(textOutput(ns("text_num")), align = "center")
+                                strong(textOutput(ns("text_num")), align = "center"),
+                                strong(textOutput(ns("text_num2")), align = "center")
                               ), # end Well Panel
                               wellPanel(
                                 SITE_MAP_UI(ns("site_map"))
@@ -57,14 +55,14 @@ FILTER_FLOW_UI <- function(id) {
                               # Parameter Input - Using Module Parameter Select
                               # Select 1 Parameter
                               uiOutput(ns("param_ui")),
-                              uiOutput(ns("valrange_ui")),
-                              br(),
+                              uiOutput(ns("paramtext_ui")),
                               # Date Input - Using Module Date Select
                               DATE_SELECT_UI(ns("date")),
-                              br(),
+                              # br(),
+                              CHECKBOX_SELECT_ALL_UI(ns("month")),
                               wellPanel(
                                 # Month Input - Using the custom Module SELECT_SELECT_ALL, see script of dev manual
-                                CHECKBOX_SELECT_ALL_UI(ns("month"))
+                                uiOutput(ns("valrange_ui"))
                               )
                        ) # end column
                      ) # end fluidrow
@@ -143,36 +141,50 @@ FILTER_FLOW_UI <- function(id) {
                    ) # end well panel
                )
       ),
-      tabPanel("View Data in Table",
+      tabPanel("View Daily Data in Table",
                fluidRow(br(), downloadButton(ns("download_data"), "Download table as csv"), align = "center"),
                dataTableOutput(ns("table"))
+      ), # end tabPanel
+      tabPanel("View Instantaneous Data in Table",
+               fluidRow(br(), downloadButton(ns("download_data2"), "Download table as csv"), align = "center"),
+               strong("Note: USGS data will only load if 100 days or fewer are in the date range filter"),
+               dataTableOutput(ns("table2"))
       ) # end tabPanel
     ) # end tabSetpanel
   ) # end taglist
 } # end UI function
 
 
-##############################################################################################################################
-# Server Function
-##############################################################################################################################
+# Server Function ####
 
 # This module does not take any reactive expressions. Changes will have to be made to accmodate reactive expressions
 # dfs is a list of dataframes
 
-FILTER_FLOW <- function(input, output, session, df, df_site, df_wq, df_flags = NULL, df_flag_index = NULL, type = "wq"){
+FILTER_FLOW <- function(input, output, session, df, df_inst, df_site, df_wq, df_flags = NULL, df_flag_index = NULL, type = "wq"){
 
-  ########################################################
+# df is the daily data compilation, which contains daily USGS data from NWIS and daily HOBO data which is calculated from the instantaneous values 
+#   when the .rds files are created. 
+  # df_inst is only the instantaneous HOBO data. Instantaneous USGS data must be fetched during the session. 
+  
   # Main Selection
 
   ns <- session$ns # see General Note 1
   # Change case of DATE column for Date Select, pull into long format for filtering
   # df <- df_wach_flow
+  
+  ### Source/define necessary functions ####
 
-  ### Site Selection
+  source("Functions/FetchUSGS.R")   ### Fetch USGS Function ####
+  
+  substrRight <- function(x, n){
+    substr(x, nchar(x)-n+1, nchar(x))
+  }
+  
+  ### Site choices ####
   site_choices <- reactive({
-    df_site %>% .$LocationLabel %>% sort() %>% paste()
+    df %>% .$LocationLabel %>% unique() %>% sort() %>% paste()
   })
-
+  ### Site UI ####
   output$site_ui <- renderUI({
     checkboxGroupInput(ns("site"),
                       label = "Choose Location(s):",
@@ -183,21 +195,66 @@ FILTER_FLOW <- function(input, output, session, df, df_site, df_wq, df_flags = N
 
 
   ### Parameter and Range Selection
+  # daily_parameter_choices <- reactive({
+  #     # req(Df1)
+  #     Df1() %>% .$Parameter %>% unique() %>% sort() %>% paste()
+  #   })
+  # inst_parameter_choices <- reactive({
+  #     # req(Df1)
+  #     Df1() %>% .$Parameter %>% unique() %>% sort() %>% paste()
+  #   })
+  
+  ### Parameter choices ####
+  # parameter_choices <- c("Discharge", "Water Temperature", "Stage", "Specific Conductance")
   parameter_choices <- reactive({
-      # req(Df1)
-      Df1() %>% .$Parameter %>% unique() %>% sort() %>% paste()
-    })
+    req(input$site)
+    if(any(input$site %in% usgs_sta)){
+      parameter_choices <- c("Discharge", "Water Temperature", "Stage", "Specific Conductance")
+  } else {
+    parameter_choices <- c("Discharge", "Water Temperature", "Stage")
+  }
+  })
+  # 
+### daily params ####  
+  daily_params <- reactive({
+    if("Water Temperature" %in% input$param){a <- c("TEMP_C_MIN","TEMP_C_MEAN","TEMP_C_MAX")} else { a <- NULL}
+    if("Discharge" %in% input$param){b <- c("Q_CFS_MIN", "Q_CFS_MEAN", "Q_CFS_MAX")} else { b <- NULL}
+    if("Stage" %in% input$param){c <- c("STAGE_FT_MIN", "STAGE_FT_MEAN", "STAGE_FT_MAX")} else { c <- NULL}
+    if("Specific Conductance" %in% input$param){d <- c("SPCD_MEAN","SPCD_MIN","SPCD_MAX")} else { d <- NULL}
+    daily_params <- c(a,b,c,d)
+  })
+  
+# output$paramtext <- renderText({maxrange()})
 
-  minrange <- reactive({
-      # req(Df1)
-      min(Df1()$Result)
-    })
-  maxrange <- reactive({
-    # req(Df1)
-      max(Df1()$Result)
-    })
+# output$paramtext_ui <- renderUI({
+#   textOutput(ns("paramtext"))
+#   })
+  
+ ### instantaneous params ####
+  inst_params <- reactive({
+    if("Water Temperature" %in% input$param){a <- "Water Temperature"} else { a <- NULL}
+    if("Discharge" %in% input$param){b <- "Discharge"} else { b <- NULL}
+    if("Stage" %in% input$param){c <- "Staff Gauge Height"} else { c <- NULL}
+    if("Specific Conductance" %in% input$param){d <- "Specific Conductance"} else { d <- NULL}
+    inst_params <- c(a,b,c,d)
+  })
+  
+### Set Value Range Min and Max values for 
+### minrange ####  
+minrange <- reactive({
+  req(Df1())
+  min(Df1()$Result, na.rm = TRUE)
+})
+  
+### maxrange ####
+maxrange <- reactive({
+  req(Df1())
+  max(Df1()$Result, na.rm = TRUE)
+})
+
 
   output$param_ui <- renderUI({
+    req(input$site)
     selectInput(ns("param"),
                 label = "Choose Parameter(s):",
                 choices = parameter_choices(),
@@ -206,31 +263,97 @@ FILTER_FLOW <- function(input, output, session, df, df_site, df_wq, df_flags = N
   })
 
   output$valrange_ui <- renderUI({
+    req(Df1())
     sliderInput(ns("valrange"),
                 label = "Restrict value range of selection:",
                 min = minrange(),
                 max = maxrange(),
-                value = c(minrange(),maxrange()),
-                round = TRUE)
+                value  = c(minrange(),maxrange()),
+                round = TRUE,
+                step = 1,
+                dragRange = F
+                )
   })
-
-  # observe({
-  #   Df1()
-  #   # Control the value, min, max, and step.
-  #   # Step size is 2 when input value is even; 1 when value is odd.
-  #   updateSliderInput(session,
-  #                     "valrange",
-  #                     min = minrange(),
-  #                     max = maxrange(),
-  #                     value = c(minrange():maxrange()),
-  #                     round = TRUE)
-  # })
-
-  # Reactive Dataframe - first filter of the dataframe for Site
-  Df1 <- reactive({
-    # A Site must be selected in order for Df1 (or anything that uses Df1()) to be executed
+  
+  ### INTERMEDIATE DATAFRAMES ####  
+  
+  ### USGS I.V. from web ####
+  
+  ### Logical requirements: A USGS station must be a selected location, date range must be 100 days or less
+  ### All parameters are fetched, the data is split into precip and non precip dataframes returned in a list. 
+  ### Parameter filters are applied in the final df filtering
+  
+  
+  ### List of USGS Stations
+  usgs_sta <- df_site %>%
+    filter(!is.na(LocationFlow), LocationFlow != "HOBO") %>%
+    .$LocationLabel
+  
+  ### Get the USGS station ID 
+  sta <- reactive({
     req(input$site)
-
+    if(any(input$site %in% usgs_sta)){
+      sta <- df_site$LocationFlow[df_site$LocationLabel %in% input$site]
+    } else {
+      sta <- NULL
+    }
+  })
+  
+  ### USGS pcode, Parameter -- Return variable name ####
+  # 00010 Temperature, water	--   Wtemp_Inst 
+  # 00045 Precipitation	--  Precip_Inst        
+  # 00060 Discharge	    -- Flow_Inst          
+  # 00065 Gage height	  -- GH_Inst          
+  # 00095 Specific cond at 25C	  -- SpecCond_Inst  
+  # Column for date time = "dateTime"
+  
+  ### Get list of pcodes from input$param
+  
+  pcode <- reactive({
+    req(input$param)
+    if("Discharge" %in% input$param){
+      pcode <- "00060"
+    } else {
+      pcode <- NULL
+    }
+    if("Water Temperature" %in% input$param){
+      pcode <- c(pcode, "00010")
+    }
+    if("Stage " %in% input$param){
+      pcode <- c(pcode, "00065")
+    }
+    if("Specific Conductance" %in% input$param){
+      pcode <- c(pcode, "00095")
+    }
+    pcode
+})
+  
+  ### Make the reactive list of USGS dfs - if more than 100 days are selected or no USGS site is selected then both dfs are NULL
+  usgs_dfrx <- reactive({
+    req(sta(), Date_Year$Lower(), Date_Year$Upper())
+    if(!is.null(sta()) & as.numeric(Date_Year$Upper() - Date_Year$Lower()) <= 100){
+    print(paste0("Number of Instantaneous days: ", as.numeric(Date_Year$Upper() - Date_Year$Lower())))
+      ### Run FETCH_USGS Function
+    usgs_dfrx <- FETCH_USGS(sta = sta(), 
+                        pcode = c(pcode(), "00045"), 
+                        mindate = Date_Year$Lower(), 
+                        maxdate = Date_Year$Upper()
+    )
+    } else {
+      usgs_dfrx <- NULL
+      
+    } # End if
+}) # End reactive
+  
+  
+  # as.Date(as.character("2018-12-01"), format="%Y-%m-%d") - as.Date(as.character("2018-11-01"), format="%Y-%m-%d")
+  # as.Date(2018-12-01, format="%Y-%m-%d") - as.Date(2018-11-01, format="%Y-%m-%d")
+  # 
+  
+  ### Df0 - Filter by Site #### 
+  Df0 <- reactive({
+    # A Site must be selected in order for Df (or anything that uses Df()) to be executed
+    req(input$site)
     df %>% filter(LocationLabel %in% input$site)
 
   })
@@ -238,11 +361,13 @@ FILTER_FLOW <- function(input, output, session, df, df_site, df_wq, df_flags = N
   ### Parameter and Date Range
 
   # Parameter Selection using Param_Select Module
-  # Param <- callModule(PARAM_SELECT, "param", Df = Df1)
-
+  # Param <- callModule(PARAM_SELECT, "param", Df = Df1) # THis is unnecessary in this module since all the parameters are the same at each location
+  
+  ### SELECT DATE MODULE ####
   # Date Range and Year Using Date_Select Module
-  Date_Year <- callModule(DATE_SELECT, "date", Df = Df1)
+  Date_Year <- callModule(DATE_SELECT, "date", Df = Df0)
 
+  ### SELECT MONTH MODULE ####
   # Month Selection
   Month <- callModule(CHECKBOX_SELECT_ALL, "month",
                       label = "Months:",
@@ -251,24 +376,33 @@ FILTER_FLOW <- function(input, output, session, df, df_site, df_wq, df_flags = N
                       colwidth = 3,
                       inline = TRUE)
 
+  ### Df1 - Filter by Parmeter and Dates#### 
   # Reactive Dataframe - filter for param, value range, date, and remove rows with NA for Result
-  Df2 <- reactive({
+  Df1 <- reactive({
     # Wait for all neccesary Inputs to Proceed
-    req(input$param, input$valrange, Month(),
+    req(input$param, Month(),
         (isTruthy(Date_Year$Lower()) & isTruthy(Date_Year$Upper())) | isTruthy(Date_Year$Years())) # See General Note _
 
-    Df1() %>%
-      # filter by parameter, parameter value range, and by date range
-      filter(Parameter %in% input$param,
-             # Filter by Result Range
-             Result >= input$valrange[1], Result <= input$valrange[2],
+    df_temp <- Df0() %>% # This is daily data - so there are daily min, mean and max values as parameters
+          # filter by parameter, parameter value range, and by date range
+          filter(Parameter %in% daily_params(),
              # Filter by either Date Range or By Years (Include both)
              (Date >= Date_Year$Lower() & Date <= Date_Year$Upper()) | year(Date) %in% Date_Year$Years(),
              # Filter by Month
              as.character(month(Date, label = TRUE, abbr = FALSE)) %in% Month())
+    df_temp
 
   })
-
+### Df2 - Filter by Value Range ####
+  Df2 <- reactive({
+   req(Df1())
+    df_temp <- Df1() %>%   
+    # Filter by Result Range
+    filter(Result >= input$valrange[1], Result <= input$valrange[2])
+    # print(paste0("Debug6: ", nrow(df_temp)))
+  df_temp
+  })
+  
   ##################################################
   # Advanced Filter
 
@@ -286,52 +420,50 @@ FILTER_FLOW <- function(input, output, session, df, df_site, df_wq, df_flags = N
       filter(FlagCode %in% as.numeric(substr(Flag(),1, 3))) %>%
       .$SampleID
   })
+  
+  flagged_dates <- reactive({
+    unique(as_date(df_inst$DateTimeET[df_inst$ID %in% flagged_ids()]))
+  })
 
+  
   ### Storm Sample Selection
 
   # Filter df_flag_index so that only flag 114 (Storm Sample Flag) are included
   storm_ids <- reactive({
     df_flag_index %>%
-      filter(FlagCode == 114) %>%
-      .$SampleID
+    filter(FlagCode == 114) %>%
+    .$SampleID
   })
-
+  
+  storm_dates <- reactive({
+    unique(as_date(df_inst$DateTimeET[df_inst$ID %in% storm_ids()]))
+  })
   ### Reactive List of (non-reactive) Dataframes - filter for selected site, param, value range, date, and remove rows with NA for Result
-
+  ### Df3 -  Filter by flag, storm samples ####
   Df3 <- reactive({
 
     # Assign a temporary dataframe and filter NAs
     df_temp <- Df2() %>% filter(!is.na(Result))
-
     # filter out Selected Flags
     if(isTruthy(Flag()) & isTruthy(df_flag_index)){
-      df_temp <- df_temp %>% filter(!(ID %in% flagged_ids()))
+      df_temp <- df_temp %>% filter(!(Date %in% flagged_dates()))
     }
 
     # filter out Storm Samples if unchecked
     if(input$storm != TRUE & isTruthy(df_flag_index)){ # Box is unchecked apply filter to remove storm samples
-      df_temp <- df_temp %>% filter(!(ID %in% storm_ids()))
+      df_temp <- df_temp %>% filter(!(Date %in% storm_dates()))
     }
 
     # filter out Non Storm Samples if unchecked
     if(input$nonstorm != TRUE & isTruthy(df_flag_index)){ # Box is unchecked apply filter to remove non-storm samples
-      df_temp <- df_temp %>% filter(ID %in% storm_ids())
-    }
-
-    # filter out Depth for Profile Data
-    if(isTruthy(input$depth)){
-      df_temp <- df_temp %>%
-        filter(Depth_m >= input$depth[1],
-               Depth_m <= input$depth[2])
+      df_temp <- df_temp %>% filter(Date %in% storm_dates())
     }
 
     df_temp
 
   })
 
-
-  ########################################################
-  # Create Final Dataframes for use Table, Export, Plots, and Statistics
+  ### Create Final Dataframes for use Table, Export, Plots, and Statistics ####
 
   # If Full dataframe is used or if selection/filters are used
   # Reactive Dataframe - Long Format (Regular format)
@@ -342,20 +474,18 @@ FILTER_FLOW <- function(input, output, session, df, df_site, df_wq, df_flags = N
       Df3()
     }
   })
-
+  ### Df4_Wide -  Wide format final (daily data) ####
   # Reactive Dataframe - Wide Format (for Correlation ScatterPlot and Correlation Matrix)
   Df4_Wide <- reactive({
     # require Dataframe to be more than zero observations - prevent from crashing
-    req(Df4() %>% summarise(n()) %>% unlist() != 0)
+    req(nrow(Df3() > 0))
     Df4() %>%
-      # Need to get rid of Units column to properly Spread the data due to discrepencies in Units
-      select(-Units) %>%
       # Should verify no duplicate records and then remove this dinstinct code line
       distinct(LocationLabel, Date, Parameter, .keep_all = TRUE) %>%
       # Spread parameters to each have their own row (wide format)
       spread("Parameter", "Result")
   })
-
+  ### Df4_Stat - daily data stats ####
   # Reactive Dataframe - Adding Columns for Year, Season, and Month for grouping purposesin some modules
   Df4_Stat <- reactive({
     Df4() %>%
@@ -364,24 +494,135 @@ FILTER_FLOW <- function(input, output, session, df, df_site, df_wq, df_flags = N
              Month = month.abb[lubridate::month(Date)])
   })
 
-  #####################################################
-  # CSV output and Table
 
-  # render Datatable
+  ### Df5 - Instantaneous data ####
+  ### 
+  Df5 <- reactive({
+    req(input$param, Month(), input$site,
+        (isTruthy(Date_Year$Lower()) & isTruthy(Date_Year$Upper())) | isTruthy(Date_Year$Years())) # See General Note _
+    
+    df_temp <- df_inst %>% ### This is the HOBO data
+      gather(key = "Parameter", value = "Result", 4:6) %>% 
+      dplyr::rename("DateTime" = DateTimeET)
+    
+    df_temp$Parameter <- df_temp$Parameter %>% 
+      recode(Logger_temp_c = "Water Temperature", 
+             Discharge_cfs = "Discharge",
+             Stage_ft = "Staff Gauge Height")
+    
+    df_temp <- df_temp %>% 
+      mutate(Location = df_site$LocationLabel[match(Location, df_site$Site)]) %>% 
+      filter(Location %in% input$site, Parameter %in% inst_params(),
+        # Filter by either Date Range or By Years (Include both)
+        (DateTime >= Date_Year$Lower() & DateTime <= Date_Year$Upper()) | year(DateTime) %in% Date_Year$Years(),
+        # Filter by Month
+        as.character(month(DateTime, label = TRUE, abbr = FALSE)) %in% Month()
+      ) 
+    # print(paste0("Debug3: ", nrow(df_temp)))
+    ### After applying all filters check to see if any data remains. If not then make it NULL
+    if(nrow(df_temp) > 0){
+      df_temp <- df_temp
+    } else {
+      df_temp <- NULL
+    }
+    ### There are 4 possible options for df_temp
+    ### 1. NULL HOBO, NOT NULL USGS
+    ### 2. NOT NULL HOBO, NOT NULL USGS
+    ### 3. BOTH NULL
+    ### 4. BOTH NOT NULL
+
+    # Bind USGS I.V. if any instantaneous USGS was fetched, then add the units column
+    if(is.null(df_temp)){ # No HOBO data, evaluate USGS next
+      if(is.null(usgs_dfrx())){ # No USGS data... df_temp is NULL
+        df_temp <- NULL
+        } else {
+        df_temp <- usgs_dfrx() %>% # There is USGS data, add units to the df
+          mutate(Units = df_wach_param$ParameterUnits[match(Parameter,df_wach_param$ParameterName)])
+          print(unique(usgs_dfrx()$Parameter))
+      }
+    } else { # There is HOBO Dta
+      if(is.null(usgs_dfrx())){ # No USGS data, so df_temp is unchanged
+        df_temp <- df_temp %>%
+          mutate(Units = df_wach_param$ParameterUnits[match(Parameter,df_wach_param$ParameterName)])
+      } else { # There is also USGS data, need to bind rows then add units column
+        df_temp <- bind_rows(usgs_dfrx(), df_temp) %>%
+          mutate(Units = df_wach_param$ParameterUnits[match(Parameter,df_wach_param$ParameterName)])
+      }
+    }
+      if(is.null(df_temp)){
+        print("There are no instantaneous values!")
+        df_temp <- NULL
+      } else {
+        # filter out Selected Flags
+        if(isTruthy(Flag()) & isTruthy(df_flag_index)){
+          df_temp <- df_temp %>% filter(!(ID %in% flagged_ids()))
+        }
+
+        # filter out Storm Samples if unchecked
+        if(input$storm != TRUE & isTruthy(df_flag_index)){ # Box is unchecked apply filter to remove storm samples
+          df_temp <- df_temp %>% filter(!(ID %in% storm_ids()))
+        }
+
+        # filter out Non Storm Samples if unchecked
+        if(input$nonstorm != TRUE & isTruthy(df_flag_index)){ # Box is unchecked apply filter to remove non-storm samples
+          df_temp <- df_temp %>% filter(ID %in% storm_ids())
+        }
+      }
+    print(head(df_temp))
+    df_temp
+  })
+  
+### Df6 - final Instantaneous Data ####
+Df6 <- reactive({
+  
+  if(input$full_data){
+    df_temp <- df_inst %>% 
+      gather(key = "Parameter", value = "Result", 4:6) %>% 
+      dplyr::rename("DateTime" = DateTimeET)
+      df_temp$Parameter <- df_temp$Parameter %>% 
+        recode(Logger_temp_c = "Water Temperature", 
+               Discharge_cfs = "Discharge",
+               Stage_ft = "Staff Gauge Height")
+      df_temp <- df_temp %>% 
+        mutate(Location = df_site$LocationLabel[match(Location, df_site$Site)],
+             Units = df_wach_param$ParameterUnits[match(Parameter, df_wach_param$ParameterName)])
+    df_temp
+  } else{
+    Df5()
+  }
+})
+  
+  ### CSV output and Table ####
+
+  ### render Datatable
   output$table <- renderDataTable(Df4(), selection = 'none')
+  
+  output$table2 <- renderDataTable({
+    req(try(Df6()))
+    datatable(Df6()) %>% 
+      formatDate(columns = "DateTime", method = 'toLocaleString')
+})
 
   # Downloadable csv of selected dataset
   output$download_data <- downloadHandler(
     filename = function() {
-      paste("DCRExportedWQData", ".csv", sep = "")
+      paste("DCRExportedFlowData", ".csv", sep = "")
     },
     content = function(file) {
       write_csv(Df4(), file)
     }
   )
+  # Downloadable csv of selected dataset
+  output$download_data2 <- downloadHandler(
+    filename = function() {
+      paste("DCRExportedFlowData", ".csv", sep = "")
+    },
+    content = function(file) {
+      write_csv(Df6(), file)
+    }
+  )
 
-  ######################################################
-  # Texts
+  ### Text Outputs ####
 
   # Text - Number of Samples - Words
   output$text_num_text <- renderText({
@@ -392,8 +633,14 @@ FILTER_FLOW <- function(input, output, session, df, df_site, df_wq, df_flags = N
   # Text - Number of Samples - Number
   output$text_num <- renderText({
     req(Df4()) # See General Note 1
-    Df4() %>% summarise(n()) %>% paste()
+    paste0("Daily records: ", nrow(Df4()))
   })
+   
+    # Text - Number of Samples - Number
+    output$text_num2 <- renderText({
+      # req(!is.null(Df6())) # See General Note 1
+      paste0("Instantaneous Records: ", nrow(Df6()))
+    })
 
   # Text - Select Month
   output$text_full_data <- renderText({
@@ -431,11 +678,10 @@ FILTER_FLOW <- function(input, output, session, df, df_site, df_wq, df_flags = N
     "- Please Select Storm Sample Types"
   })
 
-  #####################################################
-  # Other
+  ### Other ####
 
-  ### Site Map
-  # Selected Sites to Highlight Red
+  ### Site Map ####
+  ### Selected Sites to Highlight Red
   Site_List <- reactive({
     if(input$full_data){
       df_site$LocationLabel
@@ -458,7 +704,8 @@ FILTER_FLOW <- function(input, output, session, df, df_site, df_wq, df_flags = N
 
   return(list(Long = Df4,
               Wide = Df4_Wide,
-              Stat = Df4_Stat))
+              Stat = Df4_Stat,
+              Inst = Df6))
 
 } # end Server Function
 
