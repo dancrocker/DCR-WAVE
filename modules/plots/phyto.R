@@ -47,7 +47,7 @@ PHYTO_UI <- function(id,df) {
                column(1), # Spacer Column
                column(5, # Depth Range sliders
                       sliderInput(ns("Depth1"), "Epilimnion Depth Range (meters):",
-                                  min = 0, max = 4, value = c(1,4), step = 0.5),
+                                  min = 0, max = 4, value = c(0,4), step = 0.5),
                       sliderInput(ns("Depth2"), "Epi-Metalimnion Depth Range (meters):",
                                   min = 6, max = 14, value = c(6,14), step = 0.5)
                ) # End Column

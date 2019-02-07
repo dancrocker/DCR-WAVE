@@ -102,7 +102,7 @@ p
 phytoplot <- function(df,locs,vyear,epi_min,epi_max,em_min,em_max) {
 # Specify the data specs
 secchi <- df_secchi_wach # Eventually this needs to be changed to a df argument with ns()
-
+df <- df %>% select(-PA)
 #Function Arguments
 # df <- df_phyto_wach %>%
 #   mutate(Year = year(df$Date))
@@ -169,9 +169,12 @@ p  <- ggplot() +
   geom_point(data = GTA_epi, aes(x = date, y = value, color = epi_leg), size = 3, shape = 15) +
   geom_line(data = GTA_epi, aes(x = date, y = value, color = epi_leg), size = 1.5) +
   geom_point(data = GTA_em, aes(x = date, y = value, color = em_leg), size = 4, shape = 18) +
-  geom_line(data = GTA_em, aes(x = date, y = value, color = em_leg), size = 1.5) +
-  geom_point(data = secchi_yr, aes(x = date, y = value * mult, color = "Secchi (ft)"), size = 3, shape = 17) +
-  geom_line(data = secchi_yr, aes(x = date, y = value * mult, color = "Secchi (ft)"), size = 1.5) +
+  geom_line(data = GTA_em, aes(x = date, y = value, color = em_leg), size = 1.5) 
+  if(nrow(secchi_yr) > 0){
+  p <- p + geom_point(data = secchi_yr, aes(x = date, y = value * mult, color = "Secchi (ft)"), size = 3, shape = 17) +
+            geom_line(data = secchi_yr, aes(x = date, y = value * mult, color = "Secchi (ft)"), size = 1.5) 
+  }
+  p <- p +
   scale_y_continuous(breaks = pretty_breaks(),limits = c(0,y1lim),
                      sec.axis = sec_axis(~./mult, breaks = pretty_breaks(), name = "Secchi Transparency (ft)")) +
   scale_x_date(date_labels = "%b", date_breaks(width = "1 month"), expand = c(0,0),limits = c(xmin,xmax), name = "Date") +
@@ -218,8 +221,8 @@ historicplot <- function(df, taxa, locs, vyear, yg1min, yg1max, yg2min, yg2max, 
 ###########################################
 # Plot Options
   df <- df %>%
-    filter(Result != 8888, Result != 9999) %>% 
-    select(-PA)
+    filter(Result != 8888, Result != 9999)# %>% 
+    # select(-PA)
   df$Taxa_f <-  df_taxa_wach$Frmr_name[match(df$Taxa, df_taxa_wach$Name)]
   plot_taxa <- c(taxa, df$Taxa_f[df$Taxa == taxa]) %>% unique()
   
