@@ -353,7 +353,10 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_f
   # CSV output and Table
 
   # render Datatable
-  output$table <- renderDataTable(Df4(), selection = 'none')
+  output$table <- renderDataTable({
+    datatable(Df4()) %>% 
+    formatDate(columns = "SampleDateTime", method = 'toLocaleString')
+  })
 
   # Downloadable csv of selected dataset
   output$download_data <- downloadHandler(
@@ -361,7 +364,9 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_f
       paste("DCRExportedWQData", ".csv", sep = "")
     },
     content = function(file) {
-      write_csv(Df4(), file)
+        df_csv <- Df4()
+        df_csv$SampleDateTime <- format(df_csv$SampleDateTime, usetz=TRUE)
+      write_csv(df_csv, file)
     }
   )
 
