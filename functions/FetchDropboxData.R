@@ -1,9 +1,9 @@
 # This function will fetch WAVE data that is stored on Dropbox and save it to a directory to be accessed by the WAVE App. 
 
-fetchDropbox <- function(dir){
+fetchDropbox <- function(url,dir){
   require(httr)
   # Set the data url from dropbox account
-  dropbox_url <-  "https://www.dropbox.com/sh/d1n1uzd58sgubcu/AADtTFohN5oFNbKjbLPaA5mya?raw=1"
+  dropbox_url <-  url
   # Set the data directory:
   zipdir <- dir
   #Fetch the WAVE data on dropbox
