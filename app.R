@@ -29,11 +29,12 @@ packages <- c("shiny","shinyjs", "shinyFiles","rmarkdown", "knitr", "tidyverse",
   # Removed chron - was conflicting with lubridate
  ipak(packages) 
 
-if("rcmodel" %in% rownames(installed.packages()) == FALSE) {
-  print("rcmodel package not installed, installing now")
-  install_github("markwh/rcmodel")
-}
-library(rcmodel)
+### Removed rcmodel (that module will not work now - This install fails if tried within R Script.exe) 
+# if("rcmodel" %in% rownames(installed.packages()) == FALSE) {
+#   print("rcmodel package not installed, installing now")
+#   install_github("markwh/rcmodel")
+# }
+# library(rcmodel)
 ### Set any system environmental variables ####
 Sys.setenv(RSTUDIO_PANDOC= paste0(config[21],"/bin/pandoc"))
 
@@ -58,15 +59,19 @@ if(userlocation == "Quabbin"){
 } else {
   tab_selected = "Wachusett"
 }
+### Specify data source
+data_source <- config[23]
 
-### Directory with saved .rds files
-if(userlocation %in% c("UMASS","MWRA")){
-  source("functions/FetchDropboxData.R")
-  fetchDropbox(url = config[22], dir = config[1])
+if(data_source == "local"){
   datadir <- config[1]
-} else {
-  datadir <- config[1]
+} else { ### Fetch data from Dropbox 
+    source("functions/FetchDropboxData.R")
+    datadir <- paste0(getwd(), "/DB_data")
+    dir.create(file.path(dir), showWarnings = FALSE)
+    fetchDropbox(url = config[22], dir = datadir)
 }
+
+
 ### Load rds files ####
 
 ### Make a list of all the .rds files using full path
