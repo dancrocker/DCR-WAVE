@@ -67,7 +67,7 @@ if(data_source == "local"){
 } else { ### Fetch data from Dropbox 
     source("functions/FetchDropboxData.R")
     datadir <- paste0(getwd(), "/DB_data")
-    dir.create(file.path(dir), showWarnings = FALSE)
+    dir.create(file.path(datadir), showWarnings = FALSE)
     fetchDropbox(url = config[22], dir = datadir)
 }
 
