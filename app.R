@@ -14,12 +14,12 @@
 
 ### Load Libraries and Script (Sources, Modules, and Functions) ####
 print(paste0("WAVE App lauched at ", Sys.time()))
- ipak <- function(pkg){
-   new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
-   if (length(new.pkg))
-     install.packages(new.pkg, dependencies = TRUE, repos="http://cran.rstudio.com/", quiet = T, verbose = F)
-   sapply(pkg, require, character.only = TRUE)
- }
+ipak <- function(pkg){
+  new.pkg <- pkg[!(pkg %in% installed.packages(lib.loc = config[15])[, "Package"])]
+  if (length(new.pkg))
+    install.packages(new.pkg, lib = config[15], dependencies = TRUE, repos="http://cran.rstudio.com/")
+  sapply(pkg, require, character.only = TRUE)
+}
 ### Package List ####
 ### NOTE - Shiny must be installed and loaded in the LaunchAppGitHub.R script - any other packages requred should be listed below
 
@@ -70,7 +70,6 @@ if(data_source == "local"){
     dir.create(file.path(datadir), showWarnings = FALSE)
     fetchDropbox(url = config[22], dir = datadir)
 }
-
 
 ### Load rds files ####
 
