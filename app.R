@@ -27,7 +27,7 @@ packages <- c("shiny","shinyjs", "shinyFiles","rmarkdown", "knitr", "tidyverse",
               "DT", "akima", "scales", "stringr", "cowplot", "shinythemes","rgdal", "reshape2", "dataRetrieval", "pryr", "broom",
               "ggthemes", "visreg", "lattice", "hydroTSM", "httr") # Took out odbc and dbi since app no longer connects to databases directly
   # Removed chron - was conflicting with lubridate
- ipak(packages) 
+ suppressPackageStartupMessages(ipak(packages)) 
 
 ### Removed rcmodel (that module will not work now - This install fails if tried within R Script.exe) 
 # if("rcmodel" %in% rownames(installed.packages()) == FALSE) {

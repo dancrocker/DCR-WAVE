@@ -172,11 +172,13 @@ p  <- ggplot() +
   geom_line(data = GTA_em, aes(x = date, y = value, color = em_leg), size = 1.5) 
   if(nrow(secchi_yr) > 0){
   p <- p + geom_point(data = secchi_yr, aes(x = date, y = value * mult, color = "Secchi (ft)"), size = 3, shape = 17) +
-            geom_line(data = secchi_yr, aes(x = date, y = value * mult, color = "Secchi (ft)"), size = 1.5) 
+            geom_line(data = secchi_yr, aes(x = date, y = value * mult, color = "Secchi (ft)"), size = 1.5) +
+    scale_y_continuous(breaks = pretty_breaks(),limits = c(0,y1lim),
+                       sec.axis = sec_axis(~./mult, breaks = pretty_breaks(), name = "Secchi Transparency (ft)")) 
+  } else {
+    p <- p + scale_y_continuous(breaks = pretty_breaks(),limits = c(0,y1lim)) 
   }
   p <- p +
-  scale_y_continuous(breaks = pretty_breaks(),limits = c(0,y1lim),
-                     sec.axis = sec_axis(~./mult, breaks = pretty_breaks(), name = "Secchi Transparency (ft)")) +
   scale_x_date(date_labels = "%b", date_breaks(width = "1 month"), expand = c(0,0),limits = c(xmin,xmax), name = "Date") +
   labs(y = ylabel,x = xlabel, color = "") +
   ggtitle(title) +
@@ -221,7 +223,7 @@ historicplot <- function(df, taxa, locs, vyear, yg1min, yg1max, yg2min, yg2max, 
 ###########################################
 # Plot Options
   df <- df %>%
-    filter(Result != 8888, Result != 9999)# %>% 
+    filter(Result != 8888, Result != 9999,!is.na(Station), !is.na(Depth_m))# %>% 
     # select(-PA)
   df$Taxa_f <-  df_taxa_wach$Frmr_name[match(df$Taxa, df_taxa_wach$Name)]
   plot_taxa <- c(taxa, df$Taxa_f[df$Taxa == taxa]) %>% unique()
@@ -260,9 +262,12 @@ historicplot <- function(df, taxa, locs, vyear, yg1min, yg1max, yg2min, yg2max, 
   dfall <- df %>%
     group_by(month(Date), Year, plotdate) %>%
     drop_na() %>%
-    summarize(min_val = min(Result), ave_val = mean(Result),  max_val = max(Result))
-  names(dfall) <- c("month", "year", "plotdate", "min_val", "ave_val", "max_val")
-  # 1 year set by variable vyear
+    summarize(min_val = min(Result), ave_val = mean(Result),  max_val = max(Result)) %>% 
+    ungroup()
+
+    names(dfall) <- c("month", "year", "plotdate", "min_val", "ave_val", "max_val") 
+
+      # 1 year set by variable vyear
   df_yr <-df[df$Year %in% vyear, c(3,6)] %>%
     group_by(Date) %>%
     summarize(min_val = min(Result), ave_val = mean(Result),  max_val = max(Result)) %>%
@@ -273,24 +278,23 @@ historicplot <- function(df, taxa, locs, vyear, yg1min, yg1max, yg2min, yg2max, 
   df_yg1 <- dfall[dfall$year >= yg1min & dfall$year <= yg1max, ] %>%
     group_by(month, plotdate) %>%
     summarize(min_val = min(min_val), ave_val = mean(ave_val),  max_val = max(max_val)) %>%
-    drop_na()
+    drop_na() %>% ungroup()
   # Year group 2
   df_yg2 <- dfall[dfall$year >= yg2min & dfall$year <= yg2max, ] %>%
     group_by(month, plotdate) %>%
     summarize(min_val = min(min_val), ave_val = mean(ave_val),  max_val = max(max_val)) %>%
-    drop_na()
+    drop_na()%>% ungroup
   # Year group 3
   df_yg3 <- dfall[dfall$year >= yg3min & dfall$year <= yg3max, ] %>%
     group_by(month, plotdate) %>%
     summarize(min_val = min(min_val), ave_val = mean(ave_val),  max_val = max(max_val)) %>%
-    drop_na()
+    drop_na() %>% ungroup
 
 ### MAKE THE PLOTS ###
-
-var <- df_yr[stat]
-var1 <- df_yg1[stat1]
-var2 <- df_yg2[stat2]
-var3 <- df_yg3[stat3]
+var <- df_yr[stat] %>% unlist()
+var1 <- df_yg1[stat1] %>% unlist()
+var2 <- df_yg2[stat2] %>% unlist()
+var3 <- df_yg3[stat3] %>% unlist()
 
   p  <- ggplot() +
     geom_line(data = df_yg3, aes(x = plotdate, y = var3, color = yg3_leg), size = 1.5, linetype = 1) +
@@ -298,7 +302,7 @@ var3 <- df_yg3[stat3]
     geom_line(data = df_yg2, aes(x = plotdate, y = var2, color = yg2_leg), size = 2, linetype = 2) +
     geom_line(data = df_yr, aes(x = date, y = var, color = yg0_leg), size = 2, linetype = 1) +
     scale_y_continuous(breaks = pretty_breaks()) +
-    #scale_x_discrete(labels = c("J","F","M","A","M","J","J",",A","S","O","N","D")) +
+    # scale_x_discrete(labels = c("J","F","M","A","M","J","J",",A","S","O","N","D")) +
     scale_x_date(date_labels = "%b", date_breaks(width = "1 month"), expand = c(0,0),limits = c(xmin,xmax), name = "Date") +
     labs(y = ylabel,x = xlabel, title = title, subtitle = subtitle, color = "") +
     scale_colour_manual(values = colors) +
