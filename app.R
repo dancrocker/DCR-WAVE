@@ -59,13 +59,18 @@ if(userlocation == "Quabbin"){
 } else {
   tab_selected = "Wachusett"
 }
-### Specify data source
-data_source <- userdata$rds_data[userdata$Username %in% user]
 
+### Specify data source
+if (try(file.access(config[1], mode = 4)) == 0) {
+  data_source <- "Local"
+  } else {
+  data_source <- "Dropbox"
+}
+  
 if(data_source == "Local"){
   print("Fetching rds files from local source...")
   datadir <- config[1]
-} else { ### Fetch data from Dropbox 
+  } else { ### Fetch data from Dropbox 
     print("Fetching rds files from Dropbox...")
     source("functions/FetchDropboxData.R")
     datadir <- paste0(getwd(), "/DB_data")
