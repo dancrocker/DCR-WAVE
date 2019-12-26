@@ -60,11 +60,13 @@ if(userlocation == "Quabbin"){
   tab_selected = "Wachusett"
 }
 ### Specify data source
-data_source <- config[23]
+data_source <- userdata$rds_data[userdata$Username %in% user]
 
-if(data_source == "local"){
+if(data_source == "Local"){
+  print("Fetching rds files from local source...")
   datadir <- config[1]
 } else { ### Fetch data from Dropbox 
+    print("Fetching rds files from Dropbox...")
     source("functions/FetchDropboxData.R")
     datadir <- paste0(getwd(), "/DB_data")
     dir.create(file.path(datadir), showWarnings = FALSE)
