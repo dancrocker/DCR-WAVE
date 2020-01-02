@@ -121,12 +121,12 @@ jday_sum <- df_precip %>%
   mutate(jDay_YTJD = cumsum(jDay_ave_prcp[jDay_ave_prcp <= jDay]))
 
 jday_sum_thisyear <- df_precip %>%
-  filter(year(DATE) == year(Sys.Date())) %>%
+  filter(year(DATE) == this_year) %>%
   mutate(jDay_YTJD = cumsum(DailyPrcpAve[jDay <= jDay])) %>%
   left_join(jday_sum, by = "jDay")
 
 if(is.null(vyear)){
-  vyear <- year(Sys.Date())
+  vyear <- this_year
 }
 jday_sum_vyear <- df_precip %>%
   filter(year(DATE) == vyear) %>%
