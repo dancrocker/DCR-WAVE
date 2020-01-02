@@ -157,7 +157,7 @@ t_gauge_summary  <- tibble("Gauge Name" = c("WORCESTER", "FITCHBURG","STILLWATER
 t_prcp_summary <- tibble("Stat" = c(paste0("Most recent precipitation value (", end_precip, ")"),
                                     paste0("7-Day Precipitation (", end_precip - 7, " - ", end_precip, ")"),
                                     paste0("30-Day Precipitation (", end_precip - 30, " - ", end_precip, ")"),
-                                    paste0("Precipitation so far this month (", floor_date(today(),"month"), " - ", end_precip,")"),
+                                    paste0("Precipitation so far this month (", floor_date(end_precip,"month"), " - ", end_precip,")"),
                                     paste0("Year to calendar date (",this_year, "-01-01 - ", end_precip, ")"),
                                     paste0("Year to day-of-year (",end_precip - dyears(1), " - ", end_precip, ")")),
                          "Inches" = c(last1prcp, last7prcp, last30prcp, PrcpThisMonthSoFar, YTCD,YTJD),
