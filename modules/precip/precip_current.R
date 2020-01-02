@@ -38,8 +38,7 @@ PRECIP_CURRENT_UI <- function(id) {
     wellPanel(
       fluidRow(
         column(6, 
-          sliderInput(ns("vyear1"), "Switch to another year:", min = 1985, max = year(Sys.Date()), 
-                      value = year(Sys.Date()), step = 1, sep = "", ticks = F),     
+          uiOutput(ns("year1_ui")),
           uiOutput(ns("plot1_ui")),     
           # plotOutput(ns("plot_bar_current")),
           checkboxInput(ns("plot1_type"), "Check here to make interactive plot"),
@@ -50,8 +49,7 @@ PRECIP_CURRENT_UI <- function(id) {
           uiOutput(ns("table1"))
         ), # End Column
         column(6,
-          sliderInput(ns("vyear2"), "Switch to another year:", min = 1985, max = year(Sys.Date()), 
-                      value = year(Sys.Date()), step = 1, sep = "", ticks = F),
+          uiOutput(ns("year2_ui")),
           uiOutput(ns("plot2_ui")),  
           # plotOutput(ns("plot_line_current")),
           checkboxInput(ns("plot2_type"), "Check here to make interactive plot"),
@@ -107,6 +105,24 @@ df_gauges$`End Date` <- format(df_gauges$`End Date`,'%Y-%m-%d')
 
 output$t_gauges <-  renderTable(df_gauges, striped = T) 
 output$t_precip_sum <-  renderTable(dfs[[7]], striped = T)
+
+
+
+# Year UIs
+output$year1_ui <- renderUI({
+  sliderInput(ns("vyear1"), "Switch to another year:", min = 1985, max = max(year(df$DATE)), 
+              value = max(year(df$DATE)), step = 1, sep = "", ticks = F)
+
+})  
+
+output$year2_ui <- renderUI({
+  sliderInput(ns("vyear2"), "Switch to another year:", min = 1985, max = max(year(df$DATE)), 
+              value = max(year(df$DATE)), step = 1, sep = "", ticks = F)
+  
+})  
+
+
+
 
 # Plot 1 - monthly bar chart [[1]] and table [[2]]
 p1out  <- reactive({

@@ -18,7 +18,7 @@ PREPRCMODELDATA <- function(df_wq, df_flow2, df_precip, df_locs, df_flag_index,
                           minyear_q = NULL, maxyear_q = NULL, 
                           rm_storms = NULL, rm_bdl = NULL){
 ### PREP RAW DATA:
-all_pars <- c("Ammonia", "Nitrite", "Nitrate", "Total Organic Carbon", "Total Phosphorus",
+all_pars <- c("Ammonia-N", "Nitrite-N", "Nitrate-N", "Total Organic Carbon", "Total Phosphorus",
               "Total Suspended Solids", "Discharge", "Total Kjeldahl Nitrogen")
 
 ### Set vector of Storm sample IDs
@@ -68,7 +68,7 @@ df_wq <- df_wq %>%
   select(-c(1,8,9)) %>%
   filter(Parameter!="Discharge") %>% 
   spread(Parameter, Result, fill = NA) %>% 
-  mutate("Total Nitrogen" = Nitrate + Nitrite  + `Total Kjeldahl Nitrogen` - Ammonia, "InorgN" = Nitrate + Nitrite + Ammonia) %>% 
+  mutate("Total Nitrogen" = Nitrate-N + Nitrite-N  + `Total Kjeldahl Nitrogen` - Ammonia-N, "InorgN" = Nitrate-N + Nitrite-N + Ammonia-N) %>% 
   gather(key = "Parameter", value = "Result", 5:13) %>% 
   filter(!is.na(Result), Parameter %in% model_pars)
 

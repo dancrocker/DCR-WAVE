@@ -40,7 +40,7 @@
   # PlotPrecip <- TRUE
 
 #### START FUNCTION
-HYDRO_G <- function(Df, df2 = NULL, df_site, df_precip,loc, Y1Par, # required args
+HYDRO_G <- function(Df, df2 = NULL, type, df_site, df_precip,loc, Y1Par, # required args
                     Y2Par = NULL, USGS_days = NULL, USGS_IV = NULL, PlotPrecip = NULL){ # Optional args
   mindate <- min(Df$Date, na.rm = TRUE)
   maxdate <- max(Df$Date, na.rm = TRUE)
@@ -82,11 +82,11 @@ HYDRO_G <- function(Df, df2 = NULL, df_site, df_precip,loc, Y1Par, # required ar
 # Get filtered data frame and refine based on user input
   # Flow
 
-
   df <- Df %>%
     filter(Parameter %in% Y1Par & LocationLabel == loc) %>%
     filter(Date >= mindate, Date <= maxdate) %>%
     mutate(Date = force_tz(ymd_hms(paste(as.character(Date),"12:00:00", sep = " ")),tzone = "America/New_York"))
+  
   # Precip
   df_precip <- df_precip %>%
     select(DATE, DailyPrcpAve) %>%

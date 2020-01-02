@@ -15,3 +15,14 @@ fetchDropbox <- function(url,dir){
   file.remove(paste0(zipdir, "/WAVE_DATA.zip")) # tidy up by removing the zip file
 }
 
+
+# df_flags_url <- config[30]
+# datadir <- paste0(getwd(), "/rds_files")
+# 
+# GET(df_flags_url, 
+#     write_disk(paste0(datadir, "/df_flags.rds"), overwrite = T))
+# 
+# df_wach_params_url <- config[31]
+# 
+# GET(df_wach_params_url, 
+#     write_disk(paste0(datadir, "/df_wach_param.rds"), overwrite = T))
