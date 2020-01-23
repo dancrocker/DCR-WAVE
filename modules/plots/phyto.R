@@ -1,9 +1,10 @@
-##############################################################################################################################
+##############################################################################################################################.
 #     Title: Plot-Phyto.R
 #     Type: Secondary Module for DCR Shiny App
 #     Description: Time series plots for phytoplankton data
 #     Written by: Dan Crocker, Fall 2017
-##############################################################################################################################
+#     Edits: JTL updated document outline, minor changes to defaults, Jan 2020
+##############################################################################################################################.
 
 # Notes:
 #   1. req() will delay the rendering of a widget or other reactive object until a certain logical expression is TRUE or not NULL
@@ -19,16 +20,17 @@
 # Row 2 is a big plot
 # Row 3 has plot options
 
-##############################################################################################################################
-# User Interface
-##############################################################################################################################
+##############################################################################################################################.
+# User Interface ####
+##############################################################################################################################.
 
 PHYTO_UI <- function(id,df) {
 
   ns <- NS(id) # see General Note 1
   df <- df %>%
     mutate(Year = year(Date))
-
+  
+## Phytoplankton Overview Plot ####
   tagList(
     tabsetPanel(
       tabPanel("Phytoplankton Overview Plot",
@@ -38,7 +40,7 @@ PHYTO_UI <- function(id,df) {
                                            choices = df %>% .$Station %>% levels() %>% paste(),
                                            multiple = TRUE,
                                            width = '200',
-                                           selected = c("BN3417","CI3409")),
+                                           selected = c("202","206", "BN3417", "CI3409")),
                                selectInput(ns("year"), "Year:",
                                            choices = df %>%  .$Year %>%  unique() %>% sort(decreasing = TRUE),
                                            width = '200',
@@ -79,6 +81,8 @@ PHYTO_UI <- function(id,df) {
                         # ) # end column
                ) # End fr
       ), # End Tab Panel Sub
+
+## Taxa Plots ####
       tabPanel("Taxa Plots",
                # Function Args
                fluidRow(column(4, # Sites
@@ -86,9 +90,9 @@ PHYTO_UI <- function(id,df) {
                                            choices = df %>% .$Station %>% levels() %>% paste(),
                                            multiple = TRUE,
                                            width = '200',
-                                           selected = c("BN3417","CI3409")),
+                                           selected = c("202","206", "BN3417", "CI3409")),
                                selectInput(ns("taxayear"), "Year:", # Year
-                                           choices = df %>%  .$Year %>%  unique() %>% sort(decreasing = TRUE),
+                                           choices = df %>% .$Year %>%  unique() %>% sort(decreasing = TRUE),
                                            width = '200',
                                            selected = 1)
                ), # End Col
@@ -148,6 +152,8 @@ PHYTO_UI <- function(id,df) {
                ), # End fr
                fluidRow(column(9, plotOutput(ns("taxaplot14"), width = "100%", height = 400)))
       ), # End Tab Panel Taxa Plots
+
+## Historical Comparison Plots ####
       tabPanel("Historical Comparison Plots",
                fluidRow(column(3, # Sites
                                selectInput(ns("histtaxa"), "Taxa:",
@@ -158,7 +164,7 @@ PHYTO_UI <- function(id,df) {
                                            choices = df %>% .$Station %>% levels() %>% paste(),
                                            multiple = TRUE,
                                            width = '200',
-                                           selected = c("BN3417","CI3409")),
+                                           selected = c("202","206", "BN3417", "CI3409")),
                                selectInput(ns("histyear"), " Comparison Year:",
                                            choices = df %>%  .$Year %>%  unique() %>% sort(decreasing = TRUE),
                                            width = '200',
@@ -167,15 +173,15 @@ PHYTO_UI <- function(id,df) {
                                             choices= c("Minimum" = "min_val", "Average" = "ave_val", "Maximum" = "max_val"),
                                             selected = "ave_val"),
                                sliderInput(ns("depth"), "Depth Range (m):",
-                                           min = 0, max = 30, value = c(0,30), step = 1, sep = "")
+                                           min = 0, max = ceiling(max(df$Depth_m, na.rm = TRUE)), value = c(0,ceiling(max(df$Depth_m, na.rm = TRUE))), step = 1, sep = "")
                ), # End Col
                column(5,
                       sliderInput(ns("yg1"), "Year Grouping 1 (Min-Max):",
-                                  min = min(df$Year), max = max(df$Year), value = c(2012,2016), step = 1, sep = ""),
+                                  min = min(df$Year), max = max(df$Year), value = c(2012,max(df$Year)), step = 1, sep = ""),
                       sliderInput(ns("yg2"), "Year Grouping 2 (Min-Max):",
-                                  min = min(df$Year), max = max(df$Year), value = c(2007,2016), step = 1, sep = ""),
+                                  min = min(df$Year), max = max(df$Year), value = c(2007,max(df$Year)), step = 1, sep = ""),
                       sliderInput(ns("yg3"), "Year Grouping 3 (Min-Max):",
-                                  min = min(df$Year), max = max(df$Year), value = c(1988,2016), step = 1, sep = "")
+                                  min = min(df$Year), max = max(df$Year), value = c(1988,max(df$Year)), step = 1, sep = "")
                ), # End Col
                column(3,
                       radioButtons(ns("stat1"), "Stat for Year Group 1:",
@@ -207,13 +213,15 @@ PHYTO_UI <- function(id,df) {
                         ) # End Col
                ) # End fr
       ), # End Tab Panel Sub
+
+## Filter/Export Data ####
       tabPanel("Filter/Export Data",
                fluidRow(column(4, # Sites
                                selectInput(ns("filtersite"), "Station(s):",
                                            choices = df %>% .$Station %>% levels() %>% paste(),
                                            multiple = TRUE,
                                            width = '200',
-                                           selected = c("BN3417","CI3409"))
+                                           selected = c("202","206", "BN3417", "CI3409"))
                       ) # End Col
                ) # End fr
       ) # End Tab Panel
@@ -221,9 +229,9 @@ PHYTO_UI <- function(id,df) {
   ) # end taglist
 } # end UI
 
-##############################################################################################################################
-# Server Function
-##############################################################################################################################
+##############################################################################################################################.
+# Server Function ####
+##############################################################################################################################.
 
 PHYTO <- function(input, output, session, df) {
 
@@ -244,7 +252,10 @@ PHYTO <- function(input, output, session, df) {
   #       p
   #       }
   #     })
-  p <- p  <- reactive({
+  
+  ### Overview Plot ####
+  
+    p <- p  <- reactive({
     p <- phytoplot(df = df,
                    locs = input$site,
                    vyear = input$year,
@@ -266,13 +277,14 @@ PHYTO <- function(input, output, session, df) {
       contentType = 'image/png'
     }
   )
-  ### Taxa Plots
+  ### Taxa Plots ####
   # Total_Diatoms 128 dodgerblue
   p1 <- reactive({
     p1 <- taxaplot(df = df, locs = input$taxasite, vyear = input$taxayear, taxa = "Total Diatoms", color = "dodgerblue")
     p1
   })
   output$taxaplot1 <- renderPlot({p1()})
+  
   # Asterionella 430 lightskyblue
   p2 <- reactive({
     p2 <- taxaplot(df = df, locs = input$taxasite, vyear = input$taxayear, taxa = "Asterionella", color = "lightskyblue")
@@ -479,7 +491,7 @@ PHYTO <- function(input, output, session, df) {
       contentType = 'image/png'
     }
   )
-  ### Historical Plot
+  ### Historical Plot ####
 
   phist <- reactive({
     phist <- historicplot(df = df,
@@ -511,5 +523,3 @@ PHYTO <- function(input, output, session, df) {
     }
   )
 } # End Phyto Server function
-
-
