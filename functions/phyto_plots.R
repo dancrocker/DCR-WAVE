@@ -142,6 +142,13 @@ phytoplot <- function(df,locs,vyear,epi_min,epi_max,em_min,em_max) {
   # em_min <- 5
   # em_max <- 15
 
+  # Set name of reservoir for plot titles based on station number
+  if ("BN3417" %in% unique(df$Station)) {
+    res <- "Wachusett"
+  } else {
+    res <- "Quabbin"
+  }
+  
 # This plot will not work for Quabbin until Totals are added to Quabbin db
 # If Quabbin data is to be plotted, plot message saying plot unavailable
 if ("202" %in% unique(df$Station)) {
@@ -196,7 +203,7 @@ y2lim <- max(secchi_yr$value, na.rm = TRUE)
 mult <- y1lim / y2lim
 xmin <- as.Date(paste0(vyear,"-01-01"))
 xmax <- as.Date(paste0(vyear,"-12-31"))
-title <- paste0(vyear, " Phytoplankton Monitoring at ", tab_selected, " Reservoir\n Station(s) - ", str_c(locs, collapse = ", "))
+title <- paste0(vyear, " Phytoplankton Monitoring at ", res, " Reservoir\n Station(s) - ", str_c(locs, collapse = ", "))
 xlabel <- "Date"
 ylabel <- "Phytoplankton Density (ASUs/ml)"
 #Define legend labels and colors
