@@ -1,4 +1,12 @@
-# Plot Phyto Data
+##############################################################################################################################.
+#     Title: phyto_plots.R
+#     Type: Secondary Module for DCR Shiny App
+#     Description: Time series plots for phytoplankton data
+#     Written by: Dan Crocker, Fall 2017
+#     Edits: JTL added header/outline and updated code to plot Quabbin data/deal with error messages, Jan 2020
+##############################################################################################################################.
+
+#### Plot Phyto Data ####
 
 # Libraries were loaded in app.R
 # Data source was loaded in app.R
@@ -34,16 +42,27 @@
 # Grand_Total 24 black
 # Other (Select dropdown) 604 slategrey
 
+#### Taxa Plots ####
 
-
-taxaplot <- function(df,locs,vyear,taxa, color){
-# Function Arguments:
-# df <- df_phyto_wach
-# vyear <- 2018 # Selection unique(phyto)
-# taxa <- "Grand Total"
-# locs <- c("BN3417", "CI3409") # Multiple selections Set as default - adjust plot title
+taxaplot <- function(df, locs, vyear, taxa, color){
+## Function Arguments:
+# df <- df_phyto_quab
+# vyear <- 2019 # Selection unique(phyto)
+# taxa <- "test"
+# locs <- c("206", "202") # Multiple selections Set as default - adjust plot title
 # color <- "dodgerblue"
-############################################
+  ############################################.
+# Plot Conditions
+  # If taxa to be plotted is not in the current db, plot message, otherwise continue with plotting data
+    if (! (taxa %in% unique(df[year(df$Date) == vyear, ]$Taxa))){
+      p <- ggplot(df) +
+        theme_void() +
+        annotate("text", x = 4, y = 25, label = paste(
+          "No data is available for", taxa, "in", vyear, sep = " "),
+                 color = "blue", size = 5, fontface = "bold.italic")
+      return(p)
+    } else {
+  ############################################.
 # Plot Setup
 
    df_thresh <- df_taxa_wach %>%
@@ -57,6 +76,13 @@ taxaplot <- function(df,locs,vyear,taxa, color){
    df$Taxa_f <-  df_taxa_wach$Frmr_name[match(df$Taxa, df_taxa_wach$Name)]
    
   plot_taxa <- c(taxa, df$Taxa_f[df$Taxa == taxa]) %>% unique()
+  
+  # Set name of reservoir for plot titles based on station number
+  if ("BN3417" %in% unique(df$Station)) {
+    res <- "Wachusett"
+  } else {
+    res <- "Quabbin"
+  }
   
   df2 <- df[df$Taxa_f %in% plot_taxa & df$Year %in% vyear & df$Station %in% locs,]
   title <- paste0(gsub("_", " ", taxa), " at Station(s) ", str_c(locs, collapse = ", "), " in ", vyear)
@@ -93,27 +119,42 @@ p <- ggplot(df2, aes(x = Date, y = Result)) +
     #   draw_label("Early Monitoring Threshold", min(df2$Date),trigmon - (0.15 * max(df2$Result)), hjust = "left") +
     #   draw_label("Treatment Consideration Threshold", min(df2$Date),trigtreat - (0.15 * max(df2$Result)), hjust = "left")
   }
-p
+return(p)
+}
 }
 
 #taxaplot(df, locs, vyear, taxa, color)
-#######################################################
-# Plot 2
-phytoplot <- function(df,locs,vyear,epi_min,epi_max,em_min,em_max) {
-# Specify the data specs
-secchi <- df_secchi_wach # Eventually this needs to be changed to a df argument with ns()
-df <- df %>% select(-PA)
-#Function Arguments
-# df <- df_phyto_wach %>%
-#   mutate(Year = year(df$Date))
-# vyear <- 2018
-# locs <- c("BN3417", "CI3409")
-# epi_min <- 1
-# epi_max <- 4
-# em_min <- 5
-# em_max <- 15
-################################################################################
+#######################################################.
 
+#### Overview Plot ####
+
+phytoplot <- function(df,locs,vyear,epi_min,epi_max,em_min,em_max) {
+  
+  ## Function Arguments:
+  # df <- df_phyto_quab
+  # df <- df_phyto_quab %>%
+  #   mutate(Year = year(df$Date))
+  secchi <- df_secchi_wach # Eventually this needs to be changed to a df argument with ns()
+    # vyear <- 2018
+  # locs <- c("202", "206")
+  # epi_min <- 1
+  # epi_max <- 4
+  # em_min <- 5
+  # em_max <- 15
+
+# This plot will not work for Quabbin until Totals are added to Quabbin db
+# If Quabbin data is to be plotted, plot message saying plot unavailable
+if ("202" %in% unique(df$Station)) {
+  p <- ggplot(df) +
+    theme_void() +
+    annotate("text", x = 4, y = 25, label = paste(
+      "This plot will not be available for Quabbin data until totals are included in the database.", sep = " "),
+      color = "blue", size = 4.5, fontface = "bold.italic")
+  return(p)
+} else {
+
+  ######################################.
+  
 # make the data subsets
 
 # This is the Blue Line - usually 1-4 m
@@ -155,7 +196,7 @@ y2lim <- max(secchi_yr$value, na.rm = TRUE)
 mult <- y1lim / y2lim
 xmin <- as.Date(paste0(vyear,"-01-01"))
 xmax <- as.Date(paste0(vyear,"-12-31"))
-title <- paste0(vyear, " Phytoplankton Monitoring at Wachusett Reservoir\n Station(s) - ", str_c(locs, collapse = ", "))
+title <- paste0(vyear, " Phytoplankton Monitoring at ", tab_selected, " Reservoir\n Station(s) - ", str_c(locs, collapse = ", "))
 xlabel <- "Date"
 ylabel <- "Phytoplankton Density (ASUs/ml)"
 #Define legend labels and colors
@@ -163,8 +204,8 @@ epi_leg <- paste0("Epi. (",epi_min,"-",epi_max,"m)")
 em_leg <- paste0("Epi./Meta. (",em_min,"-",em_max,"m)")
 colors <- c("#0099FF", "black", "red1")
 
-###################### MAKE THE PLOT  ##############################
-
+######################################.
+### MAKE THE PLOTS ###
 p  <- ggplot() +
   geom_point(data = GTA_epi, aes(x = date, y = value, color = epi_leg), size = 3, shape = 15) +
   geom_line(data = GTA_epi, aes(x = date, y = value, color = epi_leg), size = 1.5) +
@@ -189,48 +230,70 @@ p  <- ggplot() +
         axis.title.y = element_text(angle = 90, face = "bold", color = "black", size = 12),
         legend.position="bottom",
         legend.title=element_blank())
-p
+  return(p)
+}
 }
 
 #phytoplot(data, locs,vyear,epi_min,epi_max,em_min,em_max)
-######################################################################################
+######################################################################################.
 
-#Plot 3 #Historical plot
+#### Historical Comparison Plot ####
+
+# To do:
 # Make year grouping lines curved
 # Image Export
 # Table Export
 
-
 historicplot <- function(df, taxa, locs, vyear, yg1min, yg1max, yg2min, yg2max, yg3min, yg3max, stat, stat1, stat2, stat3, depthmin, depthmax) {
-  #Function Arguments for data selection
-  # df <- df_phyto_wach
-  # taxa <- "Asterionella" # Entire list - Alphabetical (single choice)
-  # locs <- c("BN3417", "CI3409") # Radio buttons  - default both toggled on
-  # vyear <- 2017
-  # yg1min <- 2012
-  # yg1max <- 2016
+  # #Function Arguments for data selection
+  # df <- df_phyto_quab
+  # taxa <- "Urosolenia" # Entire list - Alphabetical (single choice)
+  # locs <- c("BN3417", "CI3409", "202", "206") # Radio buttons  - default both toggled on
+  # vyear <- 2019
+  # yg1min <- 2007
+  # yg1max <- 2020
   # yg2min <- 2007
-  # yg2max <- 2016
-  # yg3min <- 1988
-  # yg3max <- 2016
-  # depthmin <- 4
-  # depthmax <- 25
+  # yg2max <- 2020
+  # yg3min <- 2007
+  # yg3max <- 2020
+  # depthmin <- 1
+  # depthmax <- 21
   # # Function Arguments for Plot
   # stat <- "ave_val"
   # stat1 <- "ave_val"
   # stat2 <- "ave_val"
   # stat3<- "ave_val"
-###########################################
+###########################################.
 # Plot Options
   df <- df %>%
-    filter(Result != 8888, Result != 9999,!is.na(Station), !is.na(Depth_m))# %>% 
+    filter(Result != 8888, Result != 9999, !is.na(Station), !is.na(Depth_m))# %>% 
     # select(-PA)
   df$Taxa_f <-  df_taxa_wach$Frmr_name[match(df$Taxa, df_taxa_wach$Name)]
   plot_taxa <- c(taxa, df$Taxa_f[df$Taxa == taxa]) %>% unique()
+  df <- df %>% 
+    filter(Depth_m >= depthmin, Depth_m <= depthmax)
+
+  # Set name of reservoir for plot titles
+  if ("BN3417" %in% unique(df$Station)) {
+    res <- "Wachusett"
+    } else {
+    res <- "Quabbin"
+    }
+  
+  # If taxa to be plotted is not in the current db, plot message, otherwise continue with plotting data
+  if (! taxa %in% df$Taxa_f) {
+    p <- ggplot(df) +
+      theme_void() +
+      annotate("text", x = 4, y = 25, label = paste(
+        "This plot is not available for", paste(plot_taxa, collapse = "/"), "with the given parameters.", sep = " "),
+        color = "green", size = 4.5, fontface = "bold.italic")
+    return(p)
+  } else 
+    {
   
   taxalabel <- paste0(gsub("_", " ", taxa))
-  title <- paste0("Wachusett Reservoir ", taxalabel, " Density by Month")
-  subtitle <- paste0("Data included only from Stations: (", str_c(locs, collapse = ", "), "), All Depths")
+  title <- paste0(res, " Reservoir ", taxalabel, " Density by Month")
+  subtitle <- paste0("Data included only from Stations: (", str_c(locs, collapse = ", "), "); ", depthmin, " - ", depthmax, "m")
   xlabel <- "Month"
   ylabel <- paste0(gsub("_", " ", taxa)," Density (ASUs/ml)")
   xmin <- as.Date(paste0(as.numeric(vyear),"-01-01"), format = '%Y-%m-%d')
@@ -258,7 +321,6 @@ historicplot <- function(df, taxa, locs, vyear, yg1min, yg1max, yg2min, yg2max, 
 
 ###  Data subsets by month ###
 
-  # All years
   dfall <- df %>%
     group_by(month(Date), Year, plotdate) %>%
     drop_na() %>%
@@ -267,7 +329,7 @@ historicplot <- function(df, taxa, locs, vyear, yg1min, yg1max, yg2min, yg2max, 
 
     names(dfall) <- c("month", "year", "plotdate", "min_val", "ave_val", "max_val") 
 
-      # 1 year set by variable vyear
+  # Comparison year set by vyear
   df_yr <-df[df$Year %in% vyear, c(3,6)] %>%
     group_by(Date) %>%
     summarize(min_val = min(Result), ave_val = mean(Result),  max_val = max(Result)) %>%
@@ -295,6 +357,36 @@ var <- df_yr[stat] %>% unlist()
 var1 <- df_yg1[stat1] %>% unlist()
 var2 <- df_yg2[stat2] %>% unlist()
 var3 <- df_yg3[stat3] %>% unlist()
+
+if(dim(df_yr)[1] == 0) {
+  p <- ggplot(df) +
+    theme_void() +
+    annotate("text", x = 4, y = 25, label = paste(
+      "This plot is not available for", plot_taxa, "with the given parameters.", sep = " "),
+      color = "blue", size = 4.5, fontface = "bold.italic")
+  return(p)
+} else if (dim(df_yg1)[1] == 0) {
+    p <- ggplot(df) +
+      theme_void() +
+      annotate("text", x = 4, y = 25, label = paste(
+        "This plot is not available for", plot_taxa, "with the given parameters.", sep = " "),
+        color = "blue", size = 4.5, fontface = "bold.italic")
+    return(p)
+} else if(dim(df_yg2)[1] == 0) {
+  p <- ggplot(df) +
+    theme_void() +
+    annotate("text", x = 4, y = 25, label = paste(
+      "This plot is not available for", plot_taxa, "with the given parameters.", sep = " "),
+      color = "blue", size = 4.5, fontface = "bold.italic")
+  return(p)
+} else if (dim(df_yg3)[1] == 0) {
+    p <- ggplot(df) +
+      theme_void() +
+      annotate("text", x = 4, y = 25, label = paste(
+        "This plot is not available for", plot_taxa, "with the given parameters.", sep = " "),
+        color = "blue", size = 4.5, fontface = "bold.italic")
+    return(p)
+  } else {
 
   p  <- ggplot() +
     geom_line(data = df_yg3, aes(x = plotdate, y = var3, color = yg3_leg), size = 1.5, linetype = 1) +
@@ -324,13 +416,16 @@ var3 <- df_yg3[stat3] %>% unlist()
       geom_hline(yintercept = trigtreat, linetype=5) +
       annotate("text", min(df_yr$date), trigtreat - (0.02 * max(var, var1, var2, var3)), label = "Treatment Consideration Threshold", hjust = "left")
   }
-    p
+    return(p)
+  
+   }
+}
 }
 
-# historicplot(df, taxa, locs, vyear, yg1min, yg1max, yg2min, yg2max, yg3min, yg3max, stat, stat1, stat2, stat3, depthmin, depthmax)
+#historicplot(df, taxa, locs, vyear, yg1min, yg1max, yg2min, yg2max, yg3min, yg3max, stat, stat1, stat2, stat3, depthmin, depthmax)
 
-
-######################################################################
+## End of Plots ####
+######################################################################.
 # PLOT $ - Facet Grid Plot
 
 # grid <- ceiling(length(unique(dfall$year))^.5)
@@ -338,12 +433,3 @@ var3 <- df_yg3[stat3] %>% unlist()
 #   facet_wrap(~year, nrow = grid, scales = "fixed") +
 #   geom_point()
 #   #scale_x_discrete(date_labels = "%b", date_breaks(width = "1 month"), name = "Month")
-
-
-
-
-
-
-
-
-
