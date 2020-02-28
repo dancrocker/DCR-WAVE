@@ -18,14 +18,17 @@ library(plotly)
 library(lattice)
 # Precip stats function  - processes daily precip records and caches relevant stats for WAVE App
 
+
 #### THIS IS TEMPORARY FOR USE OUTSIDE OF SHINY
 # Read config file to access database
 # config <- read.csv("//env.govt.state.ma.us/enterprise/DCR-WestBoylston-WKGRP/WatershedJAH/EQStaff/WQDatabase/R-Shared/WAVE-WIT/Configs/WAVE_WIT_Config.csv", header = TRUE)
 # config <- as.character(config$CONFIG_VALUE)
 # 
-# rds_files <- list.files(config[1],full.names = T)
-# rds_files # Take a look at the rds files:
-# df_precip <- readRDS(rds_files[34]) # NOTE: This rds file is created daily at the conclusion of the NOAA data fetch
+# LIST_RDS()
+# 
+# LOAD_RDS(files = c("df_wach_prcp_daily.rds")) # Use vector of rds file names, index numbers may change!
+# 
+# vyear <- 2020
 #####
 
 
@@ -181,8 +184,8 @@ return(dfs)
 
 } # End Function
 
-# dfs <- PRECIP_STATS(df_precip = df_wach_prcp_daily, vyear = NULL)
-
+# dfs <- PRECIP_STATS_WACH(df_precip = df_wach_prcp_daily, vyear = vyear)
+# rm(dfs)
  # Generate Sample date vectors for precip threshold filters:
       #* Need to have an explanation on this filter saying:
       # Cummulative precipitation totals for each day include that day's precipitation as well, which could very well have fallen after
