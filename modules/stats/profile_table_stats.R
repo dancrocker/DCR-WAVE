@@ -40,7 +40,8 @@ tagList(
              sliderInput(ns("depth"), "Depth:",
                          min = 0,
                          max = df %>% select(Depth_m) %>% max() %>% ceiling(),
-                         value = c(0,df %>% select(Depth_m) %>% max() %>% ceiling())
+                         value = c(0,df %>% select(Depth_m) %>% max() %>% ceiling()),
+                         step = 1
              )
       )
     ) # end fluid row
