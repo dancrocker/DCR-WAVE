@@ -36,7 +36,7 @@ packages <- c("shiny","shinyjs", "shinyFiles","rmarkdown", "knitr", "tidyverse",
 # }
 # library(rcmodel)
 ### Set any system environmental variables ####
-Sys.setenv(RSTUDIO_PANDOC= paste0(config[21],"/bin/pandoc"))
+# Sys.setenv(RSTUDIO_PANDOC= paste0(config[21],"/bin/pandoc")) ### need to resolve issue that users have different install locations
 
 
 ### Specify User information ####
@@ -61,16 +61,16 @@ if(userlocation == "Quabbin"){
 }
 
 ### Specify data source
-if (try(file.access(config[1], mode = 4)) == 0) {
+if (config[23] == "local") {
   data_source <- "Local"
   } else {
   data_source <- "Dropbox"
 }
-  
+
 if(data_source == "Local"){
   print("Fetching rds files from local source...")
   datadir <- config[1]
-  } else { ### Fetch data from Dropbox 
+  } else { ### Fetch data from Dropbox
     print("Fetching rds files from Dropbox...")
     source("functions/FetchDropboxData.R")
     datadir <- paste0(getwd(), "/DB_data")
@@ -660,6 +660,7 @@ server <- function(input, output, session) {
   callModule(MAP_PLOT, "mod_trib_quab_map", df = df_trib_quab, df_site = df_trib_quab_site)
 
   # MetaData
+  
   callModule(METADATA, "mod_trib_quab_meta", df = df_trib_quab, df_site = df_trib_quab_site, df_param = df_quab_param)
 
   ### Ware ####

@@ -104,10 +104,10 @@ METADATA <- function(input, output, session, df_site = NULL, df_param = NULL, df
                   `Elevation (ft)` = LocationElevFt)
   ### Primary Tables
 
-  output$table_site <- renderDataTable(df_site, selection = 'single',
+  output$table_site <- DT::renderDataTable(df_site, selection = 'single',
                                        options = list(lengthMenu = c(5, 10, 50), pageLength = 5))
 
-  output$table_param <- renderDataTable(df_param, selection = 'single',
+  output$table_param <- DT::renderDataTable(df_param, selection = 'single',
                                         options = list(lengthMenu = c(5, 10, 50), pageLength = 5))
 
   #output$table_flag <- renderDataTable(df_flag, selection = 'single')

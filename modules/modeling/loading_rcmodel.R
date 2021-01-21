@@ -168,11 +168,11 @@ LOADING_RCMODEL <- function(input, output, session, df_wq, df_flow, df_precip,
     paramfilter <- input$param
     
     if("Total Nitrogen" %in% input$param){
-      paramfilter <- c(paramfilter, "Nitrate","Nitrite","Total Kjeldahl Nitrogen", "Ammonia")
+      paramfilter <- c(paramfilter, "Nitrate-N","Nitrite-N","Total Kjeldahl Nitrogen", "Ammonia-N")
       paramfilter <- paramfilter[!paramfilter %in% "Total Nitrogen"]
     }
     if("InorgN" %in% input$param){
-      paramfilter <- c(paramfilter, "Nitrate","Nitrite", "Ammonia", -"InorgN")
+      paramfilter <- c(paramfilter, "Nitrate-N","Nitrite-N", "Ammonia-N", -"InorgN")
       paramfilter <- paramfilter[!paramfilter %in% "InorgN"]
     }
   })

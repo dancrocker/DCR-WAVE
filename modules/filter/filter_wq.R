@@ -355,7 +355,7 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_f
   # render Datatable
   output$table <- renderDataTable({
     datatable(Df4()) %>% 
-    formatDate(columns = "SampleDateTime", method = 'toLocaleString')
+    formatDate(columns = "DateTimeET", method = 'toLocaleString')
   })
 
   # Downloadable csv of selected dataset
@@ -365,7 +365,7 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_f
     },
     content = function(file) {
         df_csv <- Df4()
-        df_csv$SampleDateTime <- format(df_csv$SampleDateTime, usetz=TRUE)
+        df_csv$DateTimeET <- format(df_csv$DateTimeET, usetz=TRUE)
       write_csv(df_csv, file)
     }
   )

@@ -22,7 +22,6 @@ PLOT_FLOW_UI <- function(id) {
   ns <- NS(id) # see General Note 1
   # Df <- df
 
-
   tagList(
     tabsetPanel(
       tabPanel("Plot flow with additional parameters",
@@ -279,7 +278,7 @@ Param_wq <- reactive({
   Df_wq <- reactive({
     req(input$param1, input$y2 == "wq")
       Df_wq <- df_wq %>%
-        mutate("DateTime" = SampleDateTime) %>%
+        mutate("DateTime" = DateTimeET) %>%
         filter(LocationLabel == input$site,
                Date >=  input$date[1] & Date <= input$date[2],
                Parameter == y2param())

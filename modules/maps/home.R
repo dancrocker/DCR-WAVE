@@ -44,6 +44,8 @@ tagList(
 
 HOME <- function(input, output, session, df_site) {
 
+  df_site <- filter(df_site, !is.na(LocationLat), !is.na(LocationLong))
+  
   df_site$LocationType[df_site$LocationType == "Nutrient"] <- "Reservoir"
   df_site$LocationType[df_site$LocationType == "Transect"] <- "Bacteria"
 

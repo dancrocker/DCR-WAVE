@@ -527,7 +527,7 @@ maxrange <- reactive({
     }
     ### There are 4 possible options for df_temp
     ### 1. NULL HOBO, NOT NULL USGS
-    ### 2. NOT NULL HOBO, NOT NULL USGS
+    ### 2. NOT NULL HOBO, NULL USGS
     ### 3. BOTH NULL
     ### 4. BOTH NOT NULL
 
@@ -542,8 +542,10 @@ maxrange <- reactive({
       }
     } else { # There is HOBO Dta
       if(is.null(usgs_dfrx())){ # No USGS data, so df_temp is unchanged
+        print(head(df_temp))
         df_temp <- df_temp %>%
           mutate(Units = df_wach_param$ParameterUnits[match(Parameter,df_wach_param$ParameterName)])
+        print(head(df_temp))
       } else { # There is also USGS data, need to bind rows then add units column
         df_temp <- bind_rows(usgs_dfrx(), df_temp) %>%
           mutate(Units = df_wach_param$ParameterUnits[match(Parameter,df_wach_param$ParameterName)])

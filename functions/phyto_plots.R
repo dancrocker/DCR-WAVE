@@ -148,13 +148,6 @@ phytoplot <- function(df,locs,vyear,epi_min,epi_max,em_min,em_max) {
   } else {
     res <- "Quabbin"
   }
-
-  # Set name of reservoir for plot titles based on station number
-  if ("BN3417" %in% unique(df$Station)) {
-    res <- "Wachusett"
-  } else {
-    res <- "Quabbin"
-  }
   
 # This plot will not work for Quabbin until Totals are added to Quabbin db
 # If Quabbin data is to be plotted, plot message saying plot unavailable

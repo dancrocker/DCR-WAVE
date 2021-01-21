@@ -28,6 +28,7 @@ library(lattice)
 # 
 # LOAD_RDS(files = c("df_wach_prcp_daily.rds")) # Use vector of rds file names, index numbers may change!
 # 
+# df_precip <- df_wach_prcp_daily
 # vyear <- 2020
 #####
 

@@ -168,8 +168,10 @@ PRECIP_DAILY_BAR <- function(df, date_min, date_max, type){
 # PRECIP_DAILY_BAR(df = df_wach_prcp_daily, date_min = date_min, date_max = date_max, type = FALSE)
 
 ### YEAR PLOT ####
+
 PRECIP_YEAR_BAR <- function(df, date_min, date_max, type = NULL){
   # Plot Args
+  # df <- dfs[[3]]
   # date_min <- as.Date("1985-05-03")
   # date_max <- as.Date("2018-08-08")
   this_year <- year(Sys.Date()) 
@@ -180,11 +182,11 @@ PRECIP_YEAR_BAR <- function(df, date_min, date_max, type = NULL){
     dplyr::rename("Precip" = AnnualTotal)
   PrcpAnnualAve <- round(mean(df$AnnualTotal, na.rm = T), 2)
   plotmax <- ceiling(max(PrcpAnnualAve, max(df2$Precip, na.rm = T))) * 1.04
-
+  # df2$Year <- factor(df2$Year) # Change year to factor to plot x as discrete? 
   p <- ggplot(df2, aes(x = Year, y = Precip)) +
     geom_bar(fill = "#4477AA", stat = "identity", color = "black") +
     geom_hline(yintercept = PrcpAnnualAve, color = "red") +
-    labs(title = paste0("Annual Watershed Precipitation Totals"), 
+    labs(title = paste0("Annual Watershed Precipitation Totals"),
          caption = paste0("Average Annual Watershed Precipitation = ", PrcpAnnualAve, " Inches \nSource: USGS and NOAA")) +
     xlab("Year") +
     ylab("Precipitation (Inches)") +
@@ -198,6 +200,7 @@ PRECIP_YEAR_BAR <- function(df, date_min, date_max, type = NULL){
           axis.title.x = element_text(vjust = -1, face = "bold"),
           plot.title = element_text(hjust = 0.5, face = "bold")) +
     scale_fill_manual(values=c("deepskyblue3")) +
+    # scale_x_discrete(guide = guide_axis(n.dodge = 2)) + # This new feature does not work
     scale_x_continuous(breaks = seq.int(min(years), max(years), by = 1), expand = c(0,0)) +
     scale_y_continuous(breaks = pretty_breaks(), limits = c(0, plotmax), expand = c(0,0))
     # annotate("text", x = (min(years) + max(years))/2, y = 4, label = paste0("Average Annual Watershed Precipitation = ", PrcpAnnualAve, " Inches \nSource: USGS and NOAA"))
@@ -210,6 +213,7 @@ PRECIP_YEAR_BAR <- function(df, date_min, date_max, type = NULL){
   }
 } # End of function
 # PRECIP_YEAR_BAR(df = YTD_J_Day, date_min, date_max, type = FALSE)
+
 
 ### CUMULATIVE PRECIP PLOT ####
 # Julian Day plot - Days 1 - 366 showing cumulative precip
