@@ -30,7 +30,7 @@ PLOT_TEXT_AND_VLINES_TIME_UI <- function(id) {
                         checkboxInput(ns("text1"), "Show Text"),
                         textInput(ns("text1_text"), "Text"),
                         dateInput(ns("text1_x"), "X Location", value = Sys.Date()),
-                        numericInput(ns("text1_y"), "Y Locatoin", value = 0)
+                        numericInput(ns("text1_y"), "Y Location", value = 0)
                       )
                ),
                column(3,
@@ -39,7 +39,7 @@ PLOT_TEXT_AND_VLINES_TIME_UI <- function(id) {
                         checkboxInput(ns("text2"), "Show Text"),
                         textInput(ns("text2_text"), "Text"),
                         dateInput(ns("text2_x"), "X Location", value = Sys.Date()),
-                        numericInput(ns("text2_y"), "Y Locatoin", value = 0)
+                        numericInput(ns("text2_y"), "Y Location", value = 0)
                       )
                ),
                column(3,
@@ -48,7 +48,7 @@ PLOT_TEXT_AND_VLINES_TIME_UI <- function(id) {
                         checkboxInput(ns("text3"), "Show Text"),
                         textInput(ns("text3_text"), "Text"),
                         dateInput(ns("text3_x"), "X Location", value = Sys.Date()),
-                        numericInput(ns("text3_y"), "Y Locatoin", value = 0)
+                        numericInput(ns("text3_y"), "Y Location", value = 0)
                       )
                ),
                column(3,
@@ -57,7 +57,7 @@ PLOT_TEXT_AND_VLINES_TIME_UI <- function(id) {
                         checkboxInput(ns("text4"), "Show Text"),
                         textInput(ns("text4_text"), "Text"),
                         dateInput(ns("text4_x"), "X Location", value = Sys.Date()),
-                        numericInput(ns("text4_y"), "Y Locatoin", value = 0)
+                        numericInput(ns("text4_y"), "Y Location", value = 0)
                       )
                )
              ) # end fluidRow

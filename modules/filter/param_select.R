@@ -122,7 +122,7 @@ PARAM_SELECT <- function(input, output, session, Df, multiple = TRUE) {
 
   # Parameter Value Range Bar UI
   output$range_ui <- renderUI({
-
+  req(!is.null(input$type))
       result <- Df() %>%
         filter(Parameter %in% input$type) %>%
         .$Result
