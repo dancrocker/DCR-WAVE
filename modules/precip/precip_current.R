@@ -66,7 +66,9 @@ PRECIP_CURRENT_UI <- function(id) {
 
 PRECIP_CURRENT <- function(input, output, session, df, df_site, wshed) {
   # df <- df_wach_prcp_daily
-  # df_site <- df_wq_wach_site
+  
+  df_site <- df_site %>% filter(Watershed == wshed)
+  
   callModule(PRECIP_MAP, "precip_map", df_site = df_site)
   source("functions/quab_precip_stats.R") # Function args (df)
   source("functions/wach_precip_stats.R") # Function args (df)

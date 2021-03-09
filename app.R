@@ -95,9 +95,9 @@ names(data) <- df_names
 list2env(data ,.GlobalEnv)
 ### Remove data
 rm(data)
-
-### SOURCE OTHER DATA ####    
-gam_models_wach <- readxl::read_xlsx(path = paste0(datadir,"/GAM_loading_models_wach.xlsx"))
+# 
+# ### SOURCE OTHER DATA ####    
+# gam_models_wach <- readxl::read_xlsx(path = paste0(datadir,"/GAM_loading_models_wach.xlsx"))
     
 ### SOURCE MODULES ####
 
@@ -682,7 +682,7 @@ server <- function(input, output, session) {
   callModule(MAP_PLOT, "mod_trib_ware_map", df = df_trib_ware, df_site = df_trib_ware_site)
  
   ### Precipitation #### 
-  callModule(PRECIP_CURRENT, "mod_precip_quab_current", df = df_quabbin_prcp_daily, df_site = df_trib_quab_site, wshed = "Quabbin")
+  callModule(PRECIP_CURRENT, "mod_precip_quab_current", df = df_quabbin_prcp_daily, df_site = df_all_site, wshed = "Quabbin")
   callModule(PRECIP_HISTORICAL, "mod_precip_quab_hist", df = df_quabbin_prcp_daily, wshed = "Quabbin")
 
   ### Wachusett ####
@@ -853,7 +853,7 @@ server <- function(input, output, session) {
   
   # ### Precip ####
 
-  callModule(PRECIP_CURRENT, "mod_precip_wach_current", df = df_wach_prcp_daily, df_site = df_trib_wach_site, wshed = "Wachusett")
+  callModule(PRECIP_CURRENT, "mod_precip_wach_current", df = df_wach_prcp_daily, df_site = df_all_site, wshed = "Wachusett")
   callModule(PRECIP_HISTORICAL, "mod_precip_wach_hist", df = df_wach_prcp_daily, wshed = "Wachusett")
   # callModule(PRECIP_STATS, "mod_precip_wach_stats", df = df_wach_prcp_daily)
   # callModule(PRECIP_FILTER, "mod_precip_wach_filter", df = df_wach_prcp_daily)
