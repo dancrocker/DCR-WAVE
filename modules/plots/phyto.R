@@ -270,7 +270,7 @@ PHYTO <- function(input, output, session, df) {
 
   # Plot Print
   output$save_plot <- downloadHandler(
-    filename <- function() {
+    filename = function() {
       paste0("Phytoplankton-", input$year,"_", format(Sys.time(), "%Y-%m-%d"), ".", input$plot_save_type)},
     content = function(file) {
       ggplot2::ggsave(file, plot = p(), device = input$plot_save_type, width = input$plot_save_width, height = input$plot_save_height, dpi = 300)
@@ -366,7 +366,7 @@ PHYTO <- function(input, output, session, df) {
   output$taxaplot14 <- renderPlot({p14()})
   # Save Taxa Plot
   output$save_plot1 <- downloadHandler(
-    filename <- function() {
+    filename = function() {
       paste0("Total_Diatoms", input$taxayear,"_", format(Sys.time(), "%Y-%m-%d"), ".", input$taxaplot_save_type)},
     content = function(file) {
       ggplot2::ggsave(file, plot = p1(), device = input$taxaplot_save_type,
@@ -375,7 +375,7 @@ PHYTO <- function(input, output, session, df) {
     }
   )
   output$save_plot2 <- downloadHandler(
-    filename <- function() {
+    filename = function() {
       paste0("Asterionella-", input$taxayear,"_", format(Sys.time(), "%Y-%m-%d"), ".", input$taxaplot_save_type)},
     content = function(file) {
       ggplot2::ggsave(file, plot = p2(), device = input$taxaplot_save_type,
@@ -384,7 +384,7 @@ PHYTO <- function(input, output, session, df) {
     }
   )
   output$save_plot3 <- downloadHandler(
-    filename <- function() {
+    filename = function() {
       paste0("Cyclotella-", input$taxayear,"_", format(Sys.time(), "%Y-%m-%d"), ".", input$taxaplot_save_type)},
     content = function(file) {
       ggplot2::ggsave(file, plot = p3(), device = input$taxaplot_save_type,
@@ -393,7 +393,7 @@ PHYTO <- function(input, output, session, df) {
     }
   )
   output$save_plot4 <- downloadHandler(
-    filename <- function() {
+    filename = function() {
       paste0("Total_Chlorophytes-", input$taxayear,"_", format(Sys.time(), "%Y-%m-%d"), ".", input$taxaplot_save_type)},
     content = function(file) {
       ggplot2::ggsave(file, plot = p4(), device = input$taxaplot_save_type,
@@ -402,7 +402,7 @@ PHYTO <- function(input, output, session, df) {
     }
   )
   output$save_plot5 <- downloadHandler(
-    filename <- function() {
+    filename = function() {
       paste0("Total_Chrysophytes-", input$taxayear,"_", format(Sys.time(), "%Y-%m-%d"), ".", input$taxaplot_save_type)},
     content = function(file) {
       ggplot2::ggsave(file, plot = p5(), device = input$taxaplot_save_type,
@@ -411,7 +411,7 @@ PHYTO <- function(input, output, session, df) {
     }
   )
   output$save_plot6 <- downloadHandler(
-    filename <- function() {
+    filename = function() {
       paste0("Chrysosphaerella-", input$taxayear,"_", format(Sys.time(), "%Y-%m-%d"), ".", input$taxaplot_save_type)},
     content = function(file) {
       ggplot2::ggsave(file, plot = p6(), device = input$taxaplot_save_type,
@@ -420,7 +420,7 @@ PHYTO <- function(input, output, session, df) {
     }
   )
   output$save_plot7 <- downloadHandler(
-    filename <- function() {
+    filename = function() {
       paste0("Dinobryon-", input$taxayear,"_", format(Sys.time(), "%Y-%m-%d"), ".", input$taxaplot_save_type)},
     content = function(file) {
       ggplot2::ggsave(file, plot = p7(), device = input$taxaplot_save_type,
@@ -429,7 +429,7 @@ PHYTO <- function(input, output, session, df) {
     }
   )
   output$save_plot8 <- downloadHandler(
-    filename <- function() {
+    filename = function() {
       paste0("Synura-", input$taxayear,"_", format(Sys.time(), "%Y-%m-%d"), ".", input$taxaplot_save_type)},
     content = function(file) {
       ggplot2::ggsave(file, plot = p8(), device = input$taxaplot_save_type,
@@ -438,7 +438,7 @@ PHYTO <- function(input, output, session, df) {
     }
   )
   output$save_plot9 <- downloadHandler(
-    filename <- function() {
+    filename = function() {
       paste0("Uroglenopsis-", input$taxayear,"_", format(Sys.time(), "%Y-%m-%d"), ".", input$taxaplot_save_type)},
     content = function(file) {
       ggplot2::ggsave(file, plot = p9(), device = input$taxaplot_save_type,
@@ -447,7 +447,7 @@ PHYTO <- function(input, output, session, df) {
     }
   )
   output$save_plot10 <- downloadHandler(
-    filename <- function() {
+    filename = function() {
       paste0("Total_Cyanophytes-", input$taxayear,"_", format(Sys.time(), "%Y-%m-%d"), ".", input$taxaplot_save_type)},
     content = function(file) {
       ggplot2::ggsave(file, plot = p10(), device = input$taxaplot_save_type,
@@ -456,7 +456,7 @@ PHYTO <- function(input, output, session, df) {
     }
   )
   output$save_plot11 <- downloadHandler(
-    filename <- function() {
+    filename = function() {
       paste0("Dolichospermum-", input$taxayear,"_", format(Sys.time(), "%Y-%m-%d"), ".", input$taxaplot_save_type)},
     content = function(file) {
       ggplot2::ggsave(file, plot = p11(), device = input$taxaplot_save_type,
@@ -465,7 +465,7 @@ PHYTO <- function(input, output, session, df) {
     }
   )
   output$save_plot12 <- downloadHandler(
-    filename <- function() {
+    filename = function() {
       paste0("Microcystis-", input$taxayear,"_", format(Sys.time(), "%Y-%m-%d"), ".", input$taxaplot_save_type)},
     content = function(file) {
       ggplot2::ggsave(file, plot = p12(), device = input$taxaplot_save_type,
@@ -474,7 +474,7 @@ PHYTO <- function(input, output, session, df) {
     }
   )
   output$save_plot13 <- downloadHandler(
-    filename <- function() {
+    filename = function() {
       paste0("Grand_Total-", input$taxayear,"_", format(Sys.time(), "%Y-%m-%d"), ".", input$taxaplot_save_type)},
     content = function(file) {
       ggplot2::ggsave(file, plot = p13(), device = input$taxaplot_save_type,
@@ -483,7 +483,7 @@ PHYTO <- function(input, output, session, df) {
     }
   )
   output$save_plot14 <- downloadHandler(
-    filename <- function() {
+    filename = function() {
       paste0(input$taxa14, input$taxayear,"_", format(Sys.time(), "%Y-%m-%d"), ".", input$taxaplot_save_type)},
     content = function(file) {
       ggplot2::ggsave(file, plot = p14(), device = input$taxaplot_save_type,
@@ -514,7 +514,7 @@ PHYTO <- function(input, output, session, df) {
   })
   output$histplot <- renderPlot({phist()})
   output$save_histplot <- downloadHandler(
-    filename <- function() {
+    filename = function() {
       paste0(input$histtaxa,"_HistoricalComparison_", format(Sys.time(), "%Y-%m-%d"), ".", input$histplot_save_type)},
     content = function(file) {
       ggplot2::ggsave(file, plot = phist(), device = input$histplot_save_type,

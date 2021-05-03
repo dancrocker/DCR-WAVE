@@ -53,7 +53,6 @@ SITE_MAP <- function(input, output, session, df_site, Site_List) {
   })
   
   # Base Leaflet Map - See General Note 3
-  
   output$map <- renderLeaflet({
     
     leaflet(data = df_site %>% filter(!is.na(LocationLat), !is.na(LocationLong))) %>%
@@ -76,7 +75,6 @@ SITE_MAP <- function(input, output, session, df_site, Site_List) {
   
   
   # Map Proxy - UPdate Color of Circle Markers as Site selection changes
-  
   observe({
     
     pal <- colorpal()

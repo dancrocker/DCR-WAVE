@@ -68,7 +68,6 @@ HOME <- function(input, output, session, df_site) {
 
   df_site2 <- df_site %>%
       mutate(MapFactor = factor(paste(Watershed, LocationType), levels = map_levels))
-
 # Color
 
   color_pal <- colorFactor(palette = c("firebrick",

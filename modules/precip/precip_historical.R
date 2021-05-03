@@ -112,7 +112,7 @@ PRECIP_HISTORICAL <- function(input, output, session, df, wshed) {
   
   # Plot Print ####
   output$save_plot <- downloadHandler(
-    filename <- function() {
+    filename = function() {
       paste0("HistoricalPrecip_",input$slider_type, ".png")},
     content = function(file) {
       ggplot2::ggsave(file, plot = p(), device = "png", units = "in", width = 6, height = 4, dpi = 300)

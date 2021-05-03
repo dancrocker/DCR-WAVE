@@ -384,7 +384,7 @@ observeEvent(input$plot_button, {
 
   # Plot Print
   output$save_plot <- downloadHandler(
-    filename <- function() {
+    filename = function() {
       paste0("Daily_", input$param1, "_at_", input$site,"_", Sys.Date(), ".", input$plot_save_type)},
     content = function(file) {
       ggplot2::ggsave(file, plot = p(), device = input$plot_save_type, width = input$plot_save_width, height = input$plot_save_height, dpi = 300)

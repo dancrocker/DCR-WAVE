@@ -180,7 +180,7 @@ p2  <- reactive({
 
   # Plot1 Print
   output$save_plot1 <- downloadHandler(
-    filename <- function() {
+    filename = function() {
       paste0("MonthlyPrecip_", input$vyear1, ".png")},
     content = function(file) {
       ggplot2::ggsave(file, plot = p1(), device = "png", units = "in", width = 6, height = 4, dpi = 300)
@@ -189,7 +189,7 @@ p2  <- reactive({
   )
   # Plot2 Print
   output$save_plot2 <- downloadHandler(
-    filename <- function() {
+    filename = function() {
       paste0("CummulativePrecip_", input$vyear2, ".png")},
     content = function(file) {
       ggplot2::ggsave(file, plot = p2(), device = "png", units = "in", width = 6, height = 4, dpi = 300)

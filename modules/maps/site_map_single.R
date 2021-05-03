@@ -37,7 +37,7 @@ SITE_MAP_SINGLE <- function(input, output, session, Site) {
       addMarkers(lng = ~Longitude, lat = ~Latitude,
                        label= ~Location,
                        popup = ~paste("ID =", Location, "<br/>",
-                                      "Description =", Location, "<br/>",
+                                      "Description =", Description, "<br/>",
                                       "Lat = ", Latitude, "<br/>",
                                       "Long = ", Longitude, "<br/>",
                                       "Elev = ", `Elevation (ft)`,"ft")

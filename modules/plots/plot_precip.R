@@ -169,11 +169,11 @@ PRECIP_DAILY_BAR <- function(df, date_min, date_max, type){
 
 ### YEAR PLOT ####
 
-PRECIP_YEAR_BAR <- function(df, date_min, date_max, type = NULL){
+PRECIP_YEAR_BAR <- function(df, date_min, date_max, type = NULL) {
   # Plot Args
   # df <- dfs[[3]]
   # date_min <- as.Date("1985-05-03")
-  # date_max <- as.Date("2018-08-08")
+  # date_max <- as.Date("2021-01-01")
   this_year <- year(Sys.Date()) 
   years <- seq.int(from = year(date_min), to = min(this_year - 1 , year(date_max)))
   
@@ -195,13 +195,12 @@ PRECIP_YEAR_BAR <- function(df, date_min, date_max, type = NULL){
           legend.title = element_blank(),
           panel.grid.minor = element_blank(),
           panel.grid.major = element_blank(),
-          axis.text.x = element_text(face = "bold", angle = 90, vjust=0.5),
+          axis.text.x = element_text(face = "bold", vjust=0.5),
           axis.title.y = element_text(vjust = 2, face = "bold"),
           axis.title.x = element_text(vjust = -1, face = "bold"),
           plot.title = element_text(hjust = 0.5, face = "bold")) +
     scale_fill_manual(values=c("deepskyblue3")) +
-    # scale_x_discrete(guide = guide_axis(n.dodge = 2)) + # This new feature does not work
-    scale_x_continuous(breaks = seq.int(min(years), max(years), by = 1), expand = c(0,0)) +
+    scale_x_continuous(breaks = seq.int(min(years), max(years), by = 1), expand = c(0,0), guide = guide_axis(n.dodge = 2)) +
     scale_y_continuous(breaks = pretty_breaks(), limits = c(0, plotmax), expand = c(0,0))
     # annotate("text", x = (min(years) + max(years))/2, y = 4, label = paste0("Average Annual Watershed Precipitation = ", PrcpAnnualAve, " Inches \nSource: USGS and NOAA"))
   
@@ -212,7 +211,7 @@ PRECIP_YEAR_BAR <- function(df, date_min, date_max, type = NULL){
     return(p)
   }
 } # End of function
-# PRECIP_YEAR_BAR(df = YTD_J_Day, date_min, date_max, type = FALSE)
+# PRECIP_YEAR_BAR(df = df, date_min, date_max, type = FALSE)
 
 
 ### CUMULATIVE PRECIP PLOT ####
