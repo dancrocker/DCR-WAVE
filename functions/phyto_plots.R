@@ -46,10 +46,10 @@
 
 taxaplot <- function(df, locs, vyear, taxa, color){
 ## Function Arguments:
-# df <- df_phyto_quab
-# vyear <- 2019 # Selection unique(phyto)
-# taxa <- "test"
-# locs <- c("206", "202") # Multiple selections Set as default - adjust plot title
+# df <- df_phyto_wach
+# vyear <- 2020 # Selection unique(phyto)
+# taxa <- "Dolichospermum"
+# locs <- c("CI3409", "BN3417") # Multiple selections Set as default - adjust plot title
 # color <- "dodgerblue"
   ############################################.
 # Plot Conditions
@@ -67,13 +67,13 @@ taxaplot <- function(df, locs, vyear, taxa, color){
 
    df_thresh <- df_taxa_wach %>%
     filter(!is.na(Threshold_early)) %>%
-    select("Name","Threshold_early","Threshold_Tx") %>%
-    dplyr::rename(Taxa = Name)
+    select("Phyto_Name","Threshold_early","Threshold_Tx") %>%
+    dplyr::rename(Taxa = Phyto_Name)
    df <- df %>%
      filter(Result != 8888, Result != 9999) %>% 
      mutate("Year" = year(Date))
    
-   df$Taxa_f <-  df_taxa_wach$Frmr_name[match(df$Taxa, df_taxa_wach$Name)]
+   df$Taxa_f <-  df_taxa_wach$Frmr_name[match(df$Taxa, df_taxa_wach$Phyto_Name)]
    
   plot_taxa <- c(taxa, df$Taxa_f[df$Taxa == taxa]) %>% unique()
   
@@ -122,7 +122,7 @@ p <- ggplot(df2, aes(x = Date, y = Result)) +
 return(p)
 }
 }
-
+p
 #taxaplot(df, locs, vyear, taxa, color)
 #######################################################.
 
@@ -275,7 +275,7 @@ historicplot <- function(df, taxa, locs, vyear, yg1min, yg1max, yg2min, yg2max, 
   df <- df %>%
     filter(Result != 8888, Result != 9999, !is.na(Station), !is.na(Depth_m))# %>% 
     # select(-PA)
-  df$Taxa_f <-  df_taxa_wach$Frmr_name[match(df$Taxa, df_taxa_wach$Name)]
+  df$Taxa_f <-  df_taxa_wach$Frmr_name[match(df$Taxa, df_taxa_wach$Phyto_Name)]
   plot_taxa <- c(taxa, df$Taxa_f[df$Taxa == taxa]) %>% unique()
   df <- df %>% 
     filter(Depth_m >= depthmin, Depth_m <= depthmax)
@@ -307,8 +307,8 @@ historicplot <- function(df, taxa, locs, vyear, yg1min, yg1max, yg2min, yg2max, 
   xmax <- as.Date(paste0(as.numeric(vyear),"-12-31"), format = '%Y-%m-%d')
   df_thresh <- df_taxa_wach %>%
     filter(!is.na(Threshold_early)) %>%
-    select("Name","Threshold_early","Threshold_Tx") %>%
-    dplyr::rename(Taxa = Name)
+    select("Phyto_Name","Threshold_early","Threshold_Tx") %>%
+    dplyr::rename(Taxa = Phyto_Name)
   taxathreshlist <- unique(df_thresh$Taxa)
   #Define legend labels and colors
   yg0_leg <- paste0(vyear, " ", taxalabel, " Values")
