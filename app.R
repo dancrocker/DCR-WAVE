@@ -1,11 +1,12 @@
-#__________________________________________________________________________________________________________
-#     Title: app.R
-#     Type: Master file for DCR Shiny App
-#     Description: This Shiny App contains the "master" script for the app. The app contains a ui and server component
+###############################################################################.
+#  TITLE: app.R (WAVE SHINY APP)
+#  DESCRIPTION: This Shiny App contains the "master" script for the app. The app contains a ui and server component
 #           and sources R scripts from the App folder
-#     Written by: Nick Zinck and Dan Crocker, Spring 2017 -  Spring 2018
-#__________________________________________________________________________________________________________
-
+#  AUTHOR(S): Dan Crocker and Nick Zinck
+#  DATE LAST UPDATED: 2022-01-20
+#  GIT REPO: dancrocker/DCR-WAVE
+#  R version 4.1.1 (2021-08-10)  x86_64
+##############################################################################.
 ### Notes:
 ###   1_
 ###
@@ -15,9 +16,9 @@
 ### Load Libraries and Script (Sources, Modules, and Functions) ####
 print(paste0("WAVE App lauched at ", Sys.time()))
 ipak <- function(pkg){
-  new.pkg <- pkg[!(pkg %in% installed.packages(lib.loc = config[15])[, "Package"])]
+  new.pkg <- pkg[!(pkg %in% installed.packages(lib.loc = config[["R_lib_Path"]])[, "Package"])]
   if (length(new.pkg))
-    install.packages(new.pkg, lib = config[15], dependencies = TRUE, repos="http://cran.rstudio.com/")
+    install.packages(new.pkg, lib = config[["R_lib_Path"]], dependencies = TRUE, repos="http://cran.rstudio.com/")
   sapply(pkg, require, character.only = TRUE)
 }
 ### Package List ####
@@ -37,11 +38,18 @@ packages <- c("shiny","shinyjs", "shinyFiles","rmarkdown", "knitr", "tidyverse",
 # library(rcmodel)
 ### Set any system environmental variables ####
 # Sys.setenv(RSTUDIO_PANDOC= paste0(config[21],"/bin/pandoc")) ### need to resolve issue that users have different install locations
-
+ ### Set Location Dependent Variables - datatsets and distro
+ 
+ if (userlocation == "Wachusett") {
+   rootdir <- wach_team_root
+ } else {
+   rootdir <- quab_team_root
+ }
 
 ### Specify User information ####
-user <-  Sys.getenv("USERNAME")
-userdata <- readxl::read_xlsx(path = config[17])
+user <-  Sys.getenv("USERNAME") %>% toupper()
+userdata <- readxl::read_xlsx(path = paste0(rootdir, config[["Users"]]))
+userdata$Username <- userdata$Username %>% toupper()
 
 if(user %in% userdata$Username){
   username <- paste(userdata$FirstName[userdata$Username %in% user], userdata$LastName[userdata$Username %in% user], sep = " ")
@@ -61,33 +69,18 @@ if(userlocation == "Quabbin"){
 }
 
 ### Specify data source
-if (config[23] == "local") {
-  data_source <- "Local"
-  } else {
-  data_source <- "Dropbox"
-}
 
-if(data_source == "Local"){
-  print("Fetching rds files from local source...")
-  datadir <- config[1]
-  } else { ### Fetch data from Dropbox
-    print("Fetching rds files from Dropbox...")
-    source("functions/FetchDropboxData.R")
-    datadir <- paste0(getwd(), "/DB_data")
-    dir.create(file.path(datadir), showWarnings = FALSE)
-    fetchDropbox(url = config[22], dir = datadir)
-}
+datadir <- config[["DataCache"]]
 
 ### Load rds files ####
-
 ### Make a list of all the .rds files using full path
-rds_files <- list.files(datadir,full.names = TRUE ,pattern = "\\.rds$")
+rds_files <- list.files(paste0(rootdir, datadir), full.names = TRUE ,pattern = "\\.rds$")
 
 ### create an object that contains all of the rds files
 data <- lapply(rds_files, readRDS)
 
 ### Make a list of the df names by eliminating extension from files
-df_names <- gsub(".rds", "", list.files(datadir, pattern = "\\.rds$"))
+df_names <- gsub(".rds", "", list.files(paste0(rootdir, datadir), pattern = "\\.rds$"))
 
 # name each df in the data object appropriately
 names(data) <- df_names

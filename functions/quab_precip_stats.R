@@ -25,7 +25,7 @@
 # config <- read.csv("//env.govt.state.ma.us/enterprise/DCR-WestBoylston-WKGRP/WatershedJAH/EQStaff/WQDatabase/R-Shared/WAVE-WIT/Configs/WAVE_WIT_Config.csv", header = TRUE)
 # config <- as.character(config$CONFIG_VALUE)
 # 
-# rds_files <- list.files(config[1],full.names = T)
+# rds_files <- list.files(config[["DataCache"]],full.names = T)
 # rds_files # Take a look at the rds files:
 # df_precip <- readRDS(rds_files[19]) # NOTE: This rds file is created daily at the conclusion of the NOAA data fetch
 # vyear <- NULL
