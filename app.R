@@ -40,15 +40,10 @@ packages <- c("shiny","shinyjs", "shinyFiles","rmarkdown", "knitr", "tidyverse",
 # Sys.setenv(RSTUDIO_PANDOC= paste0(config[21],"/bin/pandoc")) ### need to resolve issue that users have different install locations
  ### Set Location Dependent Variables - datatsets and distro
  
- if (userlocation == "Wachusett") {
-   rootdir <- wach_team_root
- } else {
-   rootdir <- quab_team_root
- }
 
 ### Specify User information ####
 user <-  Sys.getenv("USERNAME") %>% toupper()
-userdata <- readxl::read_xlsx(path = paste0(rootdir, config[["Users"]]))
+userdata <- readxl::read_xlsx(path = paste0(wach_team_root, config[["Users"]]))
 userdata$Username <- userdata$Username %>% toupper()
 
 if(user %in% userdata$Username){
@@ -74,13 +69,13 @@ datadir <- config[["DataCache"]]
 
 ### Load rds files ####
 ### Make a list of all the .rds files using full path
-rds_files <- list.files(paste0(rootdir, datadir), full.names = TRUE ,pattern = "\\.rds$")
+rds_files <- list.files(paste0(wach_team_root, datadir), full.names = TRUE ,pattern = "\\.rds$")
 
 ### create an object that contains all of the rds files
 data <- lapply(rds_files, readRDS)
 
 ### Make a list of the df names by eliminating extension from files
-df_names <- gsub(".rds", "", list.files(paste0(rootdir, datadir), pattern = "\\.rds$"))
+df_names <- gsub(".rds", "", list.files(paste0(wach_team_root, datadir), pattern = "\\.rds$"))
 
 # name each df in the data object appropriately
 names(data) <- df_names
