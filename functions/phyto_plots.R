@@ -122,7 +122,7 @@ p <- ggplot(df2, aes(x = Date, y = Result)) +
 return(p)
 }
 }
-p
+# p
 #taxaplot(df, locs, vyear, taxa, color)
 #######################################################.
 
@@ -134,7 +134,7 @@ phytoplot <- function(df,locs,vyear,epi_min,epi_max,em_min,em_max) {
   # df <- df_phyto_quab
   # df <- df_phyto_quab %>%
   #   mutate(Year = year(df$Date))
-  # secchi <- df_secchi_wach # Eventually this needs to be changed to a df argument with ns()
+  secchi <- df_secchi_wach # Eventually this needs to be changed to a df argument with ns()
   # vyear <- 2018
   # locs <- c("202", "206")
   # locs <- c("BN3417", "CI3409")
