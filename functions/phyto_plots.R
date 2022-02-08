@@ -11,7 +11,7 @@
 # Libraries were loaded in app.R
 # Data source was loaded in app.R
 
-#Return the dataframes in a list
+## Return the dataframes in a list
 # dfs <- LoadPhytoData()
 # # Extract each dataframe
 # phyto <- dfs[[1]]
@@ -134,9 +134,10 @@ phytoplot <- function(df,locs,vyear,epi_min,epi_max,em_min,em_max) {
   # df <- df_phyto_quab
   # df <- df_phyto_quab %>%
   #   mutate(Year = year(df$Date))
-  secchi <- df_secchi_wach # Eventually this needs to be changed to a df argument with ns()
-    # vyear <- 2018
+  # secchi <- df_secchi_wach # Eventually this needs to be changed to a df argument with ns()
+  # vyear <- 2018
   # locs <- c("202", "206")
+  # locs <- c("BN3417", "CI3409")
   # epi_min <- 1
   # epi_max <- 4
   # em_min <- 5
@@ -151,14 +152,14 @@ phytoplot <- function(df,locs,vyear,epi_min,epi_max,em_min,em_max) {
   
 # This plot will not work for Quabbin until Totals are added to Quabbin db
 # If Quabbin data is to be plotted, plot message saying plot unavailable
-if ("202" %in% unique(df$Station)) {
-  p <- ggplot(df) +
-    theme_void() +
-    annotate("text", x = 4, y = 25, label = paste(
-      "This plot will not be available for Quabbin data until totals are included in the database.", sep = " "),
-      color = "blue", size = 4.5, fontface = "bold.italic")
-  return(p)
-} else {
+# if ("202" %in% unique(df$Station)) {
+#   p <- ggplot(df) +
+#     theme_void() +
+#     annotate("text", x = 4, y = 25, label = paste(
+#       "This plot will not be available for Quabbin data until totals are included in the database.", sep = " "),
+#       color = "blue", size = 4.5, fontface = "bold.italic")
+#   return(p)
+# } else {
 
   ######################################.
   
@@ -169,7 +170,7 @@ GTA_epi <- df[df$Taxa == "Grand Total" & year(df$Date) %in% vyear & df$Depth_m >
       df$Station %in% locs,] %>%
   filter(Result != 8888, Result != 9999) %>% 
   group_by(Date) %>%
-  drop_na() %>%
+  drop_na(-PA) %>%
   summarize(Result = max(Result)) %>%
   mutate("epi")
 names(GTA_epi) <- c("date","value","dataset")
@@ -180,7 +181,7 @@ GTA_em <- df[df$Taxa == "Grand Total" & year(df$Date) %in% vyear & df$Depth_m >=
       df$Station %in% locs,] %>%
   filter(Result != 8888, Result != 9999) %>% 
   group_by(Date) %>%
-  drop_na() %>%
+  drop_na(-PA) %>%
   summarize(Result = max(Result)) %>%
   mutate("em")
 names(GTA_em) <- c("date","value","dataset")
@@ -239,9 +240,9 @@ p  <- ggplot() +
         legend.title=element_blank())
   return(p)
 }
-}
 
-#phytoplot(data, locs,vyear,epi_min,epi_max,em_min,em_max)
+
+#phytoplot(data, locs, vyear, epi_min, epi_max, em_min, em_max)
 ######################################################################################.
 
 #### Historical Comparison Plot ####
