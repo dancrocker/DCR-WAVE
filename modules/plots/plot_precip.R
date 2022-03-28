@@ -38,7 +38,7 @@ t_precip_month <- t1data %>%
 # Make months character abbreviations
 t_precip_month$Month <- as.character(factor(month.abb[t_precip_month$Month], levels=month.abb[1:12]))
 
-p1data$Month <- factor(month.abb[p1data$Month], levels=month.abb[1:12])
+p1data$Month <- factor(month.abb[p1data$Month], levels = month.abb)#levels=month.abb[1:12]
 p1data$Year <- factor(p1data$Year)
 
 t_precip_month <- t(t_precip_month) %>% as.data.frame()
@@ -62,11 +62,15 @@ p <- ggplot(p1data, aes(x = Month, y = Precip)) +
   theme_light() +
   theme(legend.position = "bottom",
         legend.title = element_blank(),
-        axis.title.y = element_text(vjust = 2, face = "bold"),
-        axis.title.x = element_text(vjust = -1, face = "bold"),
+        legend.text = element_text(size = 14),
+        axis.title.y = element_text(vjust = 2, face = "bold", size = 14),
+        axis.title.x = element_text(vjust = -1, face = "bold", size = 14),
+        axis.text = element_text(size = 14),
         plot.title = element_text(hjust = 0.5, face = "bold")) +
+  
   scale_fill_manual(values=c("#4477AA", "#BBBBBB")) +
-  scale_y_continuous(breaks = pretty_breaks())
+  scale_y_continuous(breaks = pretty_breaks()) +
+  scale_x_discrete(name = "", labels = substr(month.name,1,1))
 
 out <- list()
 ### Plot return type
@@ -178,7 +182,7 @@ PRECIP_YEAR_BAR <- function(df, date_min, date_max, type = NULL) {
   years <- seq.int(from = year(date_min), to = min(this_year - 1 , year(date_max)))
   
   df2 <- filter(df, Year %in% years) %>%
-    select(c(1,7)) %>%
+    select(c(1,5)) %>%
     dplyr::rename("Precip" = AnnualTotal)
   PrcpAnnualAve <- round(mean(df$AnnualTotal, na.rm = T), 2)
   plotmax <- ceiling(max(PrcpAnnualAve, max(df2$Precip, na.rm = T))) * 1.04

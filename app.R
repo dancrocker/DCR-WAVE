@@ -44,7 +44,7 @@ packages <- c("shiny","shinyjs", "shinyFiles","rmarkdown", "knitr", "tidyverse",
  user <-  Sys.getenv("USERNAME") %>% toupper()
  
  if (config[["App Location"]] == "DCR") {
-   rootdir <- wach_team_root
+   rootdir <- user_root
  } else {
    rootdir <- NULL
  }

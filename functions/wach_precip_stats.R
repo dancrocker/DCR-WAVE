@@ -29,7 +29,7 @@ library(lattice)
 # LOAD_RDS(files = c("df_wach_prcp_daily.rds")) # Use vector of rds file names, index numbers may change!
 # 
 # df_precip <- df_wach_prcp_daily
-# vyear <- 2020
+# vyear <- 2021
 #####
 
 
@@ -56,25 +56,37 @@ PrcpMonthMean <- PrcpMonthYear[PrcpMonthYear$nDays >= 28,] %>%
   summarize(MonthPrcpAve = round(mean(MonthPrcpTotal),2), nYears = n()) %>%
   ungroup()
 
+
+# jend_precip <- 200
+
 # Calculate Annual Totals- YTCD = Year to Calendar Date for last date in record - could make the date value selectable
 YTD_C_Day <- df_precip %>%
-  filter(jDay <= jend_precip) %>%
-  group_by(year(DATE)) %>%
-  summarize(YTCD = round(sum(DailyPrcpAve), 2),nDays = n()) %>%
-  rename("Year" = `year(DATE)`) %>%
+  mutate("grp" = ifelse(jDay <= jend_precip, "Before", "After"),
+         "Year" = year(DATE)) %>% 
+  group_by(Year, grp) %>%
+  summarize(YTCD = round(sum(DailyPrcpAve), 2)) %>% #nDays = n()
   ungroup()
+
+YTD_J_Day <- YTD_C_Day %>% 
+  spread(grp, YTCD, fill = 0) %>% 
+  mutate("YTJD" = round(Before + lag(After, 1), 2),
+         "AnnualTotal" = round(Before + After, 2)) %>%
+  rename("YTCD" = "Before")
 
 # More totals - YTJD = Year to Julian Date (last 365 or 366 days) This one is tricky
 #- uses lag() to combine the YTCD from each year with the precip after the Julian Date from the prior year
-YTD_J_Day <- df_precip %>%
-  filter(jDay > jend_precip) %>%
-  group_by(year(DATE)) %>%
-  summarize(After_YTCD = round(sum(DailyPrcpAve), 2),nDays = n()) %>%
-  rename("Year" = `year(DATE)`) %>%
-  full_join(YTD_C_Day,by = "Year") %>%
-  mutate("YTJD" = round(YTCD + lag(After_YTCD,1), 2)) %>%
-  mutate("AnnualTotal" = round(After_YTCD + YTCD, 2)) %>%
-  ungroup()
+# YTD_J_Day <- df_precip %>%
+#   filter(jDay > jend_precip) %>%
+#   group_by(year(DATE)) %>%
+#   summarize(After_YTCD = ifelse(is.na(n()), 0, round(sum(DailyPrcpAve), 2)),
+#             nDays = ifelse(is.na(n()), 0, n())) %>%
+#   rename("Year" = `year(DATE)`)
+# 
+# YTD_J_Day <- YTD_C_Day %>% 
+#   left_join(YTD_J_Day, by = "Year") %>%
+#   mutate("YTJD" = round(YTCD + lag(After_YTCD, 1), 2),
+#          "AnnualTotal" = round(After_YTCD + YTCD, 2)) %>%
+#   ungroup()
 
 ### Current Precip Overview ####
 
