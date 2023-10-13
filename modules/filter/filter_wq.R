@@ -1,9 +1,12 @@
-##############################################################################################################################
+
+
+
+##############################################################################################################################.
 #     Title: Export-WQ.R
 #     Type: Module for DCR Shiny App
 #     Description: Filter and Export Water Quality Data
 #     Written by: Nick Zinck, Spring 2017
-##############################################################################################################################
+##############################################################################################################################.
 
 # Notes:
 #   1. req() will delay the rendering of a widget or other reactive object until a certain logical expression is TRUE or not NULL
@@ -12,9 +15,9 @@
 #   1. Make the Metero/Hydro Filters work
 #   2. Plotting Features - Show Limits, Finish and Clean up Coloring options (flagged data, met filters)
 
-##############################################################################################################################
-# User Interface
-##############################################################################################################################
+#####################.
+# User Interface ####
+#####################.
 
 FILTER_WQ_UI <- function(id) {
 
@@ -71,73 +74,81 @@ FILTER_WQ_UI <- function(id) {
                    wellPanel(
                      fluidRow(h3("Advanced Filters", align = "center")),
                      fluidRow(
-                       column(4,
+                        column(4,
                               # Flag Selection
                               wellPanel(
                                 # Flag Input - Using the custom Module SELECT_SELECT_ALL, see script of dev manual
-                                SELECT_SELECT_ALL_UI(ns("flag"))
-                              ),
+                                selectInput(ns("flag"), label = "Select Flag(s) of interest:",
+                                            choices = df_flags$label[df_flags$Flag_ID != 114], 
+                                            multiple = TRUE),
+                                switchInput(
+                                  inputId = ns("invert_selection"),
+                                  label = "Filter data to show only data matching flag(s) selected",
+                                  labelWidth = "100%",
+                                  width = "100%",
+                                  value = FALSE
+                                ),
+                                h5(textOutput(ns("text_invert_flag_filter")), align = "center")
+                                # SELECT_SELECT_ALL_UI(ns("flag"))
+                              )
+                        ), # end column
+                        column(4,
                               # storm Sample Selection
                               wellPanel(
                                 strong("Storm Samples:"), # Bold Text
-                                checkboxInput(ns("storm"),
-                                              label =  "Include Storm Samples",
-                                              value = TRUE),
                                 checkboxInput(ns("nonstorm"),
                                               label =  "Include Non-Storm Samples",
-                                              value = TRUE)
-
+                                              value = TRUE),
+                                checkboxInput(ns("storm"),
+                                              label =  "Include Storm Samples",
+                                              value = FALSE)
+                               
                               ), # end Well Panel
                               uiOutput(ns("depth_ui"))
                        ), # end column
                        column(4,
                               # Meteoro/Hydro Filter 1
                               wellPanel(
-                                strong("Meteoro/Hydro Filter 1"), # Bold Text
+                                strong("Weather Filter"), # Bold Text
                                 br(), br(),
                                 radioButtons(ns("met_option_1"), label = NULL,
-                                             choices = c("off", "on", "group"),
+                                             choices = c("off", "on"),
                                              inline = TRUE),
                                 selectInput(ns("met_param_1"), label = NULL,
-                                            choices = c("Wind Speed",
-                                                        "Wind Direction",
-                                                        "Precipitation - 24 hrs",
-                                                        "Precipitation - 48 hrs",
-                                                        "Temperature",
-                                                        "Cloud Cover",
-                                                        "Flow - Quabbin Aquaduct",
-                                                        "Flow - East Branch Swift",
-                                                        "Flow - West Branch Swift",
-                                                        "Flow - Quinapoxet",
-                                                        "Flow - Stillwater"),
-                                            selected = "Wind Speed"),
-                                sliderInput(ns("met_value_1"), "Value Range:", min = 0, max = 12, value = c(0,12), step = 0.5)
+                                            choices = c(#"Air Temperature (C)",
+                                                        "Precipitation (in) - 24 hrs",
+                                                        "Precipitation (in) - 48 hrs",
+                                                        "Precipitation (in) - 7 day",
+                                                        "Precipitation (in) - 14 day",
+                                                        "Precipitation (in) - 30 day"),
+                                            selected = "Precipitation (in) - 24 hrs"),
+                                uiOutput(ns("weather_filter"))
                               ) # end Well Panel
-                       ),
-                       column(4,
-                              # Meteoro/Hydro Filter 2
-                              wellPanel(
-                                strong("Meteoro/Hydro Filter 2"), # Bold Text
-                                br(), br(),
-                                radioButtons(ns("met_option_2"), label = NULL,
-                                             choices = c("off", "on", "group"),
-                                             inline = TRUE),
-                                selectInput(ns("met_param_2"), label = NULL,
-                                            choices = c("Wind Speed",
-                                                        "Wind Direction",
-                                                        "Precipitation - 24 hrs",
-                                                        "Precipitation - 48 hrs",
-                                                        "Temperature",
-                                                        "Cloud Cover",
-                                                        "Flow - Quabbin Aquaduct",
-                                                        "Flow - East Branch Swift",
-                                                        "Flow - West Branch Swift",
-                                                        "Flow - Quinapoxet",
-                                                        "Flow - Stillwater"),
-                                            selected = "Precipitation - 24 hrs"),
-                                sliderInput(ns("met_value_2"), "Value Range:", min = 0, max = 12, value = c(0,12), step = 0.5)
-                              ) # end Well Panel
-                       ) # end column
+                       )
+                       # column(4,
+                       #        # Meteoro/Hydro Filter 2
+                       #        wellPanel(
+                       #          strong("Meteoro/Hydro Filter 2"), # Bold Text
+                       #          br(), br(),
+                       #          radioButtons(ns("met_option_2"), label = NULL,
+                       #                       choices = c("off", "on", "group"),
+                       #                       inline = TRUE),
+                       #          selectInput(ns("met_param_2"), label = NULL,
+                       #                      choices = c("Wind Speed",
+                       #                                  "Wind Direction",
+                       #                                  "Precipitation - 24 hrs",
+                       #                                  "Precipitation - 48 hrs",
+                       #                                  "Temperature",
+                       #                                  "Cloud Cover",
+                       #                                  "Flow - Quabbin Aquaduct",
+                       #                                  "Flow - East Branch Swift",
+                       #                                  "Flow - West Branch Swift",
+                       #                                  "Flow - Quinapoxet",
+                       #                                  "Flow - Stillwater"),
+                       #                      selected = "Precipitation - 24 hrs"),
+                       #          sliderInput(ns("met_value_2"), "Value Range:", min = 0, max = 12, value = c(0,12), step = 0.5)
+                              # ) # end Well Panel
+                       # ) # end column
                      ) # end fluidrow
                    ) # end well panel
                )
@@ -151,24 +162,23 @@ FILTER_WQ_UI <- function(id) {
 } # end UI function
 
 
-##############################################################################################################################
-# Server Function
-##############################################################################################################################
+#######################.
+# Server Function ####
+#######################.
 
 # This module does not take any reactive expressions. Changes will have to be made to accmodate reactive expressions
 # dfs is a list of dataframes
 
-FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_flag_index = NULL, type = "wq"){
+FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_precip, df_flag_index = NULL, type = "wq"){
 
   # Types include: "wq", "wq_depth", and "profile". More can be added
 
-  ########################################################
-  # Main Selection
+  # Main Selection ####
 
   ns <- session$ns # see General Note 1
 
 
-  ### Site Selection
+  ### Site Selection ####
 
   # Display sites w/o depths OR sites w/ Depths
   output$site_ui <- renderUI({
@@ -195,7 +205,7 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_f
   })
 
 
-  ### Parameter and Date Range
+  ### Parameter and Date Range ####
 
   # Parameter Selection using Param_Select Module
   Param <- callModule(PARAM_SELECT, "param", Df = Df1)
@@ -203,7 +213,7 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_f
   # Date Range and Year Using Date_Select Module
   Date_Year <- callModule(DATE_SELECT, "date", Df = Df1)
 
-  # Month Selection
+  # Month Selection ####
   Month <- callModule(CHECKBOX_SELECT_ALL, "month",
                       label = "Months:",
                       Choices = reactive({month.name}),
@@ -230,41 +240,43 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_f
 
   })
 
+  # Advanced Filters ####
 
-  ##################################################
-  # Advanced Filter
-
-
-  ### Flag Selection
+  ### Flag Selection ####
 
   # Choices
-  flag_choices <- df_flags$label[df_flags$Flag_ID != 114]
+  # flag_choices <- df_flags$label[df_flags$Flag_ID != 114]
 
   # server - Using the custom Module SELECT_SELECT_ALL, see script of dev manual
-  Flag <- callModule(SELECT_SELECT_ALL, "flag",
-                     label = "Select flag(s) to EXCLUDE from the data:",
-                     Choices = reactive({df_flags$label}),
-                     colwidth = 3)
+  # Flag <- callModule(SELECT_SELECT_ALL, "flag",
+  #                    label = "Select flag(s) to EXCLUDE from the data:",
+  #                    Choices = reactive({df_flags$label}),
+  #                    colwidth = 3)
 
-  # Subset the Sample Flag Index by the flags selected to exclude - this results in a vector of IDs to filter out
-  flagged_ids <- reactive({
-    df_flag_index %>%
-      filter(FlagCode %in% as.numeric(substr(Flag(),1, 3))) %>%
-      .$SampleID
-  })
-
-
-  ### Storm Sample Selection
-
-  # Filter df_flag_index so that only flag 114 (Storm Sample Flag) are included
+  #1 Select input for flags to choose from (input$flag)
+  #2 Toggle - off - defaults to exclude selected flags, toggle on to only show data with flags selected
+  #3 Update text to indicate that the Filter is set to [exclude | only return] Data with flag(s): x,y,z 
+  #4 The Flag data df that gets passed into the module should be as paired down as possible. 
+  #5 filter the flag index from both dfs according to the toggle setting in #2
+  #6 Recombine the filtered data dfs into 1 df
+  #7 Apply the filter in the filter pipeline
+  #9 Show output text that indicates how many records were excluded/included from the data using the flag filter
+  
+  #Fixes needed for Quabbin:
+  # 1. Modify rds file generation script: wq_quab_Flag_sample needs the flag code column
+  # 2. The trib data needs to have a column indicating which table the data is coming from
+  # 3. tblMDHEMLWQData does not seem to exist??? Where is this table?
+  # 4. Quab flag index dataset only has 1 value: "df_quab_flags_all" - this in not helpful in splitting data for modules
+  
+  ### Storm Sample Selection ####
   storm_ids <- reactive({
-    df_flag_index %>%
-      filter(FlagCode == 114) %>%
-      .$SampleID
+    Df2() %>%
+      filter(!is.na(StormSampleN),
+                    StormSampleN != "") %>%
+      .$UniqueID
   })
 
-
-  # ### Depth Filter (Profile)
+  # ### Depth Filter (Profile) ####
 
   # UI
   output$depth_ui <- renderUI({
@@ -277,28 +289,66 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_f
       )
     }
   })
-
+  
+  
+#* Weather filter ----
+#* Set slider range and label according to which choice is selected
+  met_range_min <- reactive({
+    ifelse(input$met_param_1 == "Air Temperature (C)", -5, 0)
+    })
+ 
+  met_range_max <- reactive({
+    ifelse(input$met_param_1 == "Air Temperature (C)", 40, 20) 
+  })
+              
+  output$weather_filter <- renderUI({
+    sliderInput(ns("met_value_1"), 
+                "Value Range:", min = met_range_min(), max = met_range_max(), value = c(0, 20), step = 0.5)
+  })
+  
 
   ### Reactive List of (non-reactive) Dataframes - filter for selected site, param, value range, date, and remove rows with NA for Result
 
   Df3 <- reactive({
-
+    req(Df2())
     # Assign a temporary dataframe and filter NAs
     df_temp <- Df2() %>% filter(!is.na(Result))
 
     # filter out Selected Flags
-    if(isTruthy(Flag()) & isTruthy(df_flag_index)){
-      df_temp <- df_temp %>% filter(!(ID %in% flagged_ids()))
+    if(isTruthy(input$flag) & isTruthy(df_flag_index)) {
+      
+      flagged_recs <- df_flag_index %>% 
+        filter(FlagCode %in% as.numeric(substr(input$flag, 1, 3))) %>% 
+        mutate("Flag_Index" = glue("{DataTableName}_{SampleID}"))
+      
+      x <- df_temp %>% 
+        mutate("Flag_Index" = glue("{TableName}_{ID}"))
+      
+      if(input$invert_selection) {
+        # keeps only records that are flagged
+        x <- x %>% 
+          filter(Flag_Index %in% flagged_recs$Flag_Index)
+        df_temp <- x %>% 
+          select(-c(Flag_Index))
+      } else {
+        # Excludes all records that are flagged
+        x <- x %>% 
+          filter(!Flag_Index %in% flagged_recs$Flag_Index)
+        df_temp <- x %>% 
+          select(-c(Flag_Index))
+      }
+      
+      df_temp
     }
 
     # filter out Storm Samples if unchecked
     if(input$storm != TRUE & isTruthy(df_flag_index)){
-      df_temp <- df_temp %>% filter(!(ID %in% storm_ids()))
+      df_temp <- df_temp %>% filter(!(UniqueID %in% storm_ids()))
     }
 
     # filter out Non Storm Samples if unchecked
     if(input$nonstorm != TRUE & isTruthy(df_flag_index)){
-      df_temp <- df_temp %>% filter(ID %in% storm_ids())
+      df_temp <- df_temp %>% filter(UniqueID %in% storm_ids())
     }
 
     # filter out Depth for Profile Data
@@ -307,14 +357,28 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_f
         filter(Depth_m >= input$depth[1],
                Depth_m <= input$depth[2])
     }
-
+    # Filter results if the weather filter is on
+    # For now the air temp filter goes to the default, which is all dates
+    if(input$met_option_1  == "on") {
+      weather_dates <- switch(input$met_param_1,
+        # input$met_param_1 == "Air Temperature (C)" ~ df_precip$DATE[between(df_precip$DailyPrcpAve, input$met_value_1[1], input$met_value_1[2])],
+        "Precipitation (in) - 24 hrs" = df_precip$DATE[between(df_precip$DailyPrcpAve, input$met_value_1[1], input$met_value_1[2])],
+        "Precipitation (in) - 48 hrs" = df_precip$DATE[between(df_precip$`2dPRCP`, input$met_value_1[1], input$met_value_1[2])],
+        "Precipitation (in) - 7 day" = df_precip$DATE[between(df_precip$`7dPRCP`, input$met_value_1[1], input$met_value_1[2])],
+        "Precipitation (in) - 14 day" = df_precip$DATE[between(df_precip$`14dPRCP`, input$met_value_1[1], input$met_value_1[2])],
+        "Precipitation (in) - 30 day" = df_precip$DATE[between(df_precip$`30dPRCP`, input$met_value_1[1], input$met_value_1[2])],  
+        df_precip$DATE
+      )
+      
+      df_temp <- df_temp %>%
+        filter(Date %in% na.omit(weather_dates))
+    }
+    
     df_temp
-
+    
   })
-
-
-  ########################################################
-  # Create Final Dataframes for use Table, Export, Plots, and Statistics
+  
+  # Create Final Dataframes for use Table, Export, Plots, and Statistics ####
 
   # If Full dataframe is used or if selection/filters are used
   # Reactive Dataframe - Long Format (Regular format)
@@ -340,7 +404,7 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_f
       spread("Parameter", "Result")
   })
 
-  # Reactive Dataframe - Adding Columns for Year, Season, and Month for grouping purposesin some modules
+  # Reactive Dataframe - Adding Columns for Year, Season, and Month for grouping purposes in some modules
   Df4_Stat <- reactive({
     Df4() %>%
       mutate(Year = factor(lubridate::year(Date)),
@@ -349,8 +413,7 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_f
   })
 
 
-  #####################################################
-  # CSV output and Table
+  # CSV output and Table ####
 
   # render Datatable
   output$table <- renderDataTable({
@@ -370,8 +433,7 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_f
     }
   )
 
-  ######################################################
-  # Texts
+  # Texts ####
 
   # Text - Number of Samples - Words
   output$text_num_text <- renderText({
@@ -421,10 +483,20 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_f
     "- Please Select Storm Sample Types"
   })
 
-  #####################################################
-  # Other
+  output$text_invert_flag_filter <- renderText({
+    
+    req(input$flag, Df3())
+    if(input$invert_selection) {
+      glue("The flag filter is set to only INCLUDE data with selected flag(s):{paste(input$flag, collapse = ', ')}")
+    } else {
+      glue("The flag filter is set to EXCLUDE data with selected flag(s):{paste(input$flag, collapse = ', ')}")
+    }
+  })
 
-  ### Site Map
+    
+  # OTHER ####
+
+  ### Site Map ####
   # Selected Sites to Highlight Red
   Site_List <- reactive({
     if(input$full_data){
@@ -438,13 +510,12 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_f
   callModule(SITE_MAP, "site_map", df_site = df_site, Site_List = Site_List)
 
 
-  ### Refresh Button
+  ### Refresh Button ####
   observeEvent(input$refresh, {
     shinyjs::reset("form")
   })
 
-  #####################################################
-  # Return from Module a list of reactive dataframes.
+  # Return from Module a list of reactive dataframes. ####
 
   return(list(Long = Df4,
               Wide = Df4_Wide,

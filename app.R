@@ -24,9 +24,9 @@ ipak <- function(pkg){
 ### Package List ####
 ### NOTE - Shiny must be installed and loaded in the LaunchAppGitHub.R script - any other packages requred should be listed below
 
-packages <- c("shiny","shinyjs", "shinyFiles","rmarkdown", "knitr", "tidyverse", "tidyselect", "lubridate", "plotly", "leaflet", "RColorBrewer", "devtools",
+packages <- c("shiny","shinyjs", "shinyFiles", "shinyWidgets","rmarkdown", "knitr", "tidyverse", "tidyselect", "lubridate", "plotly", "leaflet", "RColorBrewer", "devtools",
               "DT", "akima", "scales", "stringr", "cowplot", "shinythemes","rgdal", "reshape2", "dataRetrieval", "pryr", "broom",
-              "ggthemes", "visreg", "lattice", "hydroTSM", "httr") # Took out odbc and dbi since app no longer connects to databases directly
+              "ggthemes", "visreg", "lattice", "hydroTSM", "httr", "glue") # Took out odbc and dbi since app no longer connects to databases directly
   # Removed chron - was conflicting with lubridate
  suppressPackageStartupMessages(ipak(packages)) 
 
@@ -64,9 +64,9 @@ packages <- c("shiny","shinyjs", "shinyFiles","rmarkdown", "knitr", "tidyverse",
  
 ### Tab Default ####
 if(userlocation == "Quabbin"){
-  tab_selected = "Quabbin"
+  tab_selected <- "Quabbin"
 } else {
-  tab_selected = "Wachusett"
+  tab_selected <- "Wachusett"
 }
 
 ### Specify data source
@@ -638,7 +638,13 @@ server <- function(input, output, session) {
   ### Quabbin ####
 
   ### Filter
-  Df_Trib_Quab <- callModule(FILTER_WQ, "mod_trib_quab_filter", df = df_trib_quab, df_site = df_trib_quab_site, type = "wq")
+  Df_Trib_Quab <- callModule(FILTER_WQ, "mod_trib_quab_filter", 
+                             df = df_trib_quab, 
+                             df_site = df_trib_quab_site, 
+                             df_flags = df_flags,
+                             df_precip = df_quabbin_prcp_daily,
+                             df_flag_index = df_wq_quab_flag_sample,
+                             type = "wq")
     
   ### Plots
   callModule(PLOT_TIME_WQ, "mod_trib_quab_plot_time", Df = Df_Trib_Quab$Long)
@@ -660,7 +666,13 @@ server <- function(input, output, session) {
   ### Ware ####
 
   ### Filter
-  Df_Trib_Ware <- callModule(FILTER_WQ, "mod_trib_ware_filter", df = df_trib_ware, df_site = df_trib_ware_site, type = "wq")
+  Df_Trib_Ware <- callModule(FILTER_WQ, "mod_trib_ware_filter", 
+                             df = df_trib_ware, 
+                             df_site = df_trib_ware_site, 
+                             df_flags = df_flags,
+                             df_precip = df_quabbin_prcp_daily,
+                             df_flag_index = df_wq_quab_flag_sample,
+                             type = "wq")
 
   # Plots
   callModule(PLOT_TIME_WQ, "mod_trib_ware_plot_time", Df = Df_Trib_Ware$Long)
@@ -686,7 +698,8 @@ server <- function(input, output, session) {
                              df = df_trib_wach,
                              df_site = df_trib_wach_site,
                              df_flags = df_flags,
-                             df_flag_index = df_wach_flag_index[df_wach_flag_index$DataTableName == "tblWQALLDATA",],
+                             df_precip = df_wach_prcp_daily,
+                             df_flag_index = df_wach_flag_index[df_wach_flag_index$Dataset == "df_trib_bact_wach",],
                              type = "wq")
 
   ### Plots
@@ -712,7 +725,14 @@ server <- function(input, output, session) {
   ### Chemical
 
   ### Filter
-  Df_Chem_Quab <- callModule(FILTER_WQ, "mod_chem_quab_filter", df = df_chem_quab, df_site = df_chem_quab_site, type = "wq_depth")
+  Df_Chem_Quab <- callModule(FILTER_WQ, 
+                             "mod_chem_quab_filter", 
+                             df = df_chem_quab, 
+                             df_site = df_chem_quab_site, 
+                             df_flags = df_flags,
+                             df_precip = df_quabbin_prcp_daily,
+                             df_flag_index = df_wq_quab_flag_sample,
+                             type = "wq_depth")
 
   ### Plots
   callModule(PLOT_TIME_WQ, "mod_chem_quab_plot_time", Df = Df_Chem_Quab$Long) ### Update to Depth specific plot
@@ -730,7 +750,14 @@ server <- function(input, output, session) {
   ### Profile
 
   ### Filter
-  Df_Prof_Quab <- callModule(FILTER_WQ, "mod_prof_quab_filter", df = df_prof_quab, df_site = df_prof_quab_site, type = "profile")
+  Df_Prof_Quab <- callModule(FILTER_WQ, 
+                             "mod_prof_quab_filter", 
+                             df = df_prof_quab, 
+                             df_site = df_prof_quab_site,
+                             df_flags = df_flags,
+                             df_precip = df_quabbin_prcp_daily,
+                             df_flag_index = df_wq_quab_flag_sample, 
+                             type = "profile")
 
   ### Plots
   callModule(PROF_HEATMAP, "mod_prof_quab_heat", Df = Df_Prof_Quab$Long)
@@ -756,7 +783,8 @@ server <- function(input, output, session) {
                              df = df_bact_wach,
                              df_site = df_bact_wach_site,
                              df_flags = df_flags,
-                             df_flag_index = df_wach_flag_index[df_wach_flag_index$DataTableName == "tblWQALLDATA",],
+                             df_precip = df_wach_prcp_daily,
+                             df_flag_index = df_wach_flag_index[df_wach_flag_index$DataTableName == "tblMWRAResults",],
                              type = "wq")
 
   ### Plots
@@ -782,6 +810,7 @@ server <- function(input, output, session) {
                              df = df_chem_wach,
                              df_site = df_chem_wach_site,
                              df_flags = df_flags,
+                             df_precip = df_wach_prcp_daily,
                              df_flag_index = df_wach_flag_index[df_wach_flag_index$DataTableName == "tbl_Nutrients",],
                              type = "wq_depth")
 
@@ -801,7 +830,14 @@ server <- function(input, output, session) {
   ### Profile
 
   ### Filter
-  Df_Prof_Wach <- callModule(FILTER_WQ, "mod_prof_wach_filter", df = df_prof_wach, df_site = df_prof_wach_site, type = "profile")
+  Df_Prof_Wach <- callModule(FILTER_WQ, 
+                             "mod_prof_wach_filter", 
+                             df = df_prof_wach, 
+                             df_site = df_prof_wach_site,
+                             df_flags = df_flags,
+                             df_precip = df_wach_prcp_daily,
+                             df_flag_index = df_wach_flag_index[df_wach_flag_index$Dataset == "tbl_Profiles",],
+                             type = "profile")
 
   ### Plots
   callModule(PLOT_TIME_WQ, "mod_prof_wach_plot_time", Df = Df_Prof_Wach$Long) ### Update to Depth specific plot
