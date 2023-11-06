@@ -644,7 +644,7 @@ server <- function(input, output, session) {
                              df_flags = df_flags,
                              df_precip = df_quabbin_prcp_daily,
                              df_flag_index = df_wq_quab_flag_sample,
-                             type = "wq")
+                             type = "wq_trib")
     
   ### Plots
   callModule(PLOT_TIME_WQ, "mod_trib_quab_plot_time", Df = Df_Trib_Quab$Long)
@@ -672,7 +672,7 @@ server <- function(input, output, session) {
                              df_flags = df_flags,
                              df_precip = df_quabbin_prcp_daily,
                              df_flag_index = df_wq_quab_flag_sample,
-                             type = "wq")
+                             type = "wq_trib")
 
   # Plots
   callModule(PLOT_TIME_WQ, "mod_trib_ware_plot_time", Df = Df_Trib_Ware$Long)
@@ -700,7 +700,7 @@ server <- function(input, output, session) {
                              df_flags = df_flags,
                              df_precip = df_wach_prcp_daily,
                              df_flag_index = df_wach_flag_index[df_wach_flag_index$Dataset == "df_trib_bact_wach",],
-                             type = "wq")
+                             type = "wq_trib")
 
   ### Plots
   callModule(PLOT_TIME_WQ, "mod_trib_wach_plot_time", Df = Df_Trib_Wach$Long)
@@ -785,7 +785,7 @@ server <- function(input, output, session) {
                              df_flags = df_flags,
                              df_precip = df_wach_prcp_daily,
                              df_flag_index = df_wach_flag_index[df_wach_flag_index$DataTableName == "tblMWRAResults",],
-                             type = "wq")
+                             type = "wq_res")
 
   ### Plots
   callModule(PLOT_TIME_WQ, "mod_bact_wach_plot_time", Df = Df_Bact_Wach$Long)

@@ -94,16 +94,8 @@ FILTER_WQ_UI <- function(id) {
                         ), # end column
                         column(4,
                               # storm Sample Selection
-                              wellPanel(
-                                strong("Storm Samples:"), # Bold Text
-                                checkboxInput(ns("nonstorm"),
-                                              label =  "Include Non-Storm Samples",
-                                              value = TRUE),
-                                checkboxInput(ns("storm"),
-                                              label =  "Include Storm Samples",
-                                              value = FALSE)
-                               
-                              ), # end Well Panel
+                              uiOutput(ns("storm_ui")),
+                              # Depth Selection
                               uiOutput(ns("depth_ui"))
                        ), # end column
                        column(4,
@@ -166,12 +158,12 @@ FILTER_WQ_UI <- function(id) {
 # Server Function ####
 #######################.
 
-# This module does not take any reactive expressions. Changes will have to be made to accmodate reactive expressions
+# This module does not take any reactive expressions. Changes will have to be made to accomodate reactive expressions
 # dfs is a list of dataframes
 
-FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_precip, df_flag_index = NULL, type = "wq"){
+FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_precip, df_flag_index = NULL, type){
 
-  # Types include: "wq", "wq_depth", and "profile". More can be added
+  # Types include: "wq_trib", "wq_res" ,"wq_depth", and "profile". More can be added
 
   # Main Selection ####
 
@@ -182,7 +174,7 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_p
 
   # Display sites w/o depths OR sites w/ Depths
   output$site_ui <- renderUI({
-    if(type == "wq" | type == "profile"){
+    if(type == "wq_trib" | type == "profile"){
       SITE_CHECKBOX_UI(ns("site"))
     } else if(type == "wq_depth"){
       STATION_LEVEL_CHECKBOX_UI(ns("site"))
@@ -190,13 +182,12 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_p
   })
 
   # Site Selection using Site Select Module
-  Site <- if(type == "wq" | type == "profile"){
-    callModule(SITE_CHECKBOX, "site", df = df)
-  } else if(type == "wq_depth"){
+  Site <- if(type == "wq_depth") {
     callModule(STATION_LEVEL_CHECKBOX, "site", df = df)
+  } else { 
+    callModule(SITE_CHECKBOX, "site", df = df)
   }
-
-
+  
   # Reactive Dataframe - first filter of the dataframe for Site
   Df1 <- reactive({
     # A Site must be selected in order for Df1 (or anything that uses Df1()) to be executed
@@ -269,30 +260,57 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_p
   # 4. Quab flag index dataset only has 1 value: "df_quab_flags_all" - this in not helpful in splitting data for modules
   
   ### Storm Sample Selection ####
+  if(type == "wq_trib") {
   storm_ids <- reactive({
     Df2() %>%
       filter(!is.na(StormSampleN),
                     StormSampleN != "") %>%
       .$UniqueID
   })
+  }
 
   # ### Depth Filter (Profile) ####
 
   # UI
   output$depth_ui <- renderUI({
-    if(type == "profile"){
+    if(type == "profile") {
       max_depth <- max(df$Depth_m)
       tagList(
         wellPanel(
           sliderInput(ns("depth"),"Depth Range", min = 0, max = max_depth, value = c(0, max_depth))
         )
       )
+    } else {
+      wellPanel(
+        em("Depth filters not applicable to data selected.")
+      )
     }
   })
   
+  ### UI for Storm sample filter
+  # UI
+  output$storm_ui <- renderUI({
+    if(type == "wq_trib") {
+      tagList(
+        wellPanel(
+          strong("Storm Samples:"), # Bold Text
+          checkboxInput(ns("nonstorm"),
+                        label =  "Include Non-Storm Samples",
+                        value = TRUE),
+          checkboxInput(ns("storm"),
+                        label =  "Include Storm Samples",
+                        value = FALSE)
+        ) # end Well Panel
+      )
+    } else {
+      wellPanel(
+      em("Storm sample filter not applicable to data selected.")
+      )
+    }
+  })
   
-#* Weather filter ----
-#* Set slider range and label according to which choice is selected
+  #* Weather filter ----
+  #* Set slider range and label according to which choice is selected
   met_range_min <- reactive({
     ifelse(input$met_param_1 == "Air Temperature (C)", -5, 0)
     })
@@ -341,16 +359,18 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_p
       df_temp
     }
 
-    # filter out Storm Samples if unchecked
-    if(input$storm != TRUE & isTruthy(df_flag_index)){
-      df_temp <- df_temp %>% filter(!(UniqueID %in% storm_ids()))
-    }
+    # Storm Sample filters only if data has storm samples
 
-    # filter out Non Storm Samples if unchecked
-    if(input$nonstorm != TRUE & isTruthy(df_flag_index)){
-      df_temp <- df_temp %>% filter(UniqueID %in% storm_ids())
-    }
+      # filter out Storm Samples if unchecked
+      if(input$storm != TRUE & isTruthy(storm_ids())){
+        df_temp <- df_temp %>% filter(!(UniqueID %in% storm_ids()))
+      }
 
+      # filter out Non Storm Samples if unchecked
+      if(input$nonstorm != TRUE & isTruthy(storm_ids())){
+        df_temp <- df_temp %>% filter(UniqueID %in% storm_ids())
+      }
+    
     # filter out Depth for Profile Data
     if(isTruthy(input$depth)){
       df_temp <- df_temp %>%
@@ -361,7 +381,7 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_p
     # For now the air temp filter goes to the default, which is all dates
     if(input$met_option_1  == "on") {
       weather_dates <- switch(input$met_param_1,
-        # input$met_param_1 == "Air Temperature (C)" ~ df_precip$DATE[between(df_precip$DailyPrcpAve, input$met_value_1[1], input$met_value_1[2])],
+                              # input$met_param_1 == "Air Temperature (C)" ~ df_precip$DATE[between(df_precip$DailyPrcpAve, input$met_value_1[1], input$met_value_1[2])],
         "Precipitation (in) - 24 hrs" = df_precip$DATE[between(df_precip$DailyPrcpAve, input$met_value_1[1], input$met_value_1[2])],
         "Precipitation (in) - 48 hrs" = df_precip$DATE[between(df_precip$`2dPRCP`, input$met_value_1[1], input$met_value_1[2])],
         "Precipitation (in) - 7 day" = df_precip$DATE[between(df_precip$`7dPRCP`, input$met_value_1[1], input$met_value_1[2])],
@@ -479,7 +499,7 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_p
 
   # Text - Select Storm Sample Types when none are selected
   output$text_no_storm <- renderText({
-    req(!(input$storm), !(input$nonstorm), !(input$full_data))
+    req(type == "wq_trib", isTruthy(Param$Type()), isTruthy(Site()), !isTruthy(input$storm), !isTruthy(input$nonstorm), !isTruthy(input$full_data))
     "- Please Select Storm Sample Types"
   })
 
