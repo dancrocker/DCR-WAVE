@@ -25,11 +25,13 @@ ipak <- function(pkg){
 ### NOTE - Shiny must be installed and loaded in the LaunchAppGitHub.R script - any other packages requred should be listed below
 
 packages <- c("shiny","shinyjs", "shinyFiles", "shinyWidgets","rmarkdown", "knitr", "tidyverse", "tidyselect", "lubridate", "plotly", "leaflet", "RColorBrewer", "devtools",
-              "DT", "akima", "scales", "stringr", "cowplot", "shinythemes","rgdal", "reshape2", "dataRetrieval", "pryr", "broom",
-              "ggthemes", "visreg", "lattice", "hydroTSM", "httr", "glue") # Took out odbc and dbi since app no longer connects to databases directly
+              "DT", "akima", "scales", "stringr", "cowplot", "shinythemes", "reshape2", "dataRetrieval", "pryr", "broom",
+              "ggthemes", "visreg", "lattice", "httr", "glue", "sf", "sp") # Took out odbc and dbi since app no longer connects to databases directly
   # Removed chron - was conflicting with lubridate
  suppressPackageStartupMessages(ipak(packages)) 
 
+ options("sp_evolution_status" = 2) # use sf instead of rgdal and rgeos in sp
+ 
 ### Removed rcmodel (that module will not work now - This install fails if tried within R Script.exe) 
 # if("rcmodel" %in% rownames(installed.packages()) == FALSE) {
 #   print("rcmodel package not installed, installing now")

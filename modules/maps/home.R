@@ -85,8 +85,8 @@ HOME <- function(input, output, session, df_site) {
   output$map <- renderLeaflet({
 
     pal <- color_pal
-    QWW <- readOGR("gis/QuabbinWareWachusettWatersheds.shp") %>%
-      spTransform(CRS("+proj=longlat +ellps=GRS80"))
+    QWW <- read_sf("gis/QuabbinWareWachusettWatersheds.shp") %>%
+      st_transform("+proj=longlat +datum=WGS84") #+ellps=GRS80
 
     leaflet(data = df_site2) %>%
       # Set Long/Lat (not completely neccesary)
