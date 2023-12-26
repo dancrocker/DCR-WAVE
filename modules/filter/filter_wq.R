@@ -44,7 +44,6 @@ FILTER_WQ_UI <- function(id) {
                                 h4(textOutput(ns("text_site_null")), align = "center"),
                                 h4(textOutput(ns("text_param_null")), align = "center"),
                                 h4(textOutput(ns("text_date_null")), align = "center"),
-                                h4(textOutput(ns("text_no_storm")), align = "center"),
                                 h4(textOutput(ns("text_no_month")), align = "center"),
                                 h5(textOutput(ns("text_num_text")), align = "center"),
                                 strong(textOutput(ns("text_num")), align = "center")
@@ -360,7 +359,7 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_p
     }
 
     # Storm Sample filters only if data has storm samples
-
+    if(type == "wq_trib") {
       # filter out Storm Samples
       if(input$storm == FALSE & isTruthy(storm_ids())){
         df_temp <- df_temp %>% filter(!(UniqueID %in% storm_ids()))
@@ -370,6 +369,7 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_p
       if(input$nonstorm == FALSE & isTruthy(storm_ids())){
         df_temp <- df_temp %>% filter(UniqueID %in% storm_ids())
       }
+    }
     
     # filter out Depth for Profile Data
     if(isTruthy(input$depth)){
@@ -497,11 +497,11 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_p
     "Select Months"
   })
 
-  # Text - Select Storm Sample Types when none are selected
-  output$text_no_storm <- renderText({
-    req(type == "wq_trib", isTruthy(Param$Type()), isTruthy(Site()), !isTruthy(input$storm), !isTruthy(input$nonstorm), !isTruthy(input$full_data))
-    "- Please Select Storm Sample Types"
-  })
+  # # Text - Select Storm Sample Types when none are selected
+  # output$text_no_storm <- renderText({
+  #   req(type == "wq_trib", isTruthy(Param$Type()), isTruthy(Site()), !isTruthy(input$storm), !isTruthy(input$nonstorm), !isTruthy(input$full_data))
+  #   "- Please Select Storm Sample Types"
+  # })
 
   output$text_invert_flag_filter <- renderText({
     
