@@ -727,8 +727,7 @@ server <- function(input, output, session) {
   ### Chemical
 
   ### Filter
-  Df_Chem_Quab <- callModule(FILTER_WQ, 
-                             "mod_chem_quab_filter", 
+  Df_Chem_Quab <- callModule(FILTER_WQ, "mod_chem_quab_filter", 
                              df = df_chem_quab, 
                              df_site = df_chem_quab_site, 
                              df_flags = df_flags,

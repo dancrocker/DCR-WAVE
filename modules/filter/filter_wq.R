@@ -361,13 +361,13 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_p
 
     # Storm Sample filters only if data has storm samples
 
-      # filter out Storm Samples if unchecked
-      if(input$storm != TRUE & isTruthy(storm_ids())){
+      # filter out Storm Samples
+      if(input$storm == FALSE & isTruthy(storm_ids())){
         df_temp <- df_temp %>% filter(!(UniqueID %in% storm_ids()))
       }
 
-      # filter out Non Storm Samples if unchecked
-      if(input$nonstorm != TRUE & isTruthy(storm_ids())){
+      # filter out Non Storm Samples 
+      if(input$nonstorm == FALSE & isTruthy(storm_ids())){
         df_temp <- df_temp %>% filter(UniqueID %in% storm_ids())
       }
     

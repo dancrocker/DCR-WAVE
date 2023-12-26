@@ -194,13 +194,13 @@ MAP_PLOT <- function(input, output, session, df, df_site) {
     df_temp <- df_temp %>% group_by(Site) %>%
       summarise(`number of samples` = n(),
                 average = mean(Result),
-                minimum = min(Result),
-                maximum = max(Result),
+                minimum = min(Result, na.rm = TRUE),
+                maximum = max(Result, na.rm = TRUE),
                 `1st quartile` = quantile(Result, 0.25),
                 median = median(Result),
                 `3rd quartile` = quantile(Result, 0.75),
-                variance = var(Result),
-                `stand. dev.` = sd(Result),
+                variance = var(Result, na.rm = TRUE),
+                `stand. dev.` = sd(Result, na.rm = TRUE),
                 `geometric mean` = gm_mean(Result)) %>%
       gather(Stat, Value, -c(Site)) # Restructuring the Stat Columns into Two new Columns: "Stat" and "Value"
 
@@ -269,9 +269,9 @@ MAP_PLOT <- function(input, output, session, df, df_site) {
 
   output$map <- renderLeaflet({
     leaflet(data = df_site %>% filter(!is.na(LocationLat), !is.na(LocationLong))) %>%
-      addProviderTiles(providers$Stamen.TonerLite,
+      addProviderTiles(providers$CartoDB.Positron,
                        options = providerTileOptions(noWrap = TRUE)) %>%
-      fitBounds(~min((LocationLong)), ~min(LocationLat), ~max(LocationLong), ~max(LocationLat))
+      fitBounds(~min(LocationLong, na.rm = TRUE), ~min(LocationLat, na.rm = TRUE), ~max(LocationLong, na.rm = TRUE), ~max(LocationLat, na.rm = TRUE))
   })
 
 
