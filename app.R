@@ -18,7 +18,7 @@ print(paste0("WAVE App lauched at ", Sys.time()))
 ipak <- function(pkg){
   new.pkg <- pkg[!(pkg %in% installed.packages(lib.loc = config[["R_lib_Path"]])[, "Package"])]
   if (length(new.pkg))
-    install.packages(new.pkg, lib = config[["R_lib_Path"]], dependencies = TRUE, repos="http://cran.rstudio.com/")
+    install.packages(new.pkg, lib = config[["R_lib_Path"]], dependencies = TRUE, repos="https://cloud.r-project.org")
   sapply(pkg, require, character.only = TRUE)
 }
 ### Package List ####
