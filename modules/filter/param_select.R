@@ -22,7 +22,8 @@ PARAM_SELECT_UI <- function(id) {
     wellPanel(
       em("Parameters sampled at selected sites"), br(),
       uiOutput(ns("type_ui")),
-      uiOutput(ns("range_ui"))
+      uiOutput(ns("range_ui")),
+      em("Note - value range restriction applies to all parameters selected")
     ) # end Well Panel
   ) # end taglist
 
@@ -110,12 +111,14 @@ PARAM_SELECT <- function(input, output, session, Df, multiple = TRUE) {
 
 
   # Units Texts for Selected Parameter
+  # 
   Units <- reactive({
     Df() %>%
       filter(Parameter %in% input$type) %>%
       .$Units %>%
       factor() %>%
-      levels()
+      levels() %>% 
+      paste(collapse = ", ")
   })
 
 
