@@ -34,10 +34,10 @@ SITE_MAP_UI <- function(id) {
 SITE_MAP <- function(input, output, session, df_site, Site_List) {
   
   # Reactive Site Dataframe for Map Coloring, Creating a Selected Column with "Yes" or "No" values
-  
+  # Site_List is a vector of LocationLabel
   df_site_react <- reactive({
     df_temp <- df_site %>% filter(!is.na(LocationLat), !is.na(LocationLong))
-    if(!is.null(Site_List)){   # SHOULD THIS BE Site_List() ?
+    if(!is.null(Site_List())){   # SHOULD THIS BE Site_List() ?
       df_temp$Selected <- ifelse(df_temp$LocationLabel %in% Site_List(), "yes", "no")
     } else {
       df_temp$Selected <- "no"
@@ -55,8 +55,8 @@ SITE_MAP <- function(input, output, session, df_site, Site_List) {
   # Base Leaflet Map - See General Note 3
   output$map <- renderLeaflet({
     
-    leaflet(data = df_site %>% filter(!is.na(LocationLat), !is.na(LocationLong))) %>%
-      addProviderTiles(providers$Stamen.TonerLite,
+    leaflet(data = df_site_react()) %>%
+      addProviderTiles(providers$CartoDB.Positron,
                        options = providerTileOptions(noWrap = TRUE)) %>%
       addCircleMarkers(lng = ~LocationLong, lat = ~LocationLat,
                        label= ~LocationLabel,

@@ -181,7 +181,7 @@ PHYTO_UI <- function(id,df) {
                       sliderInput(ns("yg2"), "Year Grouping 2 (Min-Max):",
                                   min = min(df$Year), max = max(df$Year), value = c(2007,max(df$Year)), step = 1, sep = ""),
                       sliderInput(ns("yg3"), "Year Grouping 3 (Min-Max):",
-                                  min = min(df$Year), max = max(df$Year), value = c(1988,max(df$Year)), step = 1, sep = "")
+                                  min = min(df$Year), max = max(df$Year), value = c(min(df$Year),max(df$Year)), step = 1, sep = "")
                ), # End Col
                column(3,
                       radioButtons(ns("stat1"), "Stat for Year Group 1:",

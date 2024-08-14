@@ -11,7 +11,7 @@
 # Libraries were loaded in app.R
 # Data source was loaded in app.R
 
-## Return the dataframes in a list
+# # Return the dataframes in a list
 # dfs <- LoadPhytoData()
 # # Extract each dataframe
 # phyto <- dfs[[1]]
@@ -47,7 +47,7 @@
 taxaplot <- function(df, locs, vyear, taxa, color){
 ## Function Arguments:
 # df <- df_phyto_wach
-# vyear <- 2020 # Selection unique(phyto)
+# vyear <- 2024 # Selection unique(phyto)
 # taxa <- "Dolichospermum"
 # locs <- c("CI3409", "BN3417") # Multiple selections Set as default - adjust plot title
 # color <- "dodgerblue"
@@ -66,8 +66,8 @@ taxaplot <- function(df, locs, vyear, taxa, color){
 # Plot Setup
 
    df_thresh <- df_taxa_wach %>%
-    filter(!is.na(Threshold_early)) %>%
-    select("Phyto_Name","Threshold_early","Threshold_Tx") %>%
+    filter(!is.na(Alert_Level_Wachusett)) %>%
+    select("Phyto_Name","Alert_Level_Wachusett","Alert_Level_Quabbin") %>%
     dplyr::rename(Taxa = Phyto_Name)
    df <- df %>%
      filter(Result != 8888, Result != 9999) %>% 
@@ -109,13 +109,16 @@ p <- ggplot(df2, aes(x = Date, y = Result)) +
   scale_x_date(date_labels = "%b", date_breaks(width = "1 month"), limits = c(xmin,xmax), name = "Date")
 
   if(taxa %in% taxathreshlist) {
-    trigmon <- df_thresh$Threshold_early[match(paste0(taxa), df_thresh$Taxa)]
-    trigtreat <- df_thresh$Threshold_Tx[match(paste0(taxa), df_thresh$Taxa)]
-  p <- p + geom_hline(yintercept = trigmon, linetype=2 ) +
-    annotate("text", min(df2$Date),trigmon - (0.02 * max(df2$Result)), label = "Early Monitoring Threshold", hjust = "left") +
-    geom_hline(yintercept = trigtreat, linetype=5) +
-    annotate("text", min(df2$Date), trigtreat - (0.02 * max(df2$Result)), label = "Treatment Consideration Threshold", hjust = "left")
-    # p <- p +
+    #   trigmon <- df_thresh$Threshold_early[match(paste0(taxa), df_thresh$Taxa)]
+    #   trigtreat <- df_thresh$Threshold_Tx[match(paste0(taxa), df_thresh$Taxa)]
+    alertlevel <- case_when(tab_selected == "Wachusett" ~ df_thresh$Alert_Level_Wachusett[match(paste0(taxa), df_thresh$Taxa)],
+                         tab_selected == "Quabbin"  ~ df_thresh$Alert_Level_Quabbin[match(paste0(taxa), df_thresh$Taxa)])
+    p <- p + geom_hline(yintercept = alertlevel, linetype=2 ) +
+      annotate("text", min(df2$Date),alertlevel - (0.02 * max(df2$Result)), label = "Alert Level", hjust = "left") #+
+      # geom_hline(yintercept = trigtreat, linetype=5) +
+      # annotate("text", min(df2$Date), trigtreat - (0.02 * max(df2$Result)), label = "Treatment Consideration Threshold", hjust = "left")
+  
+  # p <- p +
     #   draw_label("Early Monitoring Threshold", min(df2$Date),trigmon - (0.15 * max(df2$Result)), hjust = "left") +
     #   draw_label("Treatment Consideration Threshold", min(df2$Date),trigtreat - (0.15 * max(df2$Result)), hjust = "left")
   }
@@ -123,7 +126,7 @@ return(p)
 }
 }
 # p
-#taxaplot(df, locs, vyear, taxa, color)
+taxaplot(df, locs, vyear, taxa, color)
 #######################################################.
 
 #### Overview Plot ####
@@ -417,12 +420,14 @@ if(dim(df_yr)[1] == 0) {
           legend.title=element_blank())
 
   if(taxa %in% taxathreshlist) {
-    trigmon <- df_thresh$Threshold_early[match(paste0(taxa), df_thresh$Taxa)]
-    trigtreat <- df_thresh$Threshold_Tx[match(paste0(taxa), df_thresh$Taxa)]
-    p <- p + geom_hline(yintercept = trigmon, linetype=2 ) +
-      annotate("text", min(df_yr$date),trigmon - (0.02 * max(var, var1, var2, var3)), label = "Early Monitoring Threshold", hjust = "left") +
-      geom_hline(yintercept = trigtreat, linetype=5) +
-      annotate("text", min(df_yr$date), trigtreat - (0.02 * max(var, var1, var2, var3)), label = "Treatment Consideration Threshold", hjust = "left")
+    # trigmon <- df_thresh$Threshold_early[match(paste0(taxa), df_thresh$Taxa)]
+    # trigtreat <- df_thresh$Threshold_Tx[match(paste0(taxa), df_thresh$Taxa)]
+    alertlevel <- case_when(tab_selected == "Wachusett" ~ df_thresh$Alert_Level_Wachusett[match(paste0(taxa), df_thresh$Taxa)],
+                            tab_selected == "Quabbin"  ~ df_thresh$Alert_Level_Quabbin[match(paste0(taxa), df_thresh$Taxa)])
+    p <- p + geom_hline(yintercept = alertlevel, linetype=2 ) +
+      annotate("text", min(df_yr$date),alertlevel - (0.02 * max(var, var1, var2, var3)), label = "Alert Level", hjust = "left") # +
+      # geom_hline(yintercept = trigtreat, linetype=5) +
+      # annotate("text", min(df_yr$date), trigtreat - (0.02 * max(var, var1, var2, var3)), label = "Treatment Consideration Threshold", hjust = "left")
   }
     return(p)
   
