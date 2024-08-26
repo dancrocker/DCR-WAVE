@@ -126,7 +126,7 @@ return(p)
 }
 }
 # p
-taxaplot(df, locs, vyear, taxa, color)
+#taxaplot(df, locs, vyear, taxa, color)
 #######################################################.
 
 #### Overview Plot ####
