@@ -49,9 +49,9 @@ PHYTO_UI <- function(id,df) {
                column(1), # Spacer Column
                column(5, # Depth Range sliders
                       sliderInput(ns("Depth1"), "Epilimnion Depth Range (meters):",
-                                  min = 0, max = 5.5, value = c(0,5.5), step = 0.5),
+                                  min = 0, max = 10, value = c(0,10), step = 0.5),
                       sliderInput(ns("Depth2"), "Epi-Metalimnion Depth Range (meters):",
-                                  min = 6, max = 40, value = c(6,40), step = 0.5)
+                                  min = 6, max = 40, value = c(10,40), step = 0.5)
                ) # End Column
                ), # End fluid row
                fluidRow(br()),
