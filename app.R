@@ -100,6 +100,7 @@ rm(data)
 ### Filter - Filter Related Modules
 source("modules/filter/filter_wq.R")
 source("modules/filter/filter_flow.R")
+
 ### source("modules/filter/filter_precip.R")
 source("modules/filter/site_checkbox.R")
 source("modules/filter/station_level_checkbox.R")
@@ -121,6 +122,7 @@ source("modules/plots/profile_heatmap.R")
 source("modules/plots/profile_line.R")
 source("modules/plots/phyto.R")
 source("modules/plots/plot_flow.R")
+source("modules/plots/plot_gw_percentile.R")
 
 ### Plot Options - Modules containing plot options
 source("modules/plot_options/plot_theme_and_hlines.R")
@@ -560,19 +562,66 @@ tabPanel("Reservoir",
                          # tabPanel("Map Overview", icon=icon("map-marker"), FILTER_WQ_UI("mod_snow_wach_map")),
                          # tabPanel("Summary Statistics", STAT_TIME_DEPTH_WQ_UI("mod_snow_wach_stat_sum"))
                        )
-              ),
-              tabPanel("Groundwater", icon=icon("calculator"),
-                       tabsetPanel(
-                         # tabPanel("Map Overview", icon=icon("map-marker"), FILTER_WQ_UI("mod_gw_wach_map")),
-                         # tabPanel("Plots", STAT_TIME_DEPTH_WQ_UI("mod_gw_wach_plots")),
-                         # tabPanel("Stats/Tables", STAT_TIME_DEPTH_WQ_UI("mod_gw_wach_stats"))
-                       )
               )
+
           ) ### end navlist panel
       ), ### End TabPanel Watersheds
       selected = tab_selected
     )
   ),  ### end Tabpanel (HydroMet)
+
+## Groundwater Plots ####
+
+tabPanel("Groundwater",
+
+         ### Header
+         fluidRow(
+           column(3, imageOutput("wave_image9", height = 50), align = "left"),
+           column(6, h2("Groundwater Data", align = "center")),
+           column(3, imageOutput("DCR_BlueLeaf6", height = 50), align = "right")
+         ),
+
+         tabsetPanel(
+           tabPanel("Quabbin",
+                    navlistPanel(widths = c(2, 10),
+                                "Groundwater"
+                                 )
+           ),
+
+           tabPanel("Wachusett",
+                    navlistPanel(widths = c(2, 10),
+
+                                 "Groundwater",
+                                 tabPanel("Select / Filter Data", icon = icon("filter"), FILTER_WQ_UI("mod_well_wach_filter")),
+                                 tabPanel("--- Plot Groundwater", icon = icon("line-chart"),
+                                          br(),
+                                          wellPanel(em('Plots use data from the "Select / Filter Data" tab')),
+                                          tabsetPanel(
+                                              tabPanel("Time-Series Scatter", PLOT_TIME_WQ_UI("mod_well_wach_plot_time")),
+                                              tabPanel("Recent Groundwater Levels", PLOT_GW_PERCENTILE_UI("mod_well_wach_plot_percentile", well_sites = df_well_wach_site)),
+                                              tabPanel("Correlation Scatter", PLOT_CORR_WQ_UI("mod_well_wach_plot_corr")),
+                                              tabPanel("Distribution Charts", DISTRIBUTION_WQ_UI("mod_well_wach_plot_dist"))
+                                            
+                                          )
+                                 ),
+                                 tabPanel("--- Groundwater Stats", icon = icon("calculator"),
+                                          br(),
+                                          wellPanel(em('Statistics use data from the "Select / Filter Data" tab')),
+                                          tabsetPanel(
+                                            
+                                            tabPanel("Summary Statistics", STAT_TIME_WQ_UI("mod_well_wach_stat_sum")),
+                                            tabPanel("Temporal Statistics", fluidRow(h5("Mann-Kendall Stats to come"))),
+                                            tabPanel("Correlation Matrix", PLOT_CORR_MATRIX_WQ_UI("mod_well_wach_stat_cormat"))
+                                          )
+                                 ),
+                                 tabPanel("Geospatial", icon = icon("map-marker"), MAP_PLOT_UI("mod_well_wach_map", df = df_trib_wach)),
+                                 tabPanel("Metadata", icon = icon("table"), METADATA_UI("mod_well_wach_meta"))
+                    ) ### end navlist panel
+           ), ### end tabpanel wachusett
+           selected = tab_selected
+         )  ### end tabpanel watersheds
+),  ### end Tabpanel (Groundwater)
+
 
 ### FORESTRY ####
 
@@ -633,7 +682,7 @@ server <- function(input, output, session) {
 
 ### HOME ####
 
-  callModule(HOME, "home", df_site = df_all_site)
+  callModule(HOME, "home", df_site = df_all_site, df_site_wells = df_well_wach_site)
 
 ### TRIBUTARY ####
 
@@ -882,6 +931,35 @@ server <- function(input, output, session) {
     # callModule(FLOW_RATINGS, "mod_flow_wach_ratings", Df = Df_Prof_Wach$Long)
     # callModule(RATINGS, "mod_prof_wach_plot_dist", Df = Df_Prof_Wach$Long)
   
+  # ### Groundwater ####
+
+  ## Filter
+  Df_GW_Wach <- callModule(FILTER_WQ, "mod_well_wach_filter",
+                             df = df_wach_wells,
+                             df_site = df_well_wach_site,
+                             df_flags = df_flags,
+                             df_precip = df_wach_prcp_daily,
+                             df_flag_index = df_wach_flag_index[df_wach_flag_index$DataTableName == "tblWellsManual",],
+                             type = "wq_well")
+
+  ### Plots
+  callModule(PLOT_TIME_WQ, "mod_well_wach_plot_time", Df = Df_GW_Wach$Long)
+  callModule(PLOT_GW_PERCENTILE, "mod_well_wach_plot_percentile", Df = df_wach_wells)
+  callModule(PLOT_CORR_WQ, "mod_well_wach_plot_corr", Df = Df_GW_Wach$Long)
+  callModule(DISTRIBUTION_WQ, "mod_well_wach_plot_dist", Df = Df_GW_Wach$Stat)
+
+  ### Stats
+  callModule(STAT_TIME_WQ, "mod_well_wach_stat_sum", Df = Df_GW_Wach$Stat)
+  # temp stats
+  callModule(PLOT_CORR_MATRIX_WQ, "mod_well_wach_stat_cormat", Df = Df_GW_Wach$Wide)
+
+  ### Geospatial
+  callModule(MAP_PLOT, "mod_well_wach_map", df = df_wach_wells, df_site = df_well_wach_site)
+
+  ### MetaData
+  callModule(METADATA, "mod_well_wach_meta", df = df_wach_wells, df_site = df_well_wach_site, df_param = df_wach_param)
+
+
   # ### Precip ####
 
   callModule(PRECIP_CURRENT, "mod_precip_wach_current", df = df_wach_prcp_daily, df_site = df_all_site, wshed = "Wachusett")
@@ -967,6 +1045,13 @@ server <- function(input, output, session) {
          height= "50")
   }, deleteFile = FALSE)
 
+  # DCR BLUE LEAF IMAGE 6
+  output$DCR_BlueLeaf6 <- renderImage({
+    list(src = "images/DCR_BlueLeaf.jpg",
+         width= "51",
+         height= "50")
+  }, deleteFile = FALSE)
+  
   # UMass IMAGE
   output$umass_image <- renderImage({
     list(src = "images/UMass.png",
@@ -1030,6 +1115,13 @@ server <- function(input, output, session) {
          height= "50")
   }, deleteFile = FALSE)
 
+  # WAVE IMAGE 9
+  output$wave_image9 <- renderImage({
+    list(src = "images/WAVE.jpg",
+         width= "225",
+         height= "50")
+  }, deleteFile = FALSE)
+  
 ### SESSION END ####
 # Code to stop app when browser session window closes
 session$onSessionEnded(function() {

@@ -55,8 +55,8 @@ DATE_SELECT <- function(input, output, session, Df, hidden = FALSE) {
 
     # Date Input
     dateRangeInput(ns("date"), "Date Range:",
-                   start = Date_Min(),
-                   end = Date_Max(),
+                   start = as.Date(Date_Min(), tryFormats = c("%Y-%m-%d")),
+                   end = as.Date(Date_Max(), tryFormats = c("%Y-%m-%d")),
                    min = Date_Min(),
                    max = Date_Max(),
                    startview = "year")

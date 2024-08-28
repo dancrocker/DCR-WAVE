@@ -162,7 +162,7 @@ FILTER_WQ_UI <- function(id) {
 
 FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_precip, df_flag_index = NULL, type){
 
-  # Types include: "wq_trib", "wq_res" ,"wq_depth", and "profile". More can be added
+  # Types include: "wq_trib", "wq_res" ,"wq_depth", "profile", and "wq_well". More can be added
 
   # Main Selection ####
 
@@ -173,7 +173,7 @@ FILTER_WQ <- function(input, output, session, df, df_site, df_flags = NULL, df_p
 
   # Display sites w/o depths OR sites w/ Depths
   output$site_ui <- renderUI({
-    if(type == "wq_trib" | type == "profile"){
+    if(type == "wq_trib" | type == "profile" | type == "wq_well"){
       SITE_CHECKBOX_UI(ns("site"))
     } else if(type == "wq_depth"){
       STATION_LEVEL_CHECKBOX_UI(ns("site"))
