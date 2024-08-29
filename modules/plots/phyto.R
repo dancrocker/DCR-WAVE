@@ -48,10 +48,9 @@ PHYTO_UI <- function(id,df) {
                ), # End Column
                column(1), # Spacer Column
                column(5, # Depth Range sliders
-                      sliderInput(ns("Depth1"), "Epilimnion Depth Range (meters):",
-                                  min = 0, max = 10, value = c(0,10), step = 0.5),
-                      sliderInput(ns("Depth2"), "Epi-Metalimnion Depth Range (meters):",
-                                  min = 6, max = 40, value = c(10,40), step = 0.5)
+                      uiOutput(ns("Depth1.UI")), ### Depth1 UI ####
+                      uiOutput(ns("Depth2.UI")) ### Depth2 UI ####
+                      
                ) # End Column
                ), # End fluid row
                fluidRow(br()),
@@ -234,7 +233,8 @@ PHYTO_UI <- function(id,df) {
 ##############################################################################################################################.
 
 PHYTO <- function(input, output, session, df) {
-
+  ns <- session$ns 
+  
   # p  <- reactive({
   #
   #
@@ -253,6 +253,39 @@ PHYTO <- function(input, output, session, df) {
   #       }
   #     })
   
+  ## Define watershed as reactive obj ####
+  watershed <- reactive({
+    # define location based on df
+    if ("BN3417" %in% df$Station){
+      "Wachusett"
+    } else {
+      "Quabbin"
+    }
+    
+  })
+  ## Depth range slider ####
+    output$Depth1.UI <- renderUI({
+    req(watershed())
+    if (watershed()== "Wachusett") {
+      sliderInput(ns("Depth1"), "Epilimnion Depth Range (meters):",
+                  min = 0, max = 5.5, value = c(0,5.5), step = 0.5)
+    } else {
+      sliderInput(ns("Depth1"), "Epilimnion Depth Range (meters):",
+                  min = 0, max = 10, value = c(0,10), step = 0.5)
+    }
+    })
+    
+    output$Depth2.UI <- renderUI({
+      req(watershed())
+      if (watershed()== "Wachusett") {
+        sliderInput(ns("Depth2"), "Epi-Metalimnion Depth Range (meters):",
+                    min = 6, max = 30, value = c(6,30), step = 0.5)
+      } else {
+        sliderInput(ns("Depth2"), "Epi-Metalimnion Depth Range (meters):",
+                    min = 10, max = 41, value = c(10,41), step = 0.5)
+      }
+    })
+    
   ### Overview Plot ####
   
     p <- p  <- reactive({
