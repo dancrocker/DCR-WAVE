@@ -42,8 +42,14 @@ tagList(
 # Server Function
 ##############################################################################################################################
 
-HOME <- function(input, output, session, df_site) {
+HOME <- function(input, output, session, df_site, df_site_wells) {
 
+  df_site_wells_map <- df_site_wells %>% 
+    filter(LocationCategory=="Primary") %>% 
+    dplyr::select("Site","LocationDescription","LocationLat","LocationLong","LocationCategory","LocationElevFt","LocationLabel", "Watershed","LocationType")
+  
+  df_site <- bind_rows(df_site,df_site_wells_map)
+  
   df_site <- filter(df_site, !is.na(LocationLat), !is.na(LocationLong))
   
   df_site$LocationType[df_site$LocationType == "Nutrient"] <- "Reservoir"
@@ -62,7 +68,8 @@ HOME <- function(input, output, session, df_site) {
                   "Quabbin Bacteria",
                   "Wachusett Bacteria",
                   "Quabbin Reservoir",
-                  "Wachusett Reservoir")
+                  "Wachusett Reservoir",
+                  "Wachusett Well")
 
 # Create a new column in df_site for coloring and legend purposes
 
@@ -76,7 +83,8 @@ HOME <- function(input, output, session, df_site) {
                                        "orange1",
                                        "orange2",
                                        "yellow1",
-                                       "yellow2"),
+                                       "yellow2",
+                                       "green2"),
                            domain = factor(map_levels, levels = map_levels),
                            ordered = TRUE)
 
