@@ -944,7 +944,9 @@ server <- function(input, output, session) {
 
   ### Plots
   callModule(PLOT_TIME_WQ, "mod_well_wach_plot_time", Df = Df_GW_Wach$Long)
-  callModule(PLOT_GW_PERCENTILE, "mod_well_wach_plot_percentile", Df = df_wach_wells)
+  callModule(PLOT_GW_PERCENTILE, "mod_well_wach_plot_percentile", Df = df_wach_wells, 
+                                                                  metadata = df_wach_wells_metadata,
+                                                                  df_flag_index = df_wach_flag_index[df_wach_flag_index$DataTableName == "tblWellsManual",])
   callModule(PLOT_CORR_WQ, "mod_well_wach_plot_corr", Df = Df_GW_Wach$Long)
   callModule(DISTRIBUTION_WQ, "mod_well_wach_plot_dist", Df = Df_GW_Wach$Stat)
 
