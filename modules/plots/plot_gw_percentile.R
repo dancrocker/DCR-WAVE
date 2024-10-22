@@ -50,13 +50,24 @@ PLOT_GW_PERCENTILE_UI <- function(id, well_sites) {
 # Thus do not use () in callModule argument for reactives
 # For non reactives wrap with "reactive" to make into a reactive expression.
 
-PLOT_GW_PERCENTILE <- function(input, output, session, Df) {
+PLOT_GW_PERCENTILE <- function(input, output, session, Df, metadata, df_flag_index) {
 
   # Turn off warnings about summarise groups
   options(dplyr.summarise.inform = FALSE)
   
   ns <- session$ns # see General Note 1
 
+  ### Create lookup for well depth (for when wells are dry)
+  metadata <- metadata %>% mutate(Total_Depth_Feet = Depth_Feet - Casing_Height_Feet)
+  depth_lookup <- metadata$Total_Depth_Feet
+  names(depth_lookup) <- metadata$Location_Code
+  
+  ### Dry well IDs
+  dry_flag <- df_flag_index %>% 
+    filter(FlagCode == 110) %>% 
+    select(SampleID)
+  
+  
 ##################### Main Reactive Expressions
 
   
@@ -68,8 +79,11 @@ PLOT_GW_PERCENTILE <- function(input, output, session, Df) {
     req(input$months)
     Df %>% filter(LocationLabel == input$site_select,
                     Parameter == "Depth Below Ground Surface",
-                    Date >= floor_date(Sys.Date(),'month') %m-% months(input$months-1))})
-
+                    Date >= floor_date(Sys.Date(),'month') %m-% months(input$months-1)) %>%
+            mutate(Dry = case_when(ID %in% c(dry_flag$SampleID) ~ "1",
+                                   TRUE ~ "0"),
+                   Result = case_when(Dry == "1" ~ unname(depth_lookup[Site]),
+                                      TRUE ~ Result),)})
 
   percentiles <- reactive({
     Df %>% filter(LocationLabel == input$site_select,
@@ -151,8 +165,9 @@ PLOT_GW_PERCENTILE <- function(input, output, session, Df) {
       geom_bar(data=percentiles_plot(), aes(x=Date, y=PercentileValue, fill=Percentile), position="stack", stat="identity", width=28, alpha=0.6, just=0.5)+
       geom_point(data=median_plot(), aes(y=Median, x=Date,color="Median"),shape=17,size=2,alpha=0.5)+
       scale_color_manual(values=c("black"))+
-      geom_point(aes(y=Result,shape="Measurement"), color="black",fill="red",size=5)+
-      scale_shape_manual(values=c(23))+
+      geom_point(aes(y=Result, shape=Dry), color="black", fill="red", size=5)+
+      scale_shape_manual(values=c(23, 5),
+                         labels = c("Measurement","Dry"))+
       scale_fill_manual(values=c("NA","#DD3D2D","#FDB366","#D9F0D3","#98CAE1","#4A7BB7","NA"),
                         labels=c("","5-10%","10-25%","25-75%","75-90%","90-95%",""))+
       # scale_y_reverse()+
@@ -165,11 +180,14 @@ PLOT_GW_PERCENTILE <- function(input, output, session, Df) {
                    limit = c(floor_date(Sys.Date(),'month') %m-% months(input$months-1),
                              ceiling_date(Sys.Date(),"month")),
                    expand=c(0,0))+
-      guides(fill = guide_legend(reverse=TRUE))+
+      guides(fill = guide_legend(reverse=TRUE, order = 3),
+             color = guide_legend(order = 2),
+             shape = guide_legend(order = 1))+
       theme(legend.title=element_blank(),
             panel.grid.major.x = element_blank())+
       coord_cartesian(ylim=c(max(percentiles()$percentile95,Df1()$Result),
                              min(percentiles()$percentile5,Df1()$Result)))
+
     
     p
     })
