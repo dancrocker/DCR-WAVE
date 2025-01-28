@@ -146,6 +146,9 @@ MAP_PLOT <- function(input, output, session, df, df_site) {
 
   ns <- session$ns # see General Note 1
 
+  # Turn off dplyr summarise warnings
+  options(dplyr.summarise.inform = FALSE)
+  
   # Create a more condensed Site Location dataframe (with Lat,lomg,site ID)
   df_site2 <- df_site %>% select(Site, LocationLat, LocationLong)
 
@@ -181,7 +184,7 @@ MAP_PLOT <- function(input, output, session, df, df_site) {
     df_temp <- df %>%
       filter(!is.na(Result),
              Parameter %in% input$param)
-
+    
     # Filter by Date
     if(input$year != "All Years"){
       df_temp <- df_temp %>% filter(year(Date) == input$year)
@@ -194,15 +197,15 @@ MAP_PLOT <- function(input, output, session, df, df_site) {
     df_temp <- df_temp %>% group_by(Site) %>%
       summarise(`number of samples` = n(),
                 average = mean(Result),
-                minimum = min(Result, na.rm = TRUE),
-                maximum = max(Result, na.rm = TRUE),
+                minimum = suppressWarnings(min(Result, na.rm = TRUE)),
+                maximum = suppressWarnings(max(Result, na.rm = TRUE)),
                 `1st quartile` = quantile(Result, 0.25),
                 median = median(Result),
                 `3rd quartile` = quantile(Result, 0.75),
                 variance = var(Result, na.rm = TRUE),
                 `stand. dev.` = sd(Result, na.rm = TRUE),
                 `geometric mean` = gm_mean(Result)) %>%
-      gather(Stat, Value, -c(Site)) # Restructuring the Stat Columns into Two new Columns: "Stat" and "Value"
+      pivot_longer(names_to="Stat", values_to="Value", -c(Site)) # Restructuring the Stat Columns into Two new Columns: "Stat" and "Value"
 
     # Join the two tables together mathched by site - now includes lat/long info
     df_temp <- inner_join(df_temp, df_site2, "Site") %>%

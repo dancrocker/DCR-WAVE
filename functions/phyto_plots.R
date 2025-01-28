@@ -53,6 +53,13 @@ taxaplot <- function(df, locs, vyear, taxa, color){
 # color <- "dodgerblue"
   ############################################.
 # Plot Conditions
+  # define location based on df
+  if ("BN3417" %in% df$Station){
+    watershed <- "Wachusett"
+  } else {
+    watershed <- "Quabbin"
+  }
+
   # If taxa to be plotted is not in the current db, plot message, otherwise continue with plotting data
     if (! (taxa %in% unique(df[year(df$Date) == vyear, ]$Taxa))){
       p <- ggplot(df) +
@@ -67,8 +74,9 @@ taxaplot <- function(df, locs, vyear, taxa, color){
 
    df_thresh <- df_taxa_wach %>%
     filter(!is.na(Alert_Level_Wachusett)) %>%
-    select("Phyto_Name","Alert_Level_Wachusett","Alert_Level_Quabbin") %>%
-    dplyr::rename(Taxa = Phyto_Name)
+    select_at(vars(contains("Phyto_Name"), contains(watershed)))
+   names(df_thresh) <- c("Taxa", "Alert_Level")
+   
    df <- df %>%
      filter(Result != 8888, Result != 9999) %>% 
      mutate("Year" = year(Date))
@@ -111,8 +119,7 @@ p <- ggplot(df2, aes(x = Date, y = Result)) +
   if(taxa %in% taxathreshlist) {
     #   trigmon <- df_thresh$Threshold_early[match(paste0(taxa), df_thresh$Taxa)]
     #   trigtreat <- df_thresh$Threshold_Tx[match(paste0(taxa), df_thresh$Taxa)]
-    alertlevel <- case_when(tab_selected == "Wachusett" ~ df_thresh$Alert_Level_Wachusett[match(paste0(taxa), df_thresh$Taxa)],
-                         tab_selected == "Quabbin"  ~ df_thresh$Alert_Level_Quabbin[match(paste0(taxa), df_thresh$Taxa)])
+    alertlevel <- df_thresh$Alert_Level[match(paste0(taxa), df_thresh$Taxa)]
     p <- p + geom_hline(yintercept = alertlevel, linetype=2 ) +
       annotate("text", min(df2$Date),alertlevel - (0.02 * max(df2$Result)), label = "Alert Level", hjust = "left") #+
       # geom_hline(yintercept = trigtreat, linetype=5) +
@@ -126,7 +133,8 @@ return(p)
 }
 }
 # p
-#taxaplot(df, locs, vyear, taxa, color)
+
+# taxaplot(df, locs, vyear, taxa, color)
 #######################################################.
 
 #### Overview Plot ####
@@ -258,18 +266,18 @@ p  <- ggplot() +
 historicplot <- function(df, taxa, locs, vyear, yg1min, yg1max, yg2min, yg2max, yg3min, yg3max, stat, stat1, stat2, stat3, depthmin, depthmax) {
   # #Function Arguments for data selection
   # df <- df_phyto_quab
-  # taxa <- "Urosolenia" # Entire list - Alphabetical (single choice)
+  # taxa <- "Chrysosphaerella" # Entire list - Alphabetical (single choice)
   # locs <- c("BN3417", "CI3409", "202", "206") # Radio buttons  - default both toggled on
-  # vyear <- 2019
-  # yg1min <- 2007
-  # yg1max <- 2020
-  # yg2min <- 2007
+  # vyear <- 2024
+  # yg1min <- 2019
+  # yg1max <- 2019
+  # yg2min <- 2020
   # yg2max <- 2020
-  # yg3min <- 2007
-  # yg3max <- 2020
+  # yg3min <- 2021
+  # yg3max <- 2021
   # depthmin <- 1
-  # depthmax <- 21
-  # # Function Arguments for Plot
+  # depthmax <- 40
+  # Function Arguments for Plot
   # stat <- "ave_val"
   # stat1 <- "ave_val"
   # stat2 <- "ave_val"
@@ -291,6 +299,11 @@ historicplot <- function(df, taxa, locs, vyear, yg1min, yg1max, yg2min, yg2max, 
     res <- "Quabbin"
     }
   
+  df_thresh <- df_taxa_wach %>%
+    filter(!is.na(Alert_Level_Wachusett)) %>%
+    select_at(vars(contains("Phyto_Name"), contains(res)))
+  names(df_thresh) <- c("Taxa", "Alert_Level")
+  
   # If taxa to be plotted is not in the current db, plot message, otherwise continue with plotting data
   if (! taxa %in% df$Taxa_f) {
     p <- ggplot(df) +
@@ -309,10 +322,6 @@ historicplot <- function(df, taxa, locs, vyear, yg1min, yg1max, yg2min, yg2max, 
   ylabel <- paste0(gsub("_", " ", taxa)," Density (ASUs/ml)")
   xmin <- as.Date(paste0(as.numeric(vyear),"-01-01"), format = '%Y-%m-%d')
   xmax <- as.Date(paste0(as.numeric(vyear),"-12-31"), format = '%Y-%m-%d')
-  df_thresh <- df_taxa_wach %>%
-    filter(!is.na(Threshold_early)) %>%
-    select("Phyto_Name","Threshold_early","Threshold_Tx") %>%
-    dplyr::rename(Taxa = Phyto_Name)
   taxathreshlist <- unique(df_thresh$Taxa)
   #Define legend labels and colors
   yg0_leg <- paste0(vyear, " ", taxalabel, " Values")
@@ -420,10 +429,7 @@ if(dim(df_yr)[1] == 0) {
           legend.title=element_blank())
 
   if(taxa %in% taxathreshlist) {
-    # trigmon <- df_thresh$Threshold_early[match(paste0(taxa), df_thresh$Taxa)]
-    # trigtreat <- df_thresh$Threshold_Tx[match(paste0(taxa), df_thresh$Taxa)]
-    alertlevel <- case_when(tab_selected == "Wachusett" ~ df_thresh$Alert_Level_Wachusett[match(paste0(taxa), df_thresh$Taxa)],
-                            tab_selected == "Quabbin"  ~ df_thresh$Alert_Level_Quabbin[match(paste0(taxa), df_thresh$Taxa)])
+    alertlevel <- df_thresh$Alert_Level[match(paste0(taxa), df_thresh$Taxa)]
     p <- p + geom_hline(yintercept = alertlevel, linetype=2 ) +
       annotate("text", min(df_yr$date),alertlevel - (0.02 * max(var, var1, var2, var3)), label = "Alert Level", hjust = "left") # +
       # geom_hline(yintercept = trigtreat, linetype=5) +
@@ -435,7 +441,7 @@ if(dim(df_yr)[1] == 0) {
 }
 }
 
-#historicplot(df, taxa, locs, vyear, yg1min, yg1max, yg2min, yg2max, yg3min, yg3max, stat, stat1, stat2, stat3, depthmin, depthmax)
+# historicplot(df, taxa, locs, vyear, yg1min, yg1max, yg2min, yg2max, yg3min, yg3max, stat, stat1, stat2, stat3, depthmin, depthmax)
 
 ## End of Plots ####
 ######################################################################.

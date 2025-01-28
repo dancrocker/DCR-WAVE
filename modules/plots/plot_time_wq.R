@@ -129,6 +129,8 @@ PLOT_TIME_WQ <- function(input, output, session, Df) {
 
   ns <- session$ns # see General Note 1
 
+  #Turn off warnings about summarise grouping
+  options(dplyr.summarise.inform = FALSE)
 ##################### Main Reactive Expressions
 
   # Find Choices for Param
@@ -457,7 +459,7 @@ PLOT_TIME_WQ <- function(input, output, session, Df) {
                                                         linetype = input$group_shape),
                                color = input$point_color1,
                                method = input$trend_type,
-                               size = input$trend_size,
+                               linewidth = input$trend_size,
                                alpha = input$trend_alpha,
                                se = input$trend_ribbon,
                                level = as.numeric(input$trend_conf)) +
@@ -466,7 +468,7 @@ PLOT_TIME_WQ <- function(input, output, session, Df) {
                                                  linetype = input$group_shape),
                         color = input$point_color2,
                         method = input$trend_type,
-                        size = input$trend_size,
+                        linewidth = input$trend_size,
                         alpha = input$trend_alpha,
                         se = input$trend_ribbon,
                         level = as.numeric(input$trend_conf))
@@ -492,7 +494,7 @@ PLOT_TIME_WQ <- function(input, output, session, Df) {
                              linetype = input$trend_line,
                              color = input$point_color1,
                              method = input$trend_type,
-                             size = input$trend_size,
+                             linewidth = input$trend_size,
                              se = input$trend_ribbon,
                              level = as.numeric(input$trend_conf)) +
           geom_smooth(data = Df2(), aes_string(x = "DateTimeET",
@@ -500,7 +502,7 @@ PLOT_TIME_WQ <- function(input, output, session, Df) {
                       linetype = input$trend_line,
                       color = input$point_color2,
                       method = input$trend_type,
-                      size = input$trend_size,
+                      linewidth = input$trend_size,
                       se = input$trend_ribbon,
                       level = as.numeric(input$trend_conf))
       }

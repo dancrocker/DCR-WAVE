@@ -49,6 +49,7 @@ SITE_CHECKBOX <- function(input, output, session, df) {
   # List
   site_primary_choices <- df %>%
     filter(grepl("Primary", LocationCategory)) %>%
+    arrange(Site)%>% #Sorts them alphabetically by Site (eg. MD01, MD02)
     .$LocationLabel %>% unique()
 
   # Primary Site INput Widget
@@ -87,6 +88,7 @@ SITE_CHECKBOX <- function(input, output, session, df) {
 
     df %>%
       filter(LocationCategory %in% input$site_nonprimary_category) %>%
+      arrange(Site)%>% #Sorts them alphabetically by Site (eg. MD01, MD02)
       .$LocationLabel %>%
       factor() %>%
       levels()
