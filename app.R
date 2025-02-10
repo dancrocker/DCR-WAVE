@@ -13,6 +13,14 @@
 ### To-Do List:
 ###   1_
 
+
+#* Set R Library path ----
+if(exists("rportable_library")){
+  r_lib <- .libPaths()[1]
+} else {
+  r_lib <- config[["R_lib_Path"]]
+}
+
 ### Load Libraries and Script (Sources, Modules, and Functions) ####
 print(paste0("WAVE App lauched at ", Sys.time()))
 ipak <- function(pkg){
