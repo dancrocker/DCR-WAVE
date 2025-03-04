@@ -3,7 +3,7 @@
 #     Type: Secondary Module for DCR Shiny App
 #     Description: Time series plots for phytoplankton data
 #     Written by: Dan Crocker, Fall 2017
-#     Edits: 2024-08-14  JTL updated alert levels
+#     Edits: 2025-03-05  JTL added group plots
 ##############################################################################################################################.
 
 #### Plot Phyto Data ####
@@ -442,6 +442,88 @@ if(dim(df_yr)[1] == 0) {
 }
 
 # historicplot(df, taxa, locs, vyear, yg1min, yg1max, yg2min, yg2max, yg3min, yg3max, stat, stat1, stat2, stat3, depthmin, depthmax)
+
+# Annual Stacked Bar Group Plots ####
+
+groupplot <- function(df, locs, vyear, groupepi_max) {
+## here's the data
+  if ("BN3417" %in% unique(df$Station)) {
+    res <- "Wachusett"
+  } else {
+    res <- "Quabbin"
+  }
+  groupxmin <- as.Date(paste0(as.numeric(vyear),"-01-01"), format = '%Y-%m-%d')
+  groupxmax <- as.Date(paste0(as.numeric(vyear),"-12-31"), format = '%Y-%m-%d')
+  
+  gtitle <- paste0(vyear, " Weekly Phytoplankton Group Totals at ", res, " Reservoir\n Station(s) - ", str_c(locs, collapse = ", "))
+  gxlabel <- "Date"
+  gylabel <- "Phytoplankton Density (ASUs/ml)"
+  # #Define legend labels and colors
+  # gepi_leg <- paste0("Epi. (",epi_min,"-",epi_max,"m)")
+  # gem_leg <- paste0("Epi./Meta. (",em_min,"-",em_max,"m)")
+
+group.totals <- df %>% 
+  # filter(!Depth_m < surface.max) %>% # filter out surface samples
+  filter(Result < 8888) %>% 
+  filter(Station %in% locs) %>%
+  filter(year(Date) == vyear) %>%
+  filter(str_detect(Taxa, "^Total"), Taxa != "Total Dinoflagellates", Taxa != "Total Dinobryon") %>% 
+  mutate(week = ifelse(week(Date) <= 52, week(Date), 52), year = year(Date)) %>% 
+  mutate(depth_cat = ifelse(Depth_m <= groupepi_max, "Epilimnion", "Metalimnion")) %>% 
+  group_by(year, week, Station, depth_cat, Taxa) %>% 
+  summarise(stat = max(Result)) %>% # picks max if > 1 sample at either depth category
+  mutate(date_legend = as.Date(paste(vyear, week, 1, sep = "-"), "%Y-%U-%u")) %>% 
+  as.data.frame() 
+
+## here's the plot
+
+# if (! taxa %in% df$Taxa_f) {
+#   p <- ggplot(df) +
+#     theme_void() +
+#     annotate("text", x = 4, y = 25, label = paste(
+#       "This plot is not available for", paste(plot_taxa, collapse = "/"), "with the given parameters.", sep = " "),
+#       color = "green", size = 4.5, fontface = "bold.italic")
+#   return(p)
+# } else 
+# {
+if (nrow(group.totals) < 1) {
+  ggplot() +
+        theme_void() +
+        annotate("text", x = 4, y = 25, label = paste(
+          "This plot is not available with the given parameters.", sep = " "),
+          color = "#228833", size = 4.5, fontface = "bold.italic")
+  } else {
+    group.totals %>% 
+      ggplot() +
+      geom_col(aes(date_legend, stat, fill = Taxa), width = 5) +
+      facet_grid(depth_cat~.) +
+      scale_fill_manual(guide = "legend", 
+                        values = c("Total Diatoms" = '#0077BB', 
+                                   "Total Chlorophytes" = '#228833', 
+                                   "Total Chrysophytes" = '#EE7733', 
+                                   "Total Cyanophytes" = '#33BBEE')) +
+      scale_x_date(date_labels = "%b", limits = as.Date(c(groupxmin, groupxmax))) +
+      xlab(gxlabel) +
+      ylab(gylabel) +
+      ggtitle(gtitle) +
+      theme_light() +
+      theme(
+        strip.text.y = element_text(size = 15, face = "bold.italic"),
+        plot.title = element_text(color= "black", face="bold", size = 15, vjust = 1, hjust = 0.5),
+        plot.subtitle =  element_text(color= "black", size = 15, vjust = 1, hjust = 0.5),
+        axis.title.x = element_text(angle = 0, face = "bold", color = "black", size = 15),
+        axis.title.y = element_text(angle = 90, face = "bold", color = "black", size = 15),
+        axis.text = element_text(size = 14),
+        # panel.grid.major.x = element_blank() , # remove the vertical grid lines
+        # panel.grid.major.y = element_line(size=.1, color="#808080"), # explicitly set the horizontal lines (or they will disappear too)
+        legend.position = "top",
+        legend.text = element_text(size = 14),
+        legend.title = element_blank()
+      )
+}
+
+}
+
 
 ## End of Plots ####
 ######################################################################.
