@@ -13,12 +13,12 @@
 ### To-Do List:
 ###   1_
 
-
 #* Set R Library path ----
-if(exists("rportable_library")){
-  r_lib <- .libPaths()[1]
-} else {
+# Specify R Library path for installing and loading packages
+if(dir.exists(config[["R_lib_Path"]])) {
   r_lib <- config[["R_lib_Path"]]
+} else {
+  r_lib <- .libPaths()[1]
 }
 
 ### Load Libraries and Script (Sources, Modules, and Functions) ####
