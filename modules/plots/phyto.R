@@ -3,7 +3,7 @@
 #     Type: Secondary Module for DCR Shiny App
 #     Description: Time series plots for phytoplankton data
 #     Written by: Dan Crocker, Fall 2017
-#     Edits: JTL updated document outline, minor changes to defaults, Jan 2020
+#     Edits: March 2025 JTL added tab for group plots
 ##############################################################################################################################.
 
 # Notes:
@@ -25,14 +25,15 @@
 ##############################################################################################################################.
 
 PHYTO_UI <- function(id,df) {
-
+  
   ns <- NS(id) # see General Note 1
   df <- df %>%
     mutate(Year = year(Date))
-  
-## Phytoplankton Overview Plot ####
+
+  ## Start of taglist ####
   tagList(
     tabsetPanel(
+      ## Phytoplankton Overview Plot ####
       tabPanel("Phytoplankton Overview Plot",
                # Data filter for plot
                fluidRow(column(5, # fr2 - Site and Year Input
@@ -48,8 +49,8 @@ PHYTO_UI <- function(id,df) {
                ), # End Column
                column(1), # Spacer Column
                column(5, # Depth Range sliders
-                      uiOutput(ns("Depth1.UI")), ### Depth1 UI ####
-                      uiOutput(ns("Depth2.UI")) ### Depth2 UI ####
+                      uiOutput(ns("Depth1.UI")), ### Depth1 UI ###
+                      uiOutput(ns("Depth2.UI")) ### Depth2 UI ###
                       
                ) # End Column
                ), # End fluid row
@@ -80,8 +81,8 @@ PHYTO_UI <- function(id,df) {
                         # ) # end column
                ) # End fr
       ), # End Tab Panel Sub
-
-## Taxa Plots ####
+      
+      ## Taxa Plots ####
       tabPanel("Taxa Plots",
                # Function Args
                fluidRow(column(4, # Sites
@@ -98,7 +99,7 @@ PHYTO_UI <- function(id,df) {
                column(4,
                       numericInput(ns("taxaplot_save_width"), "Plot Width (inches):", 7,
                                    min = 3, max = 17, step = 0.25),
-
+                      
                       numericInput(ns("taxaplot_save_height"), "Plot Height (inches):", 5,
                                    min = 3, max = 17, step = 0.25)
                ), # End Col
@@ -151,8 +152,8 @@ PHYTO_UI <- function(id,df) {
                ), # End fr
                fluidRow(column(9, plotOutput(ns("taxaplot14"), width = "100%", height = 400)))
       ), # End Tab Panel Taxa Plots
-
-## Historical Comparison Plots ####
+      
+      ## Historical Comparison Plots ####
       tabPanel("Historical Comparison Plots",
                fluidRow(column(3, # Sites
                                selectInput(ns("histtaxa"), "Taxa:",
@@ -198,22 +199,71 @@ PHYTO_UI <- function(id,df) {
                fluidRow(column(4,
                                numericInput(ns("histplot_save_width"), "Plot Width (inches):", 7,
                                             min = 3, max = 17, step = 0.25),
-
+                               
                                numericInput(ns("histplot_save_height"), "Plot Height (inches):", 5,
                                             min = 3, max = 17, step = 0.25)
-                        ), # End Col
-                        column(4,
-                               radioButtons(ns("histplot_save_type"), "File Type:",
-                                            choices= c("pdf","jpg","png"),
-                                            selected = "png")
-                        ),
-                        column(3,
-                               downloadButton(ns('save_histplot'), "Save Plot")
-                        ) # End Col
+               ), # End Col
+               column(4,
+                      radioButtons(ns("histplot_save_type"), "File Type:",
+                                   choices= c("pdf","jpg","png"),
+                                   selected = "png")
+               ),
+               column(3,
+                      downloadButton(ns('save_histplot'), "Save Plot")
+               ) # End Col
                ) # End fr
       ), # End Tab Panel Sub
-
-## Filter/Export Data ####
+      
+      ## Annual Group Stacked Bar Chart ####
+      tabPanel("Annual Grouped Bar Chart",
+               # Data filter for plot
+               fluidRow(column(5, # fr2 - Site and Year Input
+                               selectInput(ns("groupsite"), "Station(s):",
+                                           choices = df %>% .$Station %>% levels() %>% paste(),
+                                           multiple = TRUE,
+                                           width = '200',
+                                           selected = c("202","206", "BN3417", "CI3409")),
+                               selectInput(ns("groupyear"), "Year:",
+                                           choices = df %>%  .$Year %>%  unique() %>% sort(decreasing = TRUE),
+                                           width = '200',
+                                           selected = 1)
+               ),
+               column(1), # Spacer Column
+               column(5, # Depth Range sliders
+                      uiOutput(ns("groupDepth1.UI")), ### Depth1 UI ###
+                      uiOutput(ns("groupDepth2.UI")) ### Depth2 UI ###
+                      
+               )# End Column
+               ), # End fluid row
+               fluidRow(br()),
+               fluidRow(
+                 column(12, # fr3 - Plot
+                        plotOutput(ns("groupplot"), width = "100%", height = 600)
+                 )
+               ), # End fr
+               fluidRow(br(),
+                        column(2,
+                               downloadButton(ns('save_groupplot'), "Save Plot")
+                        ),
+                        column(2,
+                               numericInput(ns("groupplot_save_width"), "Plot Width (inches):", 10,
+                                            min = 3, max = 17, step = 0.25),
+                               numericInput(ns("groupplot_save_height"), "Plot Height (inches):", 6,
+                                            min = 3, max = 17, step = 0.25)
+                        ),
+                        column(2,
+                               radioButtons(ns("groupplot_save_type"), "File Type:",
+                                            choices= c("pdf","jpg","png"),
+                                            selected = "png")
+                        ) # End Col
+                        # column(2,
+                        # checkboxGroupInput(ns("plot_save_grid"), "Gridline Override:",
+                        #                     choices= c("major gridlines", "minor gridlines"))
+                        # ) # end column
+               ) # End fr
+      ), # End Tab Panel Sub
+      
+      ## Filter/Export Data ####
       tabPanel("Filter/Export Data",
                fluidRow(column(4, # Sites
                                selectInput(ns("filtersite"), "Station(s):",
@@ -221,7 +271,7 @@ PHYTO_UI <- function(id,df) {
                                            multiple = TRUE,
                                            width = '200',
                                            selected = c("202","206", "BN3417", "CI3409"))
-                      ) # End Col
+               ) # End Col
                ) # End fr
       ) # End Tab Panel
     ) # End Tabset Panel
@@ -264,7 +314,7 @@ PHYTO <- function(input, output, session, df) {
     
   })
   ## Depth range slider ####
-    output$Depth1.UI <- renderUI({
+  output$Depth1.UI <- renderUI({
     req(watershed())
     if (watershed()== "Wachusett") {
       sliderInput(ns("Depth1"), "Epilimnion Depth Range (meters):",
@@ -273,22 +323,22 @@ PHYTO <- function(input, output, session, df) {
       sliderInput(ns("Depth1"), "Epilimnion Depth Range (meters):",
                   min = 0, max = 10, value = c(0,10), step = 0.5)
     }
-    })
-    
-    output$Depth2.UI <- renderUI({
-      req(watershed())
-      if (watershed()== "Wachusett") {
-        sliderInput(ns("Depth2"), "Epi-Metalimnion Depth Range (meters):",
-                    min = 6, max = 30, value = c(6,30), step = 0.5)
-      } else {
-        sliderInput(ns("Depth2"), "Epi-Metalimnion Depth Range (meters):",
-                    min = 10, max = 41, value = c(10,41), step = 0.5)
-      }
-    })
-    
+  })
+  
+  output$Depth2.UI <- renderUI({
+    req(watershed())
+    if (watershed()== "Wachusett") {
+      sliderInput(ns("Depth2"), "Epi-Metalimnion Depth Range (meters):",
+                  min = 6, max = 30, value = c(6,30), step = 0.5)
+    } else {
+      sliderInput(ns("Depth2"), "Epi-Metalimnion Depth Range (meters):",
+                  min = 10, max = 41, value = c(10,41), step = 0.5)
+    }
+  })
+  
   ### Overview Plot ####
   
-    p <- p  <- reactive({
+  p <- p  <- reactive({
     p <- phytoplot(df = df,
                    locs = input$site,
                    vyear = input$year,
@@ -298,9 +348,9 @@ PHYTO <- function(input, output, session, df) {
                    em_max = input$Depth2[2])
     p
   })
-
+  
   output$PhytoPlot <- renderPlot({p()})
-
+  
   # Plot Print
   output$save_plot <- downloadHandler(
     filename = function() {
@@ -342,7 +392,7 @@ PHYTO <- function(input, output, session, df) {
     p5
   })
   output$taxaplot5 <- renderPlot({p5()})
-
+  
   # Chrysosphaerella 78 darkgoldenrod3
   p6 <- reactive({
     p6 <- taxaplot(df = df, locs = input$taxasite, vyear = input$taxayear, taxa = "Chrysosphaerella", color = "darkgoldenrod3")
@@ -525,24 +575,24 @@ PHYTO <- function(input, output, session, df) {
     }
   )
   ### Historical Plot ####
-
+  
   phist <- reactive({
     phist <- historicplot(df = df,
-                      taxa = input$histtaxa,
-                      locs = input$histlocs,
-                      vyear= input$histyear,
-                      yg1min = input$yg1[1],
-                      yg1max = input$yg1[2],
-                      yg2min = input$yg2[1],
-                      yg2max = input$yg2[2],
-                      yg3min = input$yg3[1],
-                      yg3max = input$yg3[2],
-                      stat = input$stat,
-                      stat1 = input$stat1,
-                      stat2 = input$stat2,
-                      stat3 = input$stat3,
-                      depthmin = input$depth[1],
-                      depthmax = input$depth[2])
+                          taxa = input$histtaxa,
+                          locs = input$histlocs,
+                          vyear= input$histyear,
+                          yg1min = input$yg1[1],
+                          yg1max = input$yg1[2],
+                          yg2min = input$yg2[1],
+                          yg2max = input$yg2[2],
+                          yg3min = input$yg3[1],
+                          yg3max = input$yg3[2],
+                          stat = input$stat,
+                          stat1 = input$stat1,
+                          stat2 = input$stat2,
+                          stat3 = input$stat3,
+                          depthmin = input$depth[1],
+                          depthmax = input$depth[2])
     phist
   })
   output$histplot <- renderPlot({phist()})
@@ -555,4 +605,54 @@ PHYTO <- function(input, output, session, df) {
       contentType = 'image/png'
     }
   )
+  
+  ### Annual Group Plot ####
+  
+  ## Depth range slider ####
+  output$groupDepth1.UI <- renderUI({
+    req(watershed())
+    if (watershed()== "Wachusett") {
+      sliderInput(ns("groupDepth1"), "Epilimnion Depth Range (meters):",
+                  min = 0, max = 5.5, value = c(0,5.5), step = 0.5)
+    } else {
+      sliderInput(ns("groupDepth1"), "Epilimnion Depth Range (meters):",
+                  min = 0, max = 10, value = c(0,10), step = 0.5)
+    }
+  })
+  
+  output$groupDepth2.UI <- renderUI({
+    req(watershed())
+    if (watershed()== "Wachusett") {
+      sliderInput(ns("groupDepth2"), "Epi-Metalimnion Depth Range (meters):",
+                  min = 6, max = 30, value = c(6,30), step = 0.5)
+    } else {
+      sliderInput(ns("groupDepth2"), "Epi-Metalimnion Depth Range (meters):",
+                  min = 10, max = 41, value = c(10,41), step = 0.5)
+    }
+  })
+  
+  
+  pg <- pg  <- reactive({
+    pg <- groupplot(df = df,
+                   locs = input$groupsite,
+                   vyear = input$groupyear,
+                   # epi_min = input$Depth1[1],
+                   groupepi_max = input$groupDepth1[2])
+                   # em_min = input$Depth2[1],
+                   # em_max = input$Depth2[2])
+    pg
+  })
+  
+  output$groupplot <- renderPlot({pg()})
+  
+  # Plot Print
+  output$save_groupplot <- downloadHandler(
+    filename = function() {
+      paste0("PhytoGroups-", input$year,"_", format(Sys.time(), "%Y-%m-%d"), ".", input$groupplot_save_type)},
+    content = function(file) {
+      ggplot2::ggsave(file, plot = pg(), device = input$groupplot_save_type, width = input$groupplot_save_width, height = input$groupplot_save_height, dpi = 300)
+      contentType = 'image/png'
+    }
+  )
+  
 } # End Phyto Server function
