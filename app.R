@@ -85,13 +85,13 @@ datadir <- config[["DataCache"]]
 
 ### Load rds files ####
 ### Make a list of all the .rds files using full path
-rds_files <- list.files(paste0(rootdir, datadir), full.names = TRUE ,pattern = "\\.rds$")
+rds_files <- list.files(paste0(rootdir, datadir), full.names = TRUE ,pattern = "[a-z].rds$")
 
 ### create an object that contains all of the rds files
 data <- lapply(rds_files, readRDS)
 
 ### Make a list of the df names by eliminating extension from files
-df_names <- gsub(".rds", "", list.files(paste0(rootdir, datadir), pattern = "\\.rds$"))
+df_names <- gsub(".rds", "", list.files(paste0(rootdir, datadir), pattern = "[a-z].rds$"))
 
 # name each df in the data object appropriately
 names(data) <- df_names
